@@ -44,13 +44,26 @@ def product_list(request):
             'short_description': 'Bubuk kakao organik untuk minuman dan baking.',
             'image': 'https://via.placeholder.com/300x200?text=Bubuk+Kakao',
         },
+        
     ]
 
-    if category in ['kopi', 'cokelat']:
+    categories = []
+    seen = set()
+
+    for product in products:
+        if product['category'] not in seen:
+            categories.append({
+                'value': product['category'],
+                'label': product['category_display'],
+            })
+            seen.add(product['category'])
+
+    if category:
         products = [p for p in products if p['category'] == category]
 
     context = {
         'products': products,
+        'categories': categories,
         'selected_category': category,
     }
     return render(request, 'products/product_list.html', context)
