@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Desa Manud Jaya — Wisata Alam Berkelanjutan{% endblock %}
+
+{% block content %}
+<!-- ===== HERO SECTION ===== -->
+<section class="hero" id="hero">
+    <div class="hero-bg" style="background-image: url('{% static 'home/images/hero-bg.png' %}');"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Desa Manud Jaya</h1>
+        <p class="hero-tagline">Wisata Alam Berkelanjutan di Jantung Nusantara</p>
+        <p class="hero-desc">
+            Temukan keindahan alam yang lestari, kehangatan homestay tradisional,
+            dan kelezatan kopi serta cokelat lokal berkualitas tinggi.
+        </p>
+        <a href="#potensi" class="btn-primary">
+            Jelajahi Desa Kami
+        </a>
+    </div>
+    <a href="#potensi" class="scroll-arrow" aria-label="Scroll down">
+        <i class="fas fa-chevron-down"></i>
+    </a>
+</section>
+
+<!-- ===== POTENSI DESA SECTION ===== -->
+<section class="potensi" id="potensi">
+    <div class="potensi-header">
+        <h2 class="section-title">Jelajahi Potensi Desa</h2>
+        <p class="section-subtitle">
+            Desa Manud Jaya menawarkan pengalaman wisata yang mengintegrasikan
+            alam, budaya, dan produk lokal dalam satu ekosistem berkelanjutan
+        </p>
+    </div>
+
+    <div class="cards-grid">
+        <!-- Card 1: Wisata Alam -->
+        <article class="card" id="card-wisata">
+            <div class="card-img-wrapper">
+                <img src="{% static 'home/images/wisata-alam.png' %}" alt="Wisata Alam Desa Manud Jaya" loading="lazy">
+                <div class="card-icon">
+                    <i class="fas fa-leaf"></i>
+                </div>
+            </div>
+            <div class="card-body">
+                <h3 class="card-title">Wisata Alam</h3>
+                <p class="card-text">
+                    Jelajahi keindahan alam yang masih asri dengan
+                    air terjun, hutan tropis, dan pemandangan
+                    sawah terasing yang memukau. Nikmati
+                    ecotourism yang bertanggung jawab.
+                </p>
+                <a href="#" class="card-link">
+                    Lihat Selengkapnya <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </article>
+
+        <!-- Card 2: Homestay Ramah Lingkungan -->
+        <article class="card" id="card-homestay">
+            <div class="card-img-wrapper">
+                <img src="{% static 'home/images/homestay.png' %}" alt="Homestay Ramah Lingkungan Desa Manud Jaya"
+                    loading="lazy">
+                <div class="card-icon">
+                    <i class="fas fa-home"></i>
+                </div>
+            </div>
+            <div class="card-body">
+                <h3 class="card-title">Homestay Ramah Lingkungan</h3>
+                <p class="card-text">
+                    Rasakan pengalaman menginap di homestay
+                    tradisional yang dikelola masyarakat lokal.
+                    Arsitektur autentik berpadu dengan fasilitas modern
+                    dan praktik berkelanjutan.
+                </p>
+                <a href="#" class="card-link">
+                    Lihat Selengkapnya <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </article>
+
+        <!-- Card 3: Produk Lokal Berkualitas -->
+        <article class="card" id="card-produk">
+            <div class="card-img-wrapper">
+                <img src="{% static 'home/images/produk-lokal.png' %}" alt="Produk Lokal Berkualitas Desa Manud Jaya"
+                    loading="lazy">
+                <div class="card-icon">
+                    <i class="fas fa-shopping-bag"></i>
+                </div>
+            </div>
+            <div class="card-body">
+                <h3 class="card-title">Produk Lokal Berkualitas</h3>
+                <p class="card-text">
+                    Bawa pulang kopi dan cokelat berkualitas
+                    premium hasil kebun petani lokal. Produk olahan
+                    artisan yang mendukung ekonomi masyarakat
+                    desa.
+                </p>
+                <a href="#" class="card-link">
+                    Lihat Selengkapnya <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </article>
+    </div>
+</section>
+{% endblock %}
