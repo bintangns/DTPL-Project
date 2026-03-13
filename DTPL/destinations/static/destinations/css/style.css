@@ -1,0 +1,689 @@
+/* ==========================================================================
+   Desa Manud Jaya — Destinations Page Stylesheet
+   Reuses :root CSS variables from home/css/style.css
+   ========================================================================== */
+
+/* --- Destination Hero (compact green gradient banner) --- */
+.dest-hero {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, var(--accent) 100%);
+    padding: 7rem 2rem 3rem;
+    color: var(--white);
+}
+
+.dest-hero-content {
+    max-width: 700px;
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.dest-hero-title {
+    font-size: 2.8rem;
+    font-weight: 800;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.5px;
+}
+
+.dest-hero-desc {
+    font-size: 0.95rem;
+    font-weight: 300;
+    line-height: 1.7;
+    opacity: 0.92;
+    max-width: 550px;
+}
+
+/* --- Destination Cards Grid --- */
+.dest-grid-section {
+    padding: 3rem 2rem 4rem;
+    background: var(--off-white);
+}
+
+.dest-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.dest-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+}
+
+.dest-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-card-hover);
+}
+
+/* Card Image */
+.dest-card-img {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+}
+
+.dest-card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.dest-card:hover .dest-card-img img {
+    transform: scale(1.08);
+}
+
+.dest-card-badges {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    right: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+/* Badges */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.badge-category {
+    background: var(--primary);
+    color: var(--white);
+}
+
+.badge-difficulty {
+    background: var(--white);
+    color: var(--text);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Card Body */
+.dest-card-body {
+    padding: 1.25rem 1.5rem 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.dest-card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+}
+
+.dest-card-desc {
+    font-size: 0.82rem;
+    color: var(--text-light);
+    line-height: 1.65;
+    margin-bottom: 1rem;
+    flex: 1;
+}
+
+.dest-card-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 1rem;
+    font-size: 0.78rem;
+    color: var(--text-light);
+}
+
+.dest-card-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.dest-card-meta i {
+    color: var(--primary);
+    font-size: 0.75rem;
+    width: 14px;
+    text-align: center;
+}
+
+.dest-card-link {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--primary);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: var(--transition);
+    margin-top: auto;
+}
+
+.dest-card-link:hover {
+    color: var(--primary-dark);
+    gap: 0.65rem;
+}
+
+/* --- Ticket Info Section --- */
+.dest-ticket-section {
+    padding: 0 2rem 3rem;
+    background: var(--off-white);
+}
+
+.dest-ticket-card {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 2rem 2.5rem;
+    box-shadow: var(--shadow-card);
+    border-left: 4px solid var(--primary);
+}
+
+.ticket-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.ticket-icon {
+    width: 44px;
+    height: 44px;
+    background: var(--off-white);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    font-size: 1.1rem;
+}
+
+.ticket-header h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.ticket-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-bottom: 0.75rem;
+    padding-left: 3.5rem;
+}
+
+.ticket-price {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 0.25rem;
+    padding-left: 3.5rem;
+}
+
+.ticket-per {
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: var(--text-light);
+}
+
+.ticket-desc {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    line-height: 1.7;
+    margin-bottom: 0.75rem;
+}
+
+.ticket-list {
+    list-style: none;
+    padding: 0;
+}
+
+.ticket-list li {
+    font-size: 0.82rem;
+    color: var(--text-light);
+    padding: 0.3rem 0 0.3rem 1.2rem;
+    position: relative;
+    line-height: 1.6;
+}
+
+.ticket-list li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+/* --- Ecotourism Section --- */
+.dest-eco-section {
+    padding: 0 2rem 4rem;
+    background: var(--off-white);
+}
+
+.dest-eco-card {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 2rem 2.5rem;
+    box-shadow: var(--shadow-card);
+    border-left: 4px solid var(--accent);
+}
+
+.eco-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.eco-icon {
+    width: 44px;
+    height: 44px;
+    background: #e8f5e9;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    font-size: 1.1rem;
+}
+
+.eco-header h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.eco-desc {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    line-height: 1.7;
+    margin-bottom: 1rem;
+}
+
+.eco-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.eco-list li {
+    font-size: 0.82rem;
+    color: var(--text-light);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    line-height: 1.6;
+}
+
+.eco-list li i {
+    color: var(--accent);
+    margin-top: 3px;
+    font-size: 0.8rem;
+}
+
+/* ==========================================================================
+   DETAIL PAGE
+   ========================================================================== */
+
+/* --- Back Navigation Bar --- */
+.detail-back-bar {
+    background: var(--white);
+    border-bottom: 1px solid #e9ecef;
+    padding: 0.85rem 0;
+    padding-top: calc(0.85rem + 60px); /* account for fixed navbar */
+}
+
+.detail-back-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.detail-back-link {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-light);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: var(--transition);
+}
+
+.detail-back-link:hover {
+    color: var(--primary);
+}
+
+/* --- Detail Hero --- */
+.detail-hero {
+    position: relative;
+    height: 420px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: flex-end;
+    color: var(--white);
+}
+
+.detail-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0.1) 0%,
+        rgba(0, 0, 0, 0.25) 40%,
+        rgba(27, 67, 50, 0.75) 100%
+    );
+}
+
+.detail-hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 2.5rem 2rem;
+}
+
+.detail-badges {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.detail-hero-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.5px;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+.detail-hero-desc {
+    font-size: 0.95rem;
+    font-weight: 300;
+    max-width: 650px;
+    line-height: 1.7;
+    opacity: 0.95;
+}
+
+/* --- Detail Two-Column Layout --- */
+.detail-content-section {
+    padding: 3rem 2rem 4rem;
+    background: var(--off-white);
+}
+
+.detail-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    gap: 2.5rem;
+    align-items: flex-start;
+}
+
+.detail-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.detail-sidebar {
+    width: 360px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Detail Main Content */
+.detail-section-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 1rem;
+}
+
+.detail-description {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    line-height: 1.8;
+    margin-bottom: 2rem;
+}
+
+/* Cara Akses Card */
+.detail-access-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 1.5rem 1.75rem;
+    box-shadow: var(--shadow-card);
+    margin-bottom: 2rem;
+}
+
+.access-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.access-icon {
+    width: 40px;
+    height: 40px;
+    background: #e8f5e9;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    font-size: 0.95rem;
+}
+
+.access-header h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.detail-access-card p {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    line-height: 1.7;
+}
+
+/* Facilities */
+.detail-facilities {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.detail-facilities li {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.detail-facilities li i {
+    color: var(--accent);
+    font-size: 0.8rem;
+}
+
+/* --- Sidebar Cards --- */
+.sidebar-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 1.5rem 1.75rem;
+    box-shadow: var(--shadow-card);
+}
+
+.sidebar-card-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sidebar-card-title i {
+    color: var(--accent);
+}
+
+/* Info List */
+.info-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.info-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+    color: var(--text-light);
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.info-list li:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.info-list li > i {
+    color: var(--primary);
+    margin-top: 2px;
+    font-size: 0.85rem;
+    width: 18px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.info-list li div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.info-list li strong {
+    font-weight: 600;
+    color: var(--text);
+    font-size: 0.82rem;
+}
+
+.info-list li span {
+    font-size: 0.82rem;
+}
+
+/* Ecotourism Sidebar Card */
+.eco-sidebar-card {
+    border-left: 3px solid var(--accent);
+    background: linear-gradient(135deg, #f0fdf4 0%, var(--white) 100%);
+}
+
+.eco-sidebar-card p {
+    font-size: 0.82rem;
+    color: var(--text-light);
+    line-height: 1.7;
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 1024px) {
+    .dest-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .detail-content {
+        flex-direction: column;
+    }
+
+    .detail-sidebar {
+        width: 100%;
+    }
+
+    .dest-hero-title {
+        font-size: 2.2rem;
+    }
+
+    .detail-hero-title {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .dest-hero {
+        padding: 6rem 1.5rem 2.5rem;
+    }
+
+    .dest-hero-title {
+        font-size: 1.9rem;
+    }
+
+    .dest-grid {
+        grid-template-columns: 1fr;
+        max-width: 450px;
+        margin: 0 auto;
+    }
+
+    .detail-hero {
+        height: 320px;
+    }
+
+    .detail-hero-title {
+        font-size: 1.8rem;
+    }
+
+    .detail-facilities {
+        grid-template-columns: 1fr;
+    }
+
+    .dest-ticket-card,
+    .dest-eco-card {
+        padding: 1.5rem;
+    }
+
+    .ticket-subtitle,
+    .ticket-price {
+        padding-left: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .dest-hero-title {
+        font-size: 1.6rem;
+    }
+
+    .detail-hero {
+        height: 260px;
+    }
+
+    .detail-hero-title {
+        font-size: 1.5rem;
+    }
+
+    .detail-hero-desc {
+        font-size: 0.85rem;
+    }
+}
