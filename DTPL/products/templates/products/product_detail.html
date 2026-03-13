@@ -1,73 +1,135 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detail Produk</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f7f7f7;
-            margin: 0;
-            padding: 0;
-        }
+{% extends 'base.html' %}
+{% load static %}
 
-        .container {
-            width: 90%;
-            max-width: 900px;
-            margin: 30px auto;
-            background: white;
-            border-radius: 14px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            overflow: hidden;
-        }
+{% block title %}{{ product.name }} — Desa Manud Jaya{% endblock %}
+{% block nav_home %}{% endblock %}
+{% block nav_products %}active{% endblock %}
 
-        img {
-            width: 100%;
-            height: 350px;
-            object-fit: cover;
-        }
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'products/css/style.css' %}">
+{% endblock %}
 
-        .content {
-            padding: 24px;
-        }
-
-        .price {
-            font-size: 20px;
-            font-weight: bold;
-            color: #2e7d32;
-        }
-
-        .back-btn {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 14px;
-            background: #8b5e3c;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        {% if product %}
-            <img src="{{ product.image }}" alt="{{ product.name }}">
-            <div class="content">
-                <h1>{{ product.name }}</h1>
-                <p>Kategori: {{ product.category_display }}</p>
-                <p class="price">Rp {{ product.price }}</p>
-                <p>Stok: {{ product.stock }}</p>
-                <p>{{ product.description }}</p>
-
-                <a class="back-btn" href="{% url 'products:list' %}">Kembali ke Produk</a>
-            </div>
-        {% else %}
-            <div class="content">
-                <h2>Produk tidak ditemukan</h2>
-                <a class="back-btn" href="{% url 'products:list' %}">Kembali</a>
-            </div>
-        {% endif %}
+{% block content %}
+{% if product %}
+<div class="detail-back-bar">
+    <div class="detail-back-container">
+        <a href="{% url 'products:list' %}" class="detail-back-link">
+            <i class="fas fa-arrow-left"></i> Kembali ke Daftar Produk
+        </a>
     </div>
-</body>
-</html>
+</div>
+
+<section class="detail-hero" style="background-image: url('{{ product.image }}');">
+    <div class="detail-hero-overlay"></div>
+    <div class="detail-hero-content">
+        <div class="detail-badges">
+            <span class="badge badge-category">
+                <i class="fas fa-tags"></i> {{ product.category_display }}
+            </span>
+
+            {% if product.stock > 0 %}
+                <span class="badge badge-difficulty">Stok: {{ product.stock }}</span>
+            {% else %}
+                <span class="badge badge-difficulty">Stok Habis</span>
+            {% endif %}
+        </div>
+
+        <h1 class="detail-hero-title">{{ product.name }}</h1>
+        <p class="detail-hero-desc">{{ product.short_description }}</p>
+    </div>
+</section>
+
+<section class="detail-content-section">
+    <div class="detail-content">
+        <div class="detail-main">
+            <h2 class="detail-section-title">Tentang Produk</h2>
+            <p class="detail-description">{{ product.description }}</p>
+
+            <div class="detail-access-card">
+                <div class="access-header">
+                    <div class="access-icon"><i class="fas fa-store"></i></div>
+                    <h3>Informasi Produk Lokal</h3>
+                </div>
+                <p>
+                    Produk ini merupakan hasil olahan masyarakat Desa Manud Jaya
+                    yang dikembangkan untuk mendukung ekonomi kreatif desa dan
+                    memperkenalkan potensi lokal kepada wisatawan.
+                </p>
+            </div>
+
+            <h2 class="detail-section-title">Keunggulan Produk</h2>
+            <ul class="detail-facilities">
+                <li><i class="fas fa-check-circle"></i> Diproduksi oleh masyarakat lokal</li>
+                <li><i class="fas fa-check-circle"></i> Mengangkat potensi unggulan desa</li>
+                <li><i class="fas fa-check-circle"></i> Cocok sebagai oleh-oleh khas desa</li>
+                <li><i class="fas fa-check-circle"></i> Mendukung pemberdayaan UMKM desa</li>
+            </ul>
+        </div>
+
+        <aside class="detail-sidebar">
+            <div class="sidebar-card info-card">
+                <h3 class="sidebar-card-title">Informasi Produk</h3>
+                <ul class="info-list">
+                    <li>
+                        <i class="fas fa-tags"></i>
+                        <div>
+                            <strong>Kategori</strong>
+                            <span>{{ product.category_display }}</span>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fas fa-money-bill-wave"></i>
+                        <div>
+                            <strong>Harga</strong>
+                            <span>Rp {{ product.price }}</span>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fas fa-box"></i>
+                        <div>
+                            <strong>Stok</strong>
+                            <span>
+                                {% if product.stock > 0 %}
+                                    Tersedia ({{ product.stock }})
+                                {% else %}
+                                    Habis
+                                {% endif %}
+                            </span>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fas fa-store"></i>
+                        <div>
+                            <strong>Jenis Produk</strong>
+                            <span>Produk Lokal Desa</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-card eco-sidebar-card">
+                <h3 class="sidebar-card-title"><i class="fas fa-leaf"></i> Dukungan Ekonomi Lokal</h3>
+                <p>
+                    Dengan membeli produk ini, wisatawan turut mendukung
+                    pengembangan UMKM desa, pemberdayaan masyarakat lokal,
+                    dan keberlanjutan ekonomi kreatif Desa Manud Jaya.
+                </p>
+            </div>
+        </aside>
+    </div>
+</section>
+{% else %}
+<section class="detail-content-section">
+    <div class="detail-content" style="display:block; max-width:900px; margin:auto;">
+        <div class="product-empty-card">
+            <h3>Produk tidak ditemukan</h3>
+            <p>Produk yang Anda cari belum tersedia atau data tidak ditemukan.</p>
+            <br>
+            <a href="{% url 'products:list' %}" class="product-card-link">
+                <i class="fas fa-arrow-left"></i> Kembali ke Daftar Produk
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}
