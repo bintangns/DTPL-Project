@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Destinasi Wisata — Desa Manud Jaya{% endblock %}
+{% block nav_home %}{% endblock %}
+{% block nav_destinasi %}active{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'destinations/css/style.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- ===== HERO SECTION ===== -->
+<section class="dest-hero" id="dest-hero">
+    <div class="dest-hero-content">
+        <h1 class="dest-hero-title">Destinasi Wisata</h1>
+        <p class="dest-hero-desc">
+            Jelajahi keindahan alam Desa Manud Jaya yang dikelola dengan prinsip
+            ecotourism untuk menjaga kelestarian lingkungan dan meningkatkan
+            kesejahteraan masyarakat lokal
+        </p>
+    </div>
+</section>
+
+<!-- ===== DESTINATION CARDS GRID ===== -->
+<section class="dest-grid-section">
+    <div class="dest-grid">
+        {% for dest in destinations %}
+        <article class="dest-card" id="dest-card-{{ dest.slug }}">
+            <div class="dest-card-img">
+                <img src="{% static dest.image %}" alt="{{ dest.name }}" loading="lazy">
+                <div class="dest-card-badges">
+                    <span class="badge badge-difficulty">{{ dest.difficulty }}</span>
+                    <span class="badge badge-category"><i class="fas fa-heart"></i> {{ dest.category }}</span>
+                </div>
+            </div>
+            <div class="dest-card-body">
+                <h3 class="dest-card-title">{{ dest.name }}</h3>
+                <p class="dest-card-desc">{{ dest.tagline|truncatewords:25 }}</p>
+                <div class="dest-card-meta">
+                    <span><i class="fas fa-map-marker-alt"></i> {{ dest.location }}</span>
+                    <span><i class="fas fa-clock"></i> {{ dest.duration }}</span>
+                </div>
+                <a href="{% url 'destinations:detail' dest.slug %}" class="dest-card-link">
+                    Lihat Detail <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- ===== TICKET INFO ===== -->
+<section class="dest-ticket-section">
+    <div class="dest-ticket-card">
+        <div class="ticket-header">
+            <div class="ticket-icon"><i class="fas fa-ticket-alt"></i></div>
+            <h2>Tiket Masuk Desa Wisata</h2>
+        </div>
+        <p class="ticket-subtitle">Tiket Masuk untuk Semua Destinasi</p>
+        <div class="ticket-price">
+            Rp 20.000
+            <span class="ticket-per">per orang</span>
+        </div>
+        <p class="ticket-desc">
+            Tiket masuk desa berlaku untuk mengakses semua destinasi wisata di Desa Manud Jaya.
+            Dana dari tiket masuk digunakan untuk:
+        </p>
+        <ul class="ticket-list">
+            <li><strong>Kontribusi Desa:</strong> Pemberdayaan masyarakat lokal dan program ekonomi kreatif</li>
+            <li><strong>Perawatan Lingkungan:</strong> Konservasi alam, pengelolaan sampah, dan penanaman pohon</li>
+            <li><strong>Kontribusi Pajak:</strong> Pajak daerah untuk pembangunan infrastruktur desa</li>
+        </ul>
+    </div>
+</section>
+
+<!-- ===== ECOTOURISM COMMITMENT ===== -->
+<section class="dest-eco-section">
+    <div class="dest-eco-card">
+        <div class="eco-header">
+            <div class="eco-icon"><i class="fas fa-globe-asia"></i></div>
+            <h2>Komitmen Ecotourism Kami</h2>
+        </div>
+        <p class="eco-desc">
+            Destinasi dengan label <strong>Ecotourism</strong> dikelola dengan prinsip
+            "responsible travel to natural areas that conserves the environment, sustains the well-being
+            of local people, and involves interpretation and education"
+            (The International Ecotourism Society, 2015).
+        </p>
+        <ul class="eco-list">
+            <li><i class="fas fa-check-circle"></i> Pembatasan jumlah pengunjung untuk menjaga kelestarian alam</li>
+            <li><i class="fas fa-check-circle"></i> Fasilitas ramah lingkungan (toilet kompos, tempat sampah terpilah)</li>
+            <li><i class="fas fa-check-circle"></i> Pemandu lokal yang memberikan edukasi lingkungan kepada wisatawan</li>
+            <li><i class="fas fa-check-circle"></i> Kontribusi langsung pendapatan wisata untuk konservasi dan masyarakat desa</li>
+        </ul>
+    </div>
+</section>
+{% endblock %}
