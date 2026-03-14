@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'destinations',
     'products',
     'homestays',
+    'about',
 ]
 
 MIDDLEWARE = [
