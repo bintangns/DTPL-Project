@@ -26,7 +26,7 @@
             <ul class="nav-links" id="navLinks">
                 <li><a href="{% url 'home:home' %}" class="nav-link {% block nav_home %}active{% endblock %}">Beranda</a></li>
                 <li><a href="{% url 'destinations:list' %}" class="nav-link {% block nav_destinasi %}{% endblock %}">Destinasi</a></li>
-                <li><a href="#" class="nav-link {% block nav_homestay %}{% endblock %}">Homestay</a></li>
+                <li><a href="{% url 'homestays:list' %}" class="nav-link {% block nav_homestay %}{% endblock %}">Homestay</a></li>
                 <li><a href="{% url 'products:list' %}" class="nav-link {% block nav_produk %}{% endblock %}">Produk Lokal</a></li>
                 <li><a href="{% url 'about:ecotourism' %}" class="nav-link {% block nav_about %}{% endblock %}">Ecotourism</a></li>
             </ul>
@@ -63,7 +63,7 @@
                     <h3 class="footer-title">Navigasi</h3>
                     <ul class="footer-nav">
                         <li><a href="{% url 'destinations:list' %}">Destinasi Wisata</a></li>
-                        <li><a href="#">Homestay</a></li>
+                        <li><a href="{% url 'homestays:list' %}">Homestay</a></li>
                         <li><a href="{% url 'products:list' %}">Produk Lokal</a></li>
                         <li><a href="{% url 'about:ecotourism' %}">Ecotourism</a></li>
                     </ul>
