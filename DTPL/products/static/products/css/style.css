@@ -1,8 +1,36 @@
+/* ===== NAVBAR OVERRIDE FOR PRODUCTS ===== */
+.navbar {
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.nav-link {
+    color: #ffffff !important;
+}
+
+.nav-logo {
+    color: #6ad19b !important;
+}
+
+.navbar.scrolled {
+    background: rgba(255, 255, 255, 0.96) !important;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+}
+
+.navbar.scrolled .nav-link {
+    color: #1f2c22 !important;
+}
+
+.navbar.scrolled .nav-logo {
+    color: #2f8f5b !important;
+}
+
 /* ===== PRODUCT LIST PAGE ===== */
 .product-hero {
     position: relative;
-    padding: 110px 20px 90px;
-    margin-top: 88px;
+    padding: 150px 20px 90px;
+    margin-top: 0;
     text-align: center;
     color: #fff;
     background:
@@ -277,33 +305,45 @@
 
 /* ===== PRODUCT DETAIL PAGE ===== */
 .detail-back-bar {
-    background: #ffffff;
-    border-bottom: 1px solid #e8efe9;
-    padding: 16px 20px;
-    margin-top: 88px;
+    background: transparent;
+    border-bottom: none;
+    padding: 0;
+    margin-top: 0;
+    position: absolute;
+    top: 100px;
+    left: 0;
+    width: 100%;
+    z-index: 20;
 }
 
 .detail-back-container {
     max-width: 1200px;
     margin: 0 auto;
+    padding: 0 20px;
 }
 
 .detail-back-link {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    color: #2f5d3a;
+    color: #ffffff;
     text-decoration: none;
     font-weight: 700;
+    background: rgba(0, 0, 0, 0.18);
+    padding: 10px 16px;
+    border-radius: 999px;
+    backdrop-filter: blur(6px);
 }
 
 .detail-back-link:hover {
-    color: #1d3e25;
+    color: #ffffff;
+    background: rgba(0, 0, 0, 0.28);
 }
 
 .detail-hero {
     position: relative;
     min-height: 420px;
+    padding-top: 80px;
     background-size: cover;
     background-position: center;
     display: flex;
@@ -553,8 +593,8 @@
 
 @media (max-width: 768px) {
     .product-hero {
-        padding: 90px 20px 70px;
-        margin-top: 78px;
+        padding: 130px 20px 70px;
+        margin-top: 0;
     }
 
     .product-card-img {
@@ -578,7 +618,16 @@
     }
 
     .detail-back-bar {
-        margin-top: 78px;
+        top: 86px;
+    }
+
+    .detail-back-container {
+        padding: 0 16px;
+    }
+
+    .detail-back-link {
+        padding: 9px 14px;
+        font-size: 0.92rem;
     }
 
     .detail-hero {

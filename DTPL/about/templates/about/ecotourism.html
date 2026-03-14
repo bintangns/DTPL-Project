@@ -1,0 +1,366 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ecotourism — Desa Manud Jaya{% endblock %}
+{% block nav_home %}{% endblock %}
+{% block nav_about %}active{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'about/css/style.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="eco-page">
+
+    <!-- HERO -->
+    <section class="eco-hero">
+        <div class="eco-hero-inner reveal-up">
+            <div class="eco-hero-label">
+                <i class="fas fa-leaf"></i>
+                <span>KOMITMEN BERKELANJUTAN</span>
+            </div>
+            <h1>Ecotourism Desa Manud Jaya</h1>
+            <p>
+                Wisata yang bertanggung jawab terhadap alam, memberikan manfaat bagi masyarakat lokal,
+                dan menciptakan pengalaman yang bermakna bagi setiap pengunjung.
+            </p>
+        </div>
+    </section>
+
+    <!-- APA ITU ECOTOURISM -->
+    <section class="eco-section eco-intro">
+        <div class="eco-container">
+            <div class="section-heading reveal-up">
+                <h2>Apa itu Ecotourism?</h2>
+                <p>
+                    Ecotourism atau ekowisata adalah bentuk perjalanan yang bertanggung jawab ke area alam
+                    yang melibatkan edukasi, pelestarian lingkungan, dan kesejahteraan masyarakat sekitar.
+                    Di Desa Manud Jaya, kami mengintegrasikan prinsip-prinsip ini dalam setiap aspek
+                    pengalaman wisata Anda.
+                </p>
+            </div>
+
+            <div class="eco-principles-grid">
+                <div class="eco-principle-card reveal-up">
+                    <div class="eco-icon-circle"><i class="fas fa-leaf"></i></div>
+                    <h3>Melestarikan Alam</h3>
+                    <p>Setiap kegiatan wisata dirancang untuk menjaga ekosistem dan keindahan alam desa.</p>
+                </div>
+
+                <div class="eco-principle-card reveal-up">
+                    <div class="eco-icon-circle"><i class="fas fa-heart"></i></div>
+                    <h3>Menghormati Budaya Lokal</h3>
+                    <p>Wisatawan diajak memahami adat, nilai, dan kearifan lokal masyarakat Manud Jaya.</p>
+                </div>
+
+                <div class="eco-principle-card reveal-up">
+                    <div class="eco-icon-circle"><i class="fas fa-users"></i></div>
+                    <h3>Memberdayakan Masyarakat</h3>
+                    <p>Pendapatan wisata turut mendukung ekonomi warga dan UMKM desa secara langsung.</p>
+                </div>
+
+                <div class="eco-principle-card reveal-up">
+                    <div class="eco-icon-circle"><i class="fas fa-book-open"></i></div>
+                    <h3>Edukasi Lingkungan</h3>
+                    <p>Pengunjung memperoleh wawasan tentang konservasi, pertanian, dan gaya hidup lestari.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PRAKTIK RAMAH LINGKUNGAN -->
+    <section class="eco-section eco-practices">
+        <div class="eco-container">
+            <div class="section-heading reveal-up">
+                <h2>Praktik Ramah Lingkungan Kami</h2>
+                <p>
+                    Komitmen kami dalam menjaga kelestarian alam diwujudkan melalui inisiatif dan program konkret.
+                </p>
+            </div>
+
+            <div class="eco-practice-list">
+                <div class="eco-practice-card reveal-up">
+                    <div class="practice-icon"><i class="fas fa-recycle"></i></div>
+                    <div>
+                        <h3>Manajemen Sampah Terpadu</h3>
+                        <p>
+                            Sistem pemilahan sampah organik dan anorganik, penggunaan kompos untuk pertanian,
+                            serta edukasi pengunjung untuk mengurangi sampah sekali pakai.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="eco-practice-card reveal-up">
+                    <div class="practice-icon"><i class="fas fa-bolt"></i></div>
+                    <div>
+                        <h3>Energi Terbarukan</h3>
+                        <p>
+                            Pemanfaatan pencahayaan alami, penggunaan perangkat hemat energi, dan pengurangan
+                            konsumsi listrik yang tidak perlu.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="eco-practice-card reveal-up">
+                    <div class="practice-icon"><i class="fas fa-tree"></i></div>
+                    <div>
+                        <h3>Konservasi Air</h3>
+                        <p>
+                            Pengelolaan air bersih secara bijak, pemanfaatan air hujan, dan kampanye hemat air
+                            untuk wisatawan maupun pengelola.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="eco-practice-card reveal-up">
+                    <div class="practice-icon"><i class="fas fa-seedling"></i></div>
+                    <div>
+                        <h3>Pelestarian Hutan &amp; Biodiversitas</h3>
+                        <p>
+                            Menjaga vegetasi lokal, mencegah kerusakan habitat, dan melibatkan masyarakat dalam
+                            aktivitas penghijauan.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="eco-practice-card reveal-up">
+                    <div class="practice-icon"><i class="fas fa-apple-alt"></i></div>
+                    <div>
+                        <h3>Pertanian Organik</h3>
+                        <p>
+                            Mendukung kebun lokal yang menerapkan praktik pertanian berkelanjutan dan minim bahan kimia.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="eco-practice-card reveal-up">
+                    <div class="practice-icon"><i class="fas fa-store"></i></div>
+                    <div>
+                        <h3>Pemberdayaan Ekonomi Lokal</h3>
+                        <p>
+                            Produk lokal, homestay, pemandu, dan layanan wisata dikelola dengan melibatkan warga desa.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PANDUAN -->
+    <section class="eco-section eco-guidelines">
+        <div class="eco-container">
+            <div class="section-heading reveal-up">
+                <h2>Panduan Wisatawan Bertanggung Jawab</h2>
+                <p>
+                    Dengan mengikuti panduan ini, Anda ikut menjaga kelestarian alam dan budaya Desa Manud Jaya.
+                </p>
+            </div>
+
+            <div class="guideline-list">
+                <div class="guideline-block reveal-up">
+                    <h3><i class="fas fa-info-circle"></i> Jaga Kebersihan Lingkungan</h3>
+                    <div class="guideline-grid">
+                        <div class="guideline-box good">
+                            <h4><i class="fas fa-check-circle"></i> Yang Harus Dilakukan</h4>
+                            <ul>
+                                <li>Buang sampah pada tempatnya.</li>
+                                <li>Gunakan ulang botol minum dan wadah pribadi.</li>
+                                <li>Kurangi plastik sekali pakai selama kunjungan.</li>
+                            </ul>
+                        </div>
+                        <div class="guideline-box bad">
+                            <h4><i class="fas fa-times-circle"></i> Yang Harus Dihindari</h4>
+                            <ul>
+                                <li>Meninggalkan sampah di area wisata.</li>
+                                <li>Membuang limbah ke sungai atau kebun.</li>
+                                <li>Mengotori fasilitas umum.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="guideline-block reveal-up">
+                    <h3><i class="fas fa-info-circle"></i> Hormati Alam dan Kehidupan Liar</h3>
+                    <div class="guideline-grid">
+                        <div class="guideline-box good">
+                            <h4><i class="fas fa-check-circle"></i> Yang Harus Dilakukan</h4>
+                            <ul>
+                                <li>Ikuti jalur yang telah disediakan.</li>
+                                <li>Menjaga ketenangan di area alam.</li>
+                                <li>Mengamati flora dan fauna tanpa mengganggu.</li>
+                            </ul>
+                        </div>
+                        <div class="guideline-box bad">
+                            <h4><i class="fas fa-times-circle"></i> Yang Harus Dihindari</h4>
+                            <ul>
+                                <li>Merusak tanaman atau habitat alami.</li>
+                                <li>Memberi makan satwa liar.</li>
+                                <li>Mengambil flora/fauna sebagai souvenir.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="guideline-block reveal-up">
+                    <h3><i class="fas fa-info-circle"></i> Hemat Energi dan Air</h3>
+                    <div class="guideline-grid">
+                        <div class="guideline-box good">
+                            <h4><i class="fas fa-check-circle"></i> Yang Harus Dilakukan</h4>
+                            <ul>
+                                <li>Matikan lampu dan alat elektronik saat tidak digunakan.</li>
+                                <li>Gunakan air secukupnya.</li>
+                                <li>Dukung fasilitas yang hemat energi.</li>
+                            </ul>
+                        </div>
+                        <div class="guideline-box bad">
+                            <h4><i class="fas fa-times-circle"></i> Yang Harus Dihindari</h4>
+                            <ul>
+                                <li>Membiarkan air mengalir tanpa keperluan.</li>
+                                <li>Menggunakan listrik berlebihan.</li>
+                                <li>Menyia-nyiakan sumber daya desa.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="guideline-block reveal-up">
+                    <h3><i class="fas fa-info-circle"></i> Dukung Ekonomi Lokal</h3>
+                    <div class="guideline-grid">
+                        <div class="guideline-box good">
+                            <h4><i class="fas fa-check-circle"></i> Yang Harus Dilakukan</h4>
+                            <ul>
+                                <li>Beli produk lokal dan kerajinan warga.</li>
+                                <li>Gunakan jasa pemandu lokal.</li>
+                                <li>Menginap di homestay desa bila tersedia.</li>
+                            </ul>
+                        </div>
+                        <div class="guideline-box bad">
+                            <h4><i class="fas fa-times-circle"></i> Yang Harus Dihindari</h4>
+                            <ul>
+                                <li>Menawar secara tidak wajar.</li>
+                                <li>Mengabaikan produk dan jasa lokal.</li>
+                                <li>Membandingkan desa secara merendahkan.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="guideline-block reveal-up">
+                    <h3><i class="fas fa-info-circle"></i> Hormati Budaya dan Tradisi</h3>
+                    <div class="guideline-grid">
+                        <div class="guideline-box good">
+                            <h4><i class="fas fa-check-circle"></i> Yang Harus Dilakukan</h4>
+                            <ul>
+                                <li>Berpakaian sopan sesuai norma lokal.</li>
+                                <li>Bersikap ramah kepada masyarakat.</li>
+                                <li>Ikuti arahan pemandu dan pengelola.</li>
+                            </ul>
+                        </div>
+                        <div class="guideline-box bad">
+                            <h4><i class="fas fa-times-circle"></i> Yang Harus Dihindari</h4>
+                            <ul>
+                                <li>Bersikap kasar atau meremehkan budaya setempat.</li>
+                                <li>Mengambil foto tanpa izin dalam situasi sensitif.</li>
+                                <li>Membuat keributan yang mengganggu warga.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- KONTRIBUSI -->
+    <section class="eco-impact-cta">
+        <div class="eco-container">
+            <div class="section-heading heading-light reveal-up">
+                <h2>Berkontribusi untuk Desa</h2>
+                <p>
+                    Setiap kunjungan dan pembelian produk lokal Anda ikut berkontribusi langsung
+                    pada konservasi dan kesejahteraan masyarakat Desa Manud Jaya.
+                </p>
+            </div>
+
+            <div class="impact-grid">
+                <div class="impact-card reveal-up">
+                    <div class="impact-icon"><i class="fas fa-tree"></i></div>
+                    <h3>Program Tanam Pohon</h3>
+                    <p>Bagian dari pendapatan wisata digunakan untuk penghijauan dan konservasi desa.</p>
+                </div>
+
+                <div class="impact-card reveal-up">
+                    <div class="impact-icon"><i class="fas fa-users"></i></div>
+                    <h3>Pelatihan UMKM Desa</h3>
+                    <p>Mendukung peningkatan kapasitas warga dalam produksi dan pemasaran produk lokal.</p>
+                </div>
+
+                <div class="impact-card reveal-up">
+                    <div class="impact-icon"><i class="fas fa-school"></i></div>
+                    <h3>Edukasi Pengunjung</h3>
+                    <p>Wisatawan diajak memahami pentingnya menjaga alam dan budaya secara berkelanjutan.</p>
+                </div>
+
+                <div class="impact-card reveal-up">
+                    <div class="impact-icon"><i class="fas fa-hand-holding-heart"></i></div>
+                    <h3>Dana Konservasi</h3>
+                    <p>Kontribusi wisata membantu perawatan jalur, fasilitas, dan lingkungan desa.</p>
+                </div>
+            </div>
+
+            <div class="cta-box reveal-up">
+                <p>Tertarik untuk berkontribusi lebih jauh?</p>
+                <a href="#" class="cta-button">Hubungi Kami</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- STATS -->
+    <section class="eco-section eco-stats">
+        <div class="eco-container">
+            <div class="section-heading reveal-up">
+                <h2>Dampak Positif Kami</h2>
+                <p>Pencapaian nyata dari komitmen ecotourism kami</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card reveal-up">
+                    <h3>2,500+</h3>
+                    <p>Pohon ditanam</p>
+                </div>
+                <div class="stat-card reveal-up">
+                    <h3>85%</h3>
+                    <p>Pengunjung puas</p>
+                </div>
+                <div class="stat-card reveal-up">
+                    <h3>150+</h3>
+                    <p>Warga terlibat</p>
+                </div>
+                <div class="stat-card reveal-up">
+                    <h3>40%</h3>
+                    <p>Energi terbarukan</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</section>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const items = document.querySelectorAll(".reveal-up");
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add("show");
+            }
+        });
+    }, { threshold: 0.12 });
+
+    items.forEach((item, index) => {
+        item.style.transitionDelay = `${index * 0.06}s`;
+        observer.observe(item);
+    });
+});
+</script>
+{% endblock %}
