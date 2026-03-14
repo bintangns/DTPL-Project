@@ -1,0 +1,430 @@
+/* ===== NAVBAR OVERRIDE FOR ECOTOURISM ===== */
+.navbar {
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.nav-link {
+    color: #ffffff !important;
+}
+
+.nav-logo {
+    color: #6ad19b !important;
+}
+
+.navbar.scrolled {
+    background: rgba(255, 255, 255, 0.96) !important;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+}
+
+.navbar.scrolled .nav-link {
+    color: #1f2c22 !important;
+}
+
+.navbar.scrolled .nav-logo {
+    color: #2f8f5b !important;
+}
+
+/* ===== PAGE ===== */
+.eco-page {
+    background: #f5f6f4;
+    min-height: 100vh;
+    color: #1f2c22;
+}
+
+.eco-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.eco-section {
+    padding: 64px 20px;
+}
+
+/* ===== HERO ===== */
+.eco-hero {
+    margin-top: 0;
+    background: linear-gradient(135deg, #0d7a34 0%, #149944 100%);
+    padding: 160px 20px 64px;
+    color: #fff;
+}
+
+.eco-hero-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.eco-hero-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    text-transform: uppercase;
+    opacity: 0.92;
+}
+
+.eco-hero h1 {
+    margin: 0 0 16px;
+    font-size: clamp(2.2rem, 4vw, 3.8rem);
+    font-weight: 800;
+    line-height: 1.15;
+}
+
+.eco-hero p {
+    margin: 0;
+    max-width: 760px;
+    font-size: 1.05rem;
+    line-height: 1.85;
+    color: rgba(255, 255, 255, 0.92);
+}
+
+/* ===== SECTION HEADING ===== */
+.section-heading {
+    text-align: center;
+    max-width: 900px;
+    margin: 0 auto 42px;
+}
+
+.section-heading h2 {
+    margin: 0 0 12px;
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+    font-weight: 800;
+    color: #1d2b20;
+}
+
+.section-heading p {
+    margin: 0;
+    line-height: 1.8;
+    color: #5c6b5f;
+}
+
+.heading-light h2,
+.heading-light p {
+    color: #fff;
+}
+
+/* ===== PRINCIPLES ===== */
+.eco-principles-grid {
+    display: grid;
+    gap: 22px;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+}
+
+.eco-principle-card {
+    background: #eef8f0;
+    border: 1px solid #d8ecdc;
+    border-radius: 20px;
+    padding: 26px 22px;
+    text-align: center;
+    box-shadow: 0 6px 18px rgba(26, 61, 33, 0.06);
+}
+
+.eco-icon-circle {
+    width: 58px;
+    height: 58px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0d7a34;
+    color: #fff;
+    font-size: 1.2rem;
+}
+
+.eco-principle-card h3 {
+    margin: 0 0 10px;
+    font-size: 1.1rem;
+    font-weight: 800;
+}
+
+.eco-principle-card p {
+    margin: 0;
+    color: #5a685d;
+    line-height: 1.7;
+    font-size: 0.95rem;
+}
+
+/* ===== PRACTICES ===== */
+.eco-practice-list {
+    display: grid;
+    gap: 22px;
+}
+
+.eco-practice-card {
+    background: #fff;
+    border: 1px solid #e3e8e3;
+    border-radius: 20px;
+    padding: 28px;
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+    box-shadow: 0 8px 20px rgba(26, 61, 33, 0.06);
+}
+
+.practice-icon {
+    width: 54px;
+    height: 54px;
+    min-width: 54px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e9f7ec;
+    color: #0d7a34;
+    font-size: 1.15rem;
+}
+
+.eco-practice-card h3 {
+    margin: 0 0 10px;
+    font-size: 1.15rem;
+    font-weight: 800;
+}
+
+.eco-practice-card p {
+    margin: 0;
+    color: #5a685d;
+    line-height: 1.8;
+}
+
+/* ===== GUIDELINES ===== */
+.guideline-list {
+    display: grid;
+    gap: 24px;
+}
+
+.guideline-block {
+    background: #fff;
+    border: 1px solid #e2e8e2;
+    border-radius: 20px;
+    padding: 26px;
+    box-shadow: 0 8px 20px rgba(26, 61, 33, 0.05);
+}
+
+.guideline-block h3 {
+    margin: 0 0 18px;
+    font-size: 1.18rem;
+    font-weight: 800;
+    color: #1f2c22;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.guideline-grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.guideline-box {
+    border-radius: 16px;
+    padding: 20px;
+}
+
+.guideline-box.good {
+    background: #eef8f0;
+    border: 1px solid #cae7d0;
+}
+
+.guideline-box.bad {
+    background: #fff3f3;
+    border: 1px solid #f0d0d0;
+}
+
+.guideline-box h4 {
+    margin: 0 0 12px;
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.guideline-box.good h4 {
+    color: #0d7a34;
+}
+
+.guideline-box.bad h4 {
+    color: #c0392b;
+}
+
+.guideline-box ul {
+    margin: 0;
+    padding-left: 18px;
+    line-height: 1.8;
+    color: #4f5d52;
+}
+
+/* ===== CTA IMPACT ===== */
+.eco-impact-cta {
+    background: linear-gradient(135deg, #0d7a34 0%, #149944 100%);
+    padding: 70px 20px 80px;
+}
+
+.impact-grid {
+    display: grid;
+    gap: 22px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    margin-bottom: 30px;
+}
+
+.impact-card {
+    background: rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 18px;
+    padding: 24px;
+    color: #fff;
+    backdrop-filter: blur(6px);
+}
+
+.impact-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.16);
+    font-size: 1.1rem;
+    margin-bottom: 14px;
+}
+
+.impact-card h3 {
+    margin: 0 0 10px;
+    font-size: 1.08rem;
+    font-weight: 800;
+}
+
+.impact-card p {
+    margin: 0;
+    line-height: 1.75;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.cta-box {
+    max-width: 420px;
+    margin: 0 auto;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 18px;
+    padding: 26px 20px;
+    color: #fff;
+}
+
+.cta-box p {
+    margin: 0 0 14px;
+    font-weight: 600;
+}
+
+.cta-button {
+    display: inline-block;
+    padding: 12px 22px;
+    background: #fff;
+    color: #0d7a34;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 800;
+    transition: 0.2s ease;
+}
+
+.cta-button:hover {
+    transform: translateY(-2px);
+    background: #f1fff4;
+}
+
+/* ===== STATS ===== */
+.eco-stats {
+    background: #fff;
+}
+
+.stats-grid {
+    display: grid;
+    gap: 22px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.stat-card {
+    text-align: center;
+    background: #f6faf6;
+    border: 1px solid #e2ece3;
+    border-radius: 20px;
+    padding: 28px 18px;
+}
+
+.stat-card h3 {
+    margin: 0 0 8px;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #0d7a34;
+}
+
+.stat-card p {
+    margin: 0;
+    color: #607064;
+    font-weight: 600;
+}
+
+/* ===== REVEAL ANIMATION ===== */
+.reveal-up {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.reveal-up.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 992px) {
+    .guideline-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .eco-hero {
+        margin-top: 0;
+        padding: 132px 16px 48px;
+    }
+
+    .eco-section {
+        padding: 52px 16px;
+    }
+
+    .eco-practice-card,
+    .guideline-block {
+        padding: 22px;
+    }
+
+    .eco-practice-card {
+        flex-direction: column;
+    }
+
+    .impact-grid,
+    .eco-principles-grid,
+    .stats-grid {
+        gap: 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    .eco-hero h1 {
+        font-size: 1.9rem;
+    }
+
+    .eco-hero p,
+    .section-heading p {
+        font-size: 0.95rem;
+    }
+
+    .eco-principle-card,
+    .impact-card,
+    .stat-card {
+        padding: 22px 16px;
+    }
+}
