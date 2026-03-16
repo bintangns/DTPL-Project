@@ -29,6 +29,7 @@ ALLOWED_HOSTS = [
     ".railway.app",
     "127.0.0.1",
     "localhost",
+    "focused-expression-staging.up.railway.app",
 
 
 # Application definition
