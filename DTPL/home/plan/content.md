@@ -54,8 +54,10 @@ Bawa pulang kopi dan cokelat berkualitas premium hasil kebun petani lokal. Produ
 ## 📍 Lokasi & Kontak
 
 **Desa Manud Jaya**  
-*Platform wisata berkelanjutan yang mengintegrasikan alam, budaya, dan produk lokal untuk meningkatkan kesejahteraan masyarakat desa.*
+Desa Manud Jaya, Kecamatan Sukamakmur, Kabupaten Bogor, Provinsi Jawa Barat  
+Kode Pos 16830, Indonesia
 
+📞 0812 2345 5678  
 📧 [info@manudjaya.id](mailto:info@manudjaya.id)  
 🌐 [www.manudjaya.id](https://www.manudjaya.id)  
 📱 Instagram: @manudjaya | Facebook: Desa Wisata Manud Jaya

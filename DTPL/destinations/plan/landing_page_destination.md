@@ -91,7 +91,7 @@ Wujud komitmen kami:
 
 | Desa Lestari Indah | Kontak | Navigasi |
 |---|---|---|
-| Menyajikan wisata berkualitas yang menghargai alam, budaya, dan produk lokal. | Desa Lestari Indah, Kecamatan Hijau, Kabupaten Lestari, +62 21 1234 5678 | [Destinasi](#) |
+| Menyajikan wisata berkualitas yang menghargai alam, budaya, dan produk lokal. | Desa Manud Jaya, Kecamatan Sukamakmur, Kabupaten Bogor, Provinsi Jawa Barat, Kode Pos 16830, 0812 2345 5678 | [Destinasi](#) |
 | | info@lestariindah.id | [Akomodasi](#) |
 | | | [Produk Lokal](#) |
 | | | [Ecotourism](#) |

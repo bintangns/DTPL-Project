@@ -12,6 +12,8 @@
 
 .dest-hero-content {
     max-width: 700px;
+    margin: 0 auto;
+    text-align: center;
     animation: fadeInUp 0.8s ease-out;
 }
 
@@ -28,6 +30,7 @@
     line-height: 1.7;
     opacity: 0.92;
     max-width: 550px;
+    margin: 0 auto;
 }
 
 /* --- Destination Cards Grid --- */
