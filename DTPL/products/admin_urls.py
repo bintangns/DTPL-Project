@@ -13,4 +13,10 @@ urlpatterns = [
     path('categories/create/', views.admin_category_create, name='category_create'),
     path('categories/<int:pk>/edit/', views.admin_category_edit, name='category_edit'),
     path('categories/<int:pk>/delete/', views.admin_category_delete, name='category_delete'),
+
+    path('orders/', views.admin_order_list, name='order_list'),
+    path('orders/<int:pk>/', views.admin_order_detail, name='order_detail'),
+    path('orders/<int:pk>/confirm/', views.admin_order_confirm, name='order_confirm'),
+    path('orders/<int:pk>/shipping/', views.admin_order_shipping, name='order_shipping'),
+    path('orders/<int:pk>/complete/', views.admin_order_complete, name='order_complete'),
 ]

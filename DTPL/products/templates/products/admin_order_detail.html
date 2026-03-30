@@ -1,0 +1,52 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Pesanan — Admin Produk</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'products/css/admin.css' %}">
+</head>
+<body class="admin-body">
+
+    <nav class="admin-navbar">
+        <div class="admin-nav-container">
+            <a href="{% url 'adminpanel:home' %}" class="admin-logo">Manud Jaya Admin</a>
+
+            <ul class="admin-nav-links">
+                <li><a href="#">Destinasi</a></li>
+                <li><a href="#">Homestay</a></li>
+                <li><a href="{% url 'products_admin:list' %}">Produk Lokal</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="admin-main">
+        <section class="admin-content-section">
+            <div class="admin-form-card">
+                <h1>Detail Pesanan</h1>
+
+                <p><strong>ID Pesanan:</strong> #{{ order.pk }}</p>
+                <p><strong>Produk:</strong> {{ order.product.name }}</p>
+                <p><strong>Nama:</strong> {{ order.customer_name }}</p>
+                <p><strong>Email:</strong> {{ order.email }}</p>
+                <p><strong>No. Telepon:</strong> {{ order.phone_number }}</p>
+                <p><strong>Jumlah:</strong> {{ order.quantity }}</p>
+                <p><strong>Alamat:</strong> {{ order.address }}</p>
+                <p><strong>Catatan:</strong> {{ order.notes|default:"-" }}</p>
+                <p><strong>Status:</strong> {{ order.get_status_display }}</p>
+
+                <div class="admin-form-actions">
+                    <a href="{% url 'products_admin:order_list' %}" class="btn-view">Kembali</a>
+                    <a href="{% url 'products_admin:order_confirm' order.pk %}" class="btn-edit">Konfirmasi</a>
+                    <a href="{% url 'products_admin:order_shipping' order.pk %}" class="admin-primary-btn">Sedang Diantar</a>
+                    <a href="{% url 'products_admin:order_complete' order.pk %}" class="btn-delete">Selesai</a>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

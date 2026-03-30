@@ -46,3 +46,44 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class ProductOrder(models.Model):
+    STATUS_PENDING = 'pending'
+    STATUS_CONFIRMED = 'confirmed'
+    STATUS_SHIPPING = 'shipping'
+    STATUS_COMPLETED = 'completed'
+    STATUS_CANCELLED = 'cancelled'
+
+    STATUS_CHOICES = [
+        (STATUS_PENDING, 'Pending'),
+        (STATUS_CONFIRMED, 'Confirmed'),
+        (STATUS_SHIPPING, 'Shipping'),
+        (STATUS_COMPLETED, 'Completed'),
+        (STATUS_CANCELLED, 'Cancelled'),
+    ]
+
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.PROTECT,
+        related_name='orders'
+    )
+    customer_name = models.CharField(max_length=150)
+    email = models.EmailField()
+    phone_number = models.CharField(max_length=30)
+    quantity = models.PositiveIntegerField(default=1)
+    address = models.TextField()
+    notes = models.TextField(blank=True)
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_PENDING
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'Order #{self.pk} - {self.customer_name} - {self.product.name}'

@@ -57,6 +57,15 @@
                     <p>Kelola produk lokal dan siapkan fitur CRUD admin.</p>
                     <a href="{% url 'products_admin:list' %}">Lihat Menu</a>
                 </div>
+
+                <div class="admin-feature-card">
+                    <div class="feature-icon"><i class="fas fa-box-open"></i></div>
+                    <h3>Produk Lokal</h3>
+                    <p>Kelola produk lokal, category, dan pesanan user.</p>
+                    <a href="{% url 'products_admin:list' %}">Kelola Produk</a>
+                    <br><br>
+                    <a href="{% url 'products_admin:order_list' %}">Lihat Pesanan</a>
+                </div>
             </div>
         </section>
     </main>

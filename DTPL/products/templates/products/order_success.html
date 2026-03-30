@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Pesanan Berhasil{% endblock %}
+{% block nav_home %}{% endblock %}
+{% block nav_produk %}active{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'products/css/style.css' %}">
+<link rel="stylesheet" href="{% static 'products/css/admin.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="detail-content-section" style="padding-top:140px;">
+    <div class="admin-form-card">
+        <h1>Pesanan Berhasil Dibuat</h1>
+        <p>Terima kasih, pesanan Anda telah kami terima.</p>
+
+        <ul>
+            <li><strong>Produk:</strong> {{ order.product.name }}</li>
+            <li><strong>Nama:</strong> {{ order.customer_name }}</li>
+            <li><strong>Email:</strong> {{ order.email }}</li>
+            <li><strong>Jumlah:</strong> {{ order.quantity }}</li>
+            <li><strong>Status:</strong> {{ order.get_status_display }}</li>
+        </ul>
+
+        <div class="admin-form-actions">
+            <a href="{% url 'products:list' %}" class="btn-view">Kembali ke Produk</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

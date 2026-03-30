@@ -1,5 +1,5 @@
 from django import forms
-from .models import Product, ProductCategory
+from .models import Product, ProductCategory, ProductOrder
 
 
 class ProductCategoryForm(forms.ModelForm):
@@ -20,4 +20,16 @@ class ProductForm(forms.ModelForm):
             'description',
             'image_url',
             'is_active',
+        ]
+
+class ProductOrderForm(forms.ModelForm):
+    class Meta:
+        model = ProductOrder
+        fields = [
+            'customer_name',
+            'email',
+            'phone_number',
+            'quantity',
+            'address',
+            'notes',
         ]

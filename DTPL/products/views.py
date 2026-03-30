@@ -1,6 +1,23 @@
+from django.conf import settings
+from django.core.mail import send_mail
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Product, ProductCategory
-from .forms import ProductForm, ProductCategoryForm
+
+from .forms import ProductForm, ProductCategoryForm, ProductOrderForm
+from .models import Product, ProductCategory, ProductOrder
+
+
+# =========================
+# EMAIL HELPER
+# =========================
+def send_order_status_email(order, subject, message):
+    if order.email:
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@example.com'),
+            recipient_list=[order.email],
+            fail_silently=False,
+        )
 
 
 # =========================
@@ -33,15 +50,61 @@ def product_detail(request, slug):
     return render(request, 'products/product_detail.html', {'product': product})
 
 
+def product_order_create(request, slug):
+    product = get_object_or_404(
+        Product.objects.select_related('category'),
+        slug=slug,
+        is_active=True
+    )
+
+    if request.method == 'POST':
+        form = ProductOrderForm(request.POST)
+        if form.is_valid():
+            order = form.save(commit=False)
+            order.product = product
+            order.status = ProductOrder.STATUS_PENDING
+            order.save()
+
+            subject = 'Pesanan Anda Telah Diterima'
+            message = (
+                f'Halo {order.customer_name},\n\n'
+                f'Terima kasih, pesanan Anda telah kami terima.\n\n'
+                f'Detail pesanan:\n'
+                f'Produk: {order.product.name}\n'
+                f'Jumlah: {order.quantity}\n'
+                f'Email: {order.email}\n'
+                f'No. Telepon: {order.phone_number}\n'
+                f'Alamat: {order.address}\n'
+                f'Status: Pending\n\n'
+                f'Pesanan Anda sedang kami proses.'
+            )
+            send_order_status_email(order, subject, message)
+
+            return redirect('products:order_success', pk=order.pk)
+    else:
+        form = ProductOrderForm()
+
+    return render(request, 'products/order_form.html', {
+        'product': product,
+        'form': form,
+    })
+
+
+def product_order_success(request, pk):
+    order = get_object_or_404(ProductOrder.objects.select_related('product'), pk=pk)
+    return render(request, 'products/order_success.html', {
+        'order': order,
+    })
+
+
 # =========================
-# ADMIN PAGES
+# ADMIN PRODUCT
 # =========================
 def admin_product_list(request):
     if not request.session.get('is_admin_logged_in'):
         return redirect('adminpanel:login')
 
     category_slug = request.GET.get('category')
-
     products = Product.objects.select_related('category').all()
 
     if category_slug:
@@ -112,6 +175,9 @@ def admin_product_delete(request, pk):
     })
 
 
+# =========================
+# ADMIN CATEGORY
+# =========================
 def admin_category_list(request):
     if not request.session.get('is_admin_logged_in'):
         return redirect('adminpanel:login')
@@ -175,3 +241,91 @@ def admin_category_delete(request, pk):
     return render(request, 'products/admin_category_delete.html', {
         'category': category,
     })
+
+
+# =========================
+# ADMIN ORDER
+# =========================
+def admin_order_list(request):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    orders = ProductOrder.objects.select_related('product').all()
+
+    return render(request, 'products/admin_order_list.html', {
+        'orders': orders,
+    })
+
+
+def admin_order_detail(request, pk):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    order = get_object_or_404(ProductOrder.objects.select_related('product'), pk=pk)
+
+    return render(request, 'products/admin_order_detail.html', {
+        'order': order,
+    })
+
+
+def admin_order_confirm(request, pk):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    order = get_object_or_404(ProductOrder, pk=pk)
+    order.status = ProductOrder.STATUS_CONFIRMED
+    order.save()
+
+    send_order_status_email(
+        order,
+        'Pesanan Anda Telah Dikonfirmasi',
+        (
+            f'Halo {order.customer_name},\n\n'
+            f'Pesanan Anda untuk produk {order.product.name} telah dikonfirmasi.\n'
+            f'Status saat ini: Confirmed.\n\n'
+            f'Terima kasih.'
+        )
+    )
+    return redirect('products_admin:order_detail', pk=order.pk)
+
+
+def admin_order_shipping(request, pk):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    order = get_object_or_404(ProductOrder, pk=pk)
+    order.status = ProductOrder.STATUS_SHIPPING
+    order.save()
+
+    send_order_status_email(
+        order,
+        'Pesanan Anda Sedang Diantar',
+        (
+            f'Halo {order.customer_name},\n\n'
+            f'Pesanan Anda untuk produk {order.product.name} sedang diantar.\n'
+            f'Status saat ini: Shipping.\n\n'
+            f'Terima kasih.'
+        )
+    )
+    return redirect('products_admin:order_detail', pk=order.pk)
+
+
+def admin_order_complete(request, pk):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    order = get_object_or_404(ProductOrder, pk=pk)
+    order.status = ProductOrder.STATUS_COMPLETED
+    order.save()
+
+    send_order_status_email(
+        order,
+        'Pesanan Anda Telah Selesai',
+        (
+            f'Halo {order.customer_name},\n\n'
+            f'Pesanan Anda untuk produk {order.product.name} telah selesai.\n'
+            f'Status saat ini: Completed.\n\n'
+            f'Terima kasih.'
+        )
+    )
+    return redirect('products_admin:order_detail', pk=order.pk)
