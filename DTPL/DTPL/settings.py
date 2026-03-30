@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'destinations',
     'products',
     'about',
+    'adminpanel',
 ]
 
 MIDDLEWARE = [

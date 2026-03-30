@@ -1,122 +1,177 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Product, ProductCategory
+from .forms import ProductForm, ProductCategoryForm
 
+
+# =========================
+# PUBLIC PAGES
+# =========================
 def product_list(request):
-    category = request.GET.get('category')
+    category_slug = request.GET.get('category')
 
-    products = [
-        {
-            'name': 'Kopi Arabika Manud Jaya',
-            'slug': 'kopi-arabika-manud-jaya',
-            'category': 'kopi',
-            'category_display': 'Kopi',
-            'price': 50000,
-            'stock': 20,
-            'short_description': 'Kopi arabika khas desa dengan aroma yang harum.',
-            'image': 'https://via.placeholder.com/300x200?text=Kopi+Arabika',
-        },
-        {
-            'name': 'Kopi Robusta Tradisional',
-            'slug': 'kopi-robusta-tradisional',
-            'category': 'kopi',
-            'category_display': 'Kopi',
-            'price': 45000,
-            'stock': 15,
-            'short_description': 'Kopi robusta dengan cita rasa kuat dan khas.',
-            'image': 'https://via.placeholder.com/300x200?text=Kopi+Robusta',
-        },
-        {
-            'name': 'Cokelat Batang Premium',
-            'slug': 'cokelat-batang-premium',
-            'category': 'cokelat',
-            'category_display': 'Cokelat',
-            'price': 35000,
-            'stock': 12,
-            'short_description': 'Cokelat batang premium dari kakao lokal pilihan.',
-            'image': 'https://via.placeholder.com/300x200?text=Cokelat+Batang',
-        },
-        {
-            'name': 'Bubuk Kakao Organik',
-            'slug': 'bubuk-kakao-organik',
-            'category': 'cokelat',
-            'category_display': 'Cokelat',
-            'price': 40000,
-            'stock': 8,
-            'short_description': 'Bubuk kakao organik untuk minuman dan baking.',
-            'image': 'https://via.placeholder.com/300x200?text=Bubuk+Kakao',
-        },
-        
-    ]
+    products = Product.objects.filter(is_active=True).select_related('category')
 
-    categories = []
-    seen = set()
+    if category_slug:
+        products = products.filter(category__slug=category_slug)
 
-    for product in products:
-        if product['category'] not in seen:
-            categories.append({
-                'value': product['category'],
-                'label': product['category_display'],
-            })
-            seen.add(product['category'])
-
-    if category:
-        products = [p for p in products if p['category'] == category]
+    categories = ProductCategory.objects.all()
 
     context = {
         'products': products,
         'categories': categories,
-        'selected_category': category,
+        'selected_category': category_slug,
     }
     return render(request, 'products/product_list.html', context)
 
 
 def product_detail(request, slug):
-    products = [
-        {
-            'name': 'Kopi Arabika Manud Jaya',
-            'slug': 'kopi-arabika-manud-jaya',
-            'category': 'kopi',
-            'category_display': 'Kopi',
-            'price': 50000,
-            'stock': 20,
-            'short_description': 'Kopi arabika khas desa dengan aroma yang harum.',
-            'description': 'Kopi arabika berkualitas tinggi yang diolah langsung oleh masyarakat desa.',
-            'image': 'https://via.placeholder.com/500x300?text=Kopi+Arabika',
-        },
-        {
-            'name': 'Kopi Robusta Tradisional',
-            'slug': 'kopi-robusta-tradisional',
-            'category': 'kopi',
-            'category_display': 'Kopi',
-            'price': 45000,
-            'stock': 15,
-            'short_description': 'Kopi robusta dengan cita rasa kuat dan khas.',
-            'description': 'Kopi robusta tradisional dengan rasa pekat dan cocok untuk penikmat kopi asli.',
-            'image': 'https://via.placeholder.com/500x300?text=Kopi+Robusta',
-        },
-        {
-            'name': 'Cokelat Batang Premium',
-            'slug': 'cokelat-batang-premium',
-            'category': 'cokelat',
-            'category_display': 'Cokelat',
-            'price': 35000,
-            'stock': 12,
-            'short_description': 'Cokelat batang premium dari kakao lokal pilihan.',
-            'description': 'Produk cokelat lokal premium dengan rasa autentik dan tekstur lembut.',
-            'image': 'https://via.placeholder.com/500x300?text=Cokelat+Batang',
-        },
-        {
-            'name': 'Bubuk Kakao Organik',
-            'slug': 'bubuk-kakao-organik',
-            'category': 'cokelat',
-            'category_display': 'Cokelat',
-            'price': 40000,
-            'stock': 8,
-            'short_description': 'Bubuk kakao organik untuk minuman dan baking.',
-            'description': 'Bubuk kakao organik hasil olahan masyarakat desa, cocok untuk minuman sehat.',
-            'image': 'https://via.placeholder.com/500x300?text=Bubuk+Kakao',
-        },
-    ]
-
-    product = next((p for p in products if p['slug'] == slug), None)
-
+    product = get_object_or_404(
+        Product.objects.select_related('category'),
+        slug=slug,
+        is_active=True
+    )
     return render(request, 'products/product_detail.html', {'product': product})
+
+
+# =========================
+# ADMIN PAGES
+# =========================
+def admin_product_list(request):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    category_slug = request.GET.get('category')
+
+    products = Product.objects.select_related('category').all()
+
+    if category_slug:
+        products = products.filter(category__slug=category_slug)
+
+    categories = ProductCategory.objects.all()
+
+    context = {
+        'products': products,
+        'categories': categories,
+        'selected_category': category_slug,
+    }
+    return render(request, 'products/admin_dashboard.html', context)
+
+
+def admin_product_create(request):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    if request.method == 'POST':
+        form = ProductForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('products_admin:list')
+    else:
+        form = ProductForm()
+
+    return render(request, 'products/admin_product_form.html', {
+        'form': form,
+        'page_title': 'Tambah Produk',
+        'submit_label': 'Simpan Produk',
+    })
+
+
+def admin_product_edit(request, pk):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    product = get_object_or_404(Product, pk=pk)
+
+    if request.method == 'POST':
+        form = ProductForm(request.POST, instance=product)
+        if form.is_valid():
+            form.save()
+            return redirect('products_admin:list')
+    else:
+        form = ProductForm(instance=product)
+
+    return render(request, 'products/admin_product_form.html', {
+        'form': form,
+        'page_title': 'Edit Produk',
+        'submit_label': 'Update Produk',
+    })
+
+
+def admin_product_delete(request, pk):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    product = get_object_or_404(Product, pk=pk)
+
+    if request.method == 'POST':
+        product.delete()
+        return redirect('products_admin:list')
+
+    return render(request, 'products/admin_product_delete.html', {
+        'product': product,
+    })
+
+
+def admin_category_list(request):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    categories = ProductCategory.objects.all()
+    return render(request, 'products/admin_category_list.html', {
+        'categories': categories,
+    })
+
+
+def admin_category_create(request):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    if request.method == 'POST':
+        form = ProductCategoryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('products_admin:category_list')
+    else:
+        form = ProductCategoryForm()
+
+    return render(request, 'products/admin_category_form.html', {
+        'form': form,
+        'page_title': 'Tambah Category',
+        'submit_label': 'Simpan Category',
+    })
+
+
+def admin_category_edit(request, pk):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    category = get_object_or_404(ProductCategory, pk=pk)
+
+    if request.method == 'POST':
+        form = ProductCategoryForm(request.POST, instance=category)
+        if form.is_valid():
+            form.save()
+            return redirect('products_admin:category_list')
+    else:
+        form = ProductCategoryForm(instance=category)
+
+    return render(request, 'products/admin_category_form.html', {
+        'form': form,
+        'page_title': 'Edit Category',
+        'submit_label': 'Update Category',
+    })
+
+
+def admin_category_delete(request, pk):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    category = get_object_or_404(ProductCategory, pk=pk)
+
+    if request.method == 'POST':
+        category.delete()
+        return redirect('products_admin:category_list')
+
+    return render(request, 'products/admin_category_delete.html', {
+        'category': category,
+    })

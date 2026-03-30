@@ -12,7 +12,7 @@
 {% block content %}
 <!-- ===== HERO SECTION ===== -->
 <section class="product-hero" id="product-hero">
-    <div class="product-hero-content">
+    <div class="product-hero-content reveal-up">
         <h1 class="product-hero-title">Produk Lokal</h1>
         <p class="product-hero-desc">
             Temukan berbagai produk olahan khas Desa Manud Jaya, mulai dari kopi
@@ -24,16 +24,16 @@
 
 <!-- ===== FILTER SECTION ===== -->
 <section class="product-filter-section">
-    <div class="product-filter-wrapper">
+    <div class="product-filter-wrapper reveal-up">
         <a href="{% url 'products:list' %}"
            class="filter-btn {% if not selected_category %}active{% endif %}">
             Semua
         </a>
 
         {% for category in categories %}
-            <a href="{% url 'products:list' %}?category={{ category.value }}"
-               class="filter-btn {% if selected_category == category.value %}active{% endif %}">
-                {{ category.label }}
+            <a href="{% url 'products:list' %}?category={{ category.slug }}"
+               class="filter-btn {% if selected_category == category.slug %}active{% endif %}">
+                {{ category.name }}
             </a>
         {% endfor %}
     </div>
@@ -44,11 +44,16 @@
     {% if products %}
         <div class="product-grid">
             {% for product in products %}
-            <article class="product-card" id="product-card-{{ product.slug }}">
+            <article class="product-card reveal-up" id="product-card-{{ product.slug }}">
                 <div class="product-card-img">
-                    <img src="{{ product.image }}" alt="{{ product.name }}" loading="lazy">
+                    {% if product.image_url %}
+                        <img src="{{ product.image_url }}" alt="{{ product.name }}" loading="lazy">
+                    {% else %}
+                        <img src="https://via.placeholder.com/500x300?text=Produk+Lokal" alt="{{ product.name }}" loading="lazy">
+                    {% endif %}
+
                     <div class="product-card-badges">
-                        <span class="badge badge-category">{{ product.category_display }}</span>
+                        <span class="badge badge-category">{{ product.category.name }}</span>
 
                         {% if product.stock > 0 %}
                             <span class="badge badge-stock">Stok: {{ product.stock }}</span>
@@ -63,8 +68,9 @@
                     <p class="product-card-desc">{{ product.short_description|truncatewords:20 }}</p>
 
                     <div class="product-card-meta">
-                        <span><i class="fas fa-tags"></i> Produk Lokal</span>
-                        <span><i class="fas fa-box"></i>
+                        <span><i class="fas fa-tags"></i> {{ product.category.name }}</span>
+                        <span>
+                            <i class="fas fa-box"></i>
                             {% if product.stock > 0 %}
                                 Tersedia
                             {% else %}
@@ -85,7 +91,7 @@
             {% endfor %}
         </div>
     {% else %}
-        <div class="product-empty-card">
+        <div class="product-empty-card reveal-up">
             <h3>Produk tidak ditemukan</h3>
             <p>Belum ada produk yang tampil untuk kategori ini.</p>
         </div>
@@ -94,7 +100,7 @@
 
 <!-- ===== INFO SECTION ===== -->
 <section class="product-info-section">
-    <div class="product-info-card">
+    <div class="product-info-card reveal-up">
         <div class="info-header">
             <div class="info-icon"><i class="fas fa-store"></i></div>
             <h2>Produk UMKM Desa</h2>
@@ -113,4 +119,25 @@
         </ul>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const items = document.querySelectorAll(".reveal-up");
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add("show");
+            }
+        });
+    }, { threshold: 0.12 });
+
+    items.forEach((item, index) => {
+        item.style.transitionDelay = `${index * 0.06}s`;
+        observer.observe(item);
+    });
+});
+</script>
 {% endblock %}
