@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Homestay — Desa Manud Jaya{% endblock %}
+{% block nav_home %}{% endblock %}
+{% block nav_homestay %}active{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'homestays/css/style.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="homestay-hero">
+    <div class="container">
+        <h1>Homestay Desa Manud Jaya</h1>
+        <p>
+            Rasakan kehangatan keramahtamahan Indonesia dengan menginap di homestay
+            yang dikelola langsung oleh masyarakat lokal. Setiap homestay menawarkan
+            pengalaman autentik kehidupan desa.
+        </p>
+    </div>
+</section>
+
+
+<!-- FILTER -->
+<section class="homestay-filter">
+<div class="container">
+
+<div class="filter-card">
+
+<div class="filter-header">
+<i class="fas fa-sliders-h"></i>
+<span>Filter Pencarian</span>
+</div>
+
+<div class="filter-row">
+
+<div class="filter-count">
+<strong>{{ homestays|length }}</strong> homestay tersedia
+</div>
+
+<form method="GET" class="filter-form">
+
+    <div class="filter-group">
+        <label>Harga per Malam</label>
+        <select name="price">
+            <option value="">Semua Harga</option>
+            <option value="200000" {% if request.GET.price == "200000" %}selected{% endif %}>≤ Rp 200.000</option>
+            <option value="300000" {% if request.GET.price == "300000" %}selected{% endif %}>≤ Rp 300.000</option>
+            <option value="500000" {% if request.GET.price == "500000" %}selected{% endif %}>≤ Rp 500.000</option>
+        </select>
+    </div>
+
+    <div class="filter-group">
+        <label>Kapasitas</label>
+        <select name="capacity">
+            <option value="">Semua Kapasitas</option>
+            <option value="2" {% if request.GET.capacity == "2" %}selected{% endif %}>2 orang</option>
+            <option value="4" {% if request.GET.capacity == "4" %}selected{% endif %}>4 orang</option>
+            <option value="6" {% if request.GET.capacity == "6" %}selected{% endif %}>6 orang</option>
+        </select>
+    </div>
+
+    <button type="submit" class="filter-btn filter-submit">
+        Filter
+    </button>
+
+</form>
+
+</div>
+</div>
+
+</div>
+</section>
+
+
+<!-- HOMESTAY GRID -->
+<section class="homestay-grid-section">
+<div class="container">
+
+<div class="homestay-grid">
+
+{% if homestays %}
+
+    {% for homestay in homestays %}
+
+    <div class="homestay-card">
+
+    <a href="{% url 'homestays:detail' homestay.slug %}" class="card-link">
+
+    <div class="card-image">
+    <img src="{{ homestay.image_url }}" alt="{{ homestay.name }}">
+
+    <span class="eco-badge">
+    <i class="fas fa-leaf"></i>
+    Ramah Lingkungan
+    </span>
+    </div>
+
+    <div class="card-body">
+
+    <h3>{{ homestay.name }}</h3>
+
+    <p class="owner">
+    oleh {{ homestay.owner }}
+    </p>
+
+    <p class="desc">
+    {{ homestay.description|truncatewords:15 }}
+    </p>
+
+    <div class="location">
+    <i class="fas fa-map-marker-alt"></i>
+    {{ homestay.address }}
+    </div>
+
+    <div class="meta">
+
+    <span>
+    <i class="fas fa-users"></i>
+    {{ homestay.capacity }} orang
+    </span>
+
+    <span>
+    <i class="fas fa-bed"></i>
+    {{ homestay.bedrooms }} kamar
+    </span>
+
+    <span>
+    <i class="fas fa-bath"></i>
+    {{ homestay.bathrooms }} kamar mandi
+    </span>
+
+    </div>
+
+    </div>
+
+    </a>
+
+<div class="card-footer">
+
+<div class="price">
+Rp {{ homestay.price_per_night }}
+<span>per malam</span>
+</div>
+
+<a href="{% url 'homestays:detail' homestay.slug %}" class="detail-link">
+Lihat Detail →
+</a>
+
+</div>
+
+</div>
+
+    {% endfor %}
+
+{% else %}
+
+<div class="homestay-empty">
+    <i class="fas fa-home"></i>
+    <h3>Tidak ada homestay ditemukan</h3>
+    <p>Coba ubah filter harga atau kapasitas yang dipilih.</p>
+</div>
+
+{% endif %}
+
+</div>
+
+</div>
+</section>
+
+
+<!-- ECO INFO -->
+<section class="eco-section">
+<div class="container">
+
+<div class="eco-box">
+
+<div class="eco-title">
+
+<div class="eco-icon">
+<i class="fas fa-leaf"></i>
+</div>
+
+<h2>Homestay Ramah Lingkungan</h2>
+
+</div>
+
+<p>
+Homestay dengan label <b>Ramah Lingkungan</b> menerapkan praktik keberlanjutan dalam operasionalnya:
+</p>
+
+<ul>
+
+<li>Penggunaan energi terbarukan (panel surya, biogas)</li>
+
+<li>Sistem pengolahan air limbah ramah lingkungan</li>
+
+<li>Pengurangan penggunaan plastik sekali pakai</li>
+
+<li>Penggunaan bahan bangunan lokal dan berkelanjutan</li>
+
+<li>Penyediaan makanan organik dari kebun atau petani lokal</li>
+
+</ul>
+
+</div>
+
+</div>
+</section>
+
+{% endblock %}
