@@ -1,7 +1,47 @@
+from django.conf import settings
+from django.contrib import messages
+from django.core.mail import send_mail
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Product, ProductCategory
-from .forms import ProductForm, ProductCategoryForm
 
+
+from .forms import ProductForm, ProductCategoryForm, ProductOrderForm
+from .models import Product, ProductCategory, ProductOrder
+
+
+# =========================
+# EMAIL HELPER
+# =========================
+def send_order_status_email(order, subject, message):
+    if order.email:
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@example.com'),
+            recipient_list=[order.email],
+            fail_silently=False,
+        )
+
+def can_transition_order(order, new_status):
+    allowed_transitions = {
+        ProductOrder.STATUS_PENDING: [
+            ProductOrder.STATUS_CONFIRMED,
+            ProductOrder.STATUS_CANCELLED,
+        ],
+        ProductOrder.STATUS_CONFIRMED: [
+            ProductOrder.STATUS_READY_PICKUP,
+            ProductOrder.STATUS_SHIPPING,
+            ProductOrder.STATUS_CANCELLED,
+        ],
+        ProductOrder.STATUS_READY_PICKUP: [
+            ProductOrder.STATUS_COMPLETED,
+        ],
+        ProductOrder.STATUS_SHIPPING: [
+            ProductOrder.STATUS_COMPLETED,
+        ],
+        ProductOrder.STATUS_COMPLETED: [],
+        ProductOrder.STATUS_CANCELLED: [],
+    }
+    return new_status in allowed_transitions.get(order.status, [])
 
 # =========================
 # PUBLIC PAGES
@@ -33,15 +73,62 @@ def product_detail(request, slug):
     return render(request, 'products/product_detail.html', {'product': product})
 
 
+def product_order_create(request, slug):
+    product = get_object_or_404(
+        Product.objects.select_related('category'),
+        slug=slug,
+        is_active=True
+    )
+
+    if request.method == 'POST':
+        form = ProductOrderForm(request.POST, request.FILES, product=product)
+        if form.is_valid():
+            order = form.save(commit=False)
+            order.product = product
+            order.status = ProductOrder.STATUS_PENDING
+            order.save()
+
+            subject = 'Pesanan Anda Telah Diterima'
+            message = (
+                f'Halo {order.customer_name},\n\n'
+                f'Terima kasih, pesanan Anda telah kami terima.\n\n'
+                f'Detail pesanan:\n'
+                f'Produk: {order.product.name}\n'
+                f'Jumlah: {order.quantity}\n'
+                f'Metode: {order.get_fulfillment_method_display()}\n'
+                f'Email: {order.email}\n'
+                f'No. Telepon: {order.phone_number}\n'
+                f'Alamat: {order.address if order.address else "-"}\n'
+                f'Status: Pending\n\n'
+                f'Pesanan Anda sedang kami proses.'
+            )
+            send_order_status_email(order, subject, message)
+
+            return redirect('products:order_success', pk=order.pk)
+    else:
+        form = ProductOrderForm(product=product)
+
+    return render(request, 'products/order_form.html', {
+        'product': product,
+        'form': form,
+    })
+
+
+def product_order_success(request, pk):
+    order = get_object_or_404(ProductOrder.objects.select_related('product'), pk=pk)
+    return render(request, 'products/order_success.html', {
+        'order': order,
+    })
+
+
 # =========================
-# ADMIN PAGES
+# ADMIN PRODUCT
 # =========================
 def admin_product_list(request):
     if not request.session.get('is_admin_logged_in'):
         return redirect('adminpanel:login')
 
     category_slug = request.GET.get('category')
-
     products = Product.objects.select_related('category').all()
 
     if category_slug:
@@ -112,6 +199,9 @@ def admin_product_delete(request, pk):
     })
 
 
+# =========================
+# ADMIN CATEGORY
+# =========================
 def admin_category_list(request):
     if not request.session.get('is_admin_logged_in'):
         return redirect('adminpanel:login')
@@ -175,3 +265,189 @@ def admin_category_delete(request, pk):
     return render(request, 'products/admin_category_delete.html', {
         'category': category,
     })
+
+
+# =========================
+# ADMIN ORDER
+# =========================
+def admin_order_list(request):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    orders = ProductOrder.objects.select_related('product').all()
+
+    return render(request, 'products/admin_order_list.html', {
+        'orders': orders,
+    })
+
+
+def admin_order_detail(request, pk):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    order = get_object_or_404(ProductOrder.objects.select_related('product'), pk=pk)
+
+    return render(request, 'products/admin_order_detail.html', {
+        'order': order,
+    })
+
+
+def admin_order_confirm(request, pk):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    if request.method != 'POST':
+        return redirect('products_admin:order_detail', pk=pk)
+
+    order = get_object_or_404(ProductOrder.objects.select_related('product'), pk=pk)
+
+    if not can_transition_order(order, ProductOrder.STATUS_CONFIRMED):
+        messages.error(request, 'Status pesanan tidak bisa diubah ke Konfirmasi.')
+        return redirect('products_admin:order_detail', pk=order.pk)
+
+    if not order.stock_deducted:
+        if order.product.stock < order.quantity:
+            messages.error(request, 'Stok produk tidak mencukupi untuk mengonfirmasi pesanan ini.')
+            return redirect('products_admin:order_detail', pk=order.pk)
+
+        order.product.stock -= order.quantity
+        order.product.save()
+        order.stock_deducted = True
+
+    order.status = ProductOrder.STATUS_CONFIRMED
+    order.save()
+
+    try:
+        extra_message = ''
+        if order.fulfillment_method == ProductOrder.METHOD_PICKUP:
+            extra_message = '\nPesanan Anda akan disiapkan untuk diambil di toko pusat oleh-oleh desa.'
+        else:
+            extra_message = '\nPesanan Anda telah dikonfirmasi dan akan diproses untuk pengiriman.'
+
+        send_order_status_email(
+            order,
+            'Pesanan Anda Telah Dikonfirmasi',
+            (
+                f'Halo {order.customer_name},\n\n'
+                f'Pesanan Anda untuk produk {order.product.name} telah dikonfirmasi.\n'
+                f'Status saat ini: Confirmed.\n'
+                f'Metode: {order.get_fulfillment_method_display()}\n'
+                f'Ongkir: Rp {order.shipping_cost if order.shipping_cost else 0}\n'
+                f'{extra_message}\n\n'
+                f'Terima kasih.'
+            )
+        )
+        messages.success(request, 'Pesanan berhasil dikonfirmasi dan email berhasil dikirim.')
+    except Exception as e:
+        messages.warning(request, f'Pesanan berhasil dikonfirmasi, tapi email gagal dikirim: {e}')
+
+    return redirect('products_admin:order_detail', pk=order.pk)
+
+def admin_order_shipping(request, pk):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    if request.method != 'POST':
+        return redirect('products_admin:order_detail', pk=pk)
+
+    order = get_object_or_404(ProductOrder, pk=pk)
+
+    if order.fulfillment_method != ProductOrder.METHOD_DELIVERY:
+        messages.error(request, 'Pesanan ini bukan untuk pengiriman.')
+        return redirect('products_admin:order_detail', pk=order.pk)
+
+    if not can_transition_order(order, ProductOrder.STATUS_SHIPPING):
+        messages.error(request, 'Status pesanan tidak bisa diubah ke Sedang Diantar.')
+        return redirect('products_admin:order_detail', pk=order.pk)
+
+    order.status = ProductOrder.STATUS_SHIPPING
+    order.save()
+
+    try:
+        send_order_status_email(
+            order,
+            'Pesanan Anda Sedang Diantar',
+            (
+                f'Halo {order.customer_name},\n\n'
+                f'Pesanan Anda untuk produk {order.product.name} sedang diantar.\n'
+                f'Alamat pengiriman: {order.address}\n'
+                f'Estimasi biaya pengiriman: Rp {order.shipping_cost if order.shipping_cost else 0}\n\n'
+                f'Terima kasih.'
+            )
+        )
+        messages.success(request, 'Status pesanan berhasil diubah ke Sedang Diantar dan email berhasil dikirim.')
+    except Exception as e:
+        messages.warning(request, f'Status berhasil diubah, tapi email gagal dikirim: {e}')
+
+    return redirect('products_admin:order_detail', pk=order.pk)
+
+def admin_order_ready_pickup(request, pk):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    if request.method != 'POST':
+        return redirect('products_admin:order_detail', pk=pk)
+
+    order = get_object_or_404(ProductOrder, pk=pk)
+
+    if order.fulfillment_method != ProductOrder.METHOD_PICKUP:
+        messages.error(request, 'Pesanan ini bukan untuk pengambilan di tempat.')
+        return redirect('products_admin:order_detail', pk=order.pk)
+
+    if not can_transition_order(order, ProductOrder.STATUS_READY_PICKUP):
+        messages.error(request, 'Status pesanan tidak bisa diubah ke Siap Diambil.')
+        return redirect('products_admin:order_detail', pk=order.pk)
+
+    order.status = ProductOrder.STATUS_READY_PICKUP
+    order.save()
+
+    try:
+        send_order_status_email(
+            order,
+            'Pesanan Anda Siap Diambil',
+            (
+                f'Halo {order.customer_name},\n\n'
+                f'Pesanan Anda untuk produk {order.product.name} sudah siap diambil.\n'
+                f'Silakan ambil di toko pusat oleh-oleh desa.\n\n'
+                f'Terima kasih.'
+            )
+        )
+        messages.success(request, 'Status pesanan berhasil diubah ke Siap Diambil dan email berhasil dikirim.')
+    except Exception as e:
+        messages.warning(request, f'Status berhasil diubah, tapi email gagal dikirim: {e}')
+
+    return redirect('products_admin:order_detail', pk=order.pk)
+
+
+def admin_order_complete(request, pk):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    if request.method != 'POST':
+        return redirect('products_admin:order_detail', pk=pk)
+
+    order = get_object_or_404(ProductOrder, pk=pk)
+
+    if not can_transition_order(order, ProductOrder.STATUS_COMPLETED):
+        messages.error(request, 'Status pesanan tidak bisa diubah ke Selesai.')
+        return redirect('products_admin:order_detail', pk=order.pk)
+
+    order.status = ProductOrder.STATUS_COMPLETED
+    order.save()
+
+    try:
+        send_order_status_email(
+            order,
+            'Pesanan Anda Telah Selesai',
+            (
+                f'Halo {order.customer_name},\n\n'
+                f'Pesanan Anda untuk produk {order.product.name} telah selesai.\n'
+                f'Status saat ini: Completed.\n\n'
+                f'Terima kasih.'
+            )
+        )
+        messages.success(request, 'Status pesanan berhasil diubah ke Selesai dan email berhasil dikirim.')
+    except Exception as e:
+        messages.warning(request, f'Status berhasil diubah, tapi email gagal dikirim: {e}')
+
+    return redirect('products_admin:order_detail', pk=order.pk)

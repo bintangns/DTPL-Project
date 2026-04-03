@@ -43,14 +43,18 @@
                 </div>
 
                 <div class="admin-toolbar-actions">
-                    <a href="{% url 'products_admin:create' %}" class="admin-primary-btn">
-                        <i class="fas fa-plus"></i> Tambah Produk
-                    </a>
+    <a href="{% url 'products_admin:create' %}" class="admin-primary-btn">
+        <i class="fas fa-plus"></i> Tambah Produk
+    </a>
 
-                    <a href="{% url 'products_admin:category_list' %}" class="admin-secondary-btn">
-                        <i class="fas fa-tags"></i> Kelola Category
-                    </a>
-                </div>
+    <a href="{% url 'products_admin:category_list' %}" class="admin-secondary-btn">
+        <i class="fas fa-tags"></i> Kelola Category
+    </a>
+
+    <a href="{% url 'products_admin:order_list' %}" class="admin-secondary-btn">
+        <i class="fas fa-receipt"></i> List Pesanan
+    </a>
+</div>
             </div>
 
             <div class="admin-filter-row">

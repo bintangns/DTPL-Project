@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Pesanan Berhasil{% endblock %}
+{% block nav_home %}{% endblock %}
+{% block nav_produk %}active{% endblock %}
+
+{% block extra_css %}
+
+
+<link rel="stylesheet" href="{% static 'products/css/style.css' %}">
+<link rel="stylesheet" href="{% static 'products/css/admin.css' %}">
+
+<style>
+    /* Navbar selalu solid di halaman order */
+    #navbar {
+        background: rgba(20, 34, 24, 0.96) !important;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    #navbar .nav-logo,
+    #navbar .nav-link {
+        color: #ffffff !important;
+    }
+
+    #navbar .nav-link.active {
+        color: #7ee6b7 !important;
+        border-bottom-color: #7ee6b7 !important;
+    }
+
+    #navbar.scrolled {
+        background: rgba(20, 34, 24, 0.96) !important;
+    }
+
+    /* Override menu mobile */
+    @media (max-width: 768px) {
+        #navLinks {
+            background: rgba(20, 34, 24, 0.98) !important;
+            backdrop-filter: blur(12px);
+            border-radius: 18px;
+            padding: 16px !important;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+        }
+
+        #navLinks .nav-link {
+            color: #ffffff !important;
+            display: block;
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 12px;
+        }
+
+        #navLinks .nav-link:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        #navLinks .nav-link.active {
+            background: rgba(126, 230, 183, 0.14);
+            color: #7ee6b7 !important;
+        }
+
+        #navToggle,
+        #navToggle .hamburger {
+            z-index: 1001;
+        }
+    }
+</style>
+
+
+<style>
+    .order-success-hero {
+        position: relative;
+        min-height: 360px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: #fff;
+        background:
+            linear-gradient(rgba(22, 52, 33, 0.68), rgba(22, 52, 33, 0.68)),
+            url("https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=1600&q=80")
+            center/cover no-repeat;
+    }
+
+    .order-success-hero-content {
+        max-width: 760px;
+        padding: 140px 20px 80px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .order-success-hero h1 {
+        margin: 0 0 16px;
+        font-size: clamp(2.2rem, 4vw, 3.4rem);
+        color: #fff;
+    }
+
+    .order-success-hero p {
+        margin: 0;
+        line-height: 1.8;
+        color: rgba(255, 255, 255, 0.92);
+        font-size: 1.05rem;
+    }
+
+    .order-success-section {
+        padding: 48px 20px 80px;
+        background: #f5f7f5;
+    }
+
+    .order-success-card {
+        max-width: 900px;
+        margin: -70px auto 0;
+        background: #fff;
+        border-radius: 24px;
+        padding: 32px;
+        box-shadow: 0 14px 38px rgba(25, 40, 28, 0.10);
+        position: relative;
+        z-index: 3;
+    }
+
+    .order-success-card h2 {
+        margin-top: 0;
+        margin-bottom: 14px;
+        color: #1e2d22;
+        font-size: 2rem;
+    }
+
+    .order-success-card p {
+        color: #5b685d;
+        line-height: 1.8;
+    }
+
+    .order-success-list {
+        list-style: none;
+        padding: 0;
+        margin: 24px 0;
+        display: grid;
+        gap: 12px;
+    }
+
+    .order-success-list li {
+        padding: 14px 16px;
+        border-radius: 14px;
+        background: #f8faf8;
+        border: 1px solid #e1ebe3;
+        color: #2a362d;
+    }
+
+    .order-success-list strong {
+        color: #1d2b20;
+    }
+
+    @media (max-width: 768px) {
+        .order-success-hero-content {
+            padding: 120px 16px 70px;
+        }
+
+        .order-success-section {
+            padding: 30px 16px 60px;
+        }
+
+        .order-success-card {
+            margin-top: -50px;
+            padding: 24px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="order-success-hero">
+    <div class="order-success-hero-content">
+        <h1>Pesanan Berhasil Dibuat</h1>
+        <p>
+            Terima kasih, pesanan Anda telah kami terima.
+            Kami akan segera memproses pesanan Anda dan mengirimkan update status melalui email.
+        </p>
+    </div>
+</section>
+
+<section class="order-success-section">
+    <div class="order-success-card">
+        <h2>Ringkasan Pesanan</h2>
+        <p>Berikut detail pesanan Anda:</p>
+
+        <ul class="order-success-list">
+            <li><strong>Produk:</strong> {{ order.product.name }}</li>
+            <li><strong>Nama:</strong> {{ order.customer_name }}</li>
+            <li><strong>Email:</strong> {{ order.email }}</li>
+            <li><strong>Nomor Telepon:</strong> {{ order.phone_number }}</li>
+            <li><strong>Jumlah:</strong> {{ order.quantity }}</li>
+            <li><strong>Metode Pesanan:</strong> {{ order.get_fulfillment_method_display }}</li>
+            <li><strong>Status:</strong> {{ order.get_status_display }}</li>
+
+            {% if order.address %}
+                <li><strong>Alamat:</strong> {{ order.address }}</li>
+            {% endif %}
+
+            {% if order.shipping_cost %}
+                <li><strong>Estimasi Ongkir:</strong> Rp {{ order.shipping_cost }}</li>
+            {% endif %}
+        </ul>
+
+        <div class="admin-form-actions">
+            <a href="{% url 'products:list' %}" class="btn-view">Kembali ke Produk</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List Pesanan — Admin Produk</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'products/css/admin.css' %}">
+</head>
+<body class="admin-body">
+
+    <nav class="admin-navbar">
+        <div class="admin-nav-container">
+            <a href="{% url 'adminpanel:home' %}" class="admin-logo">Manud Jaya Admin</a>
+
+            <ul class="admin-nav-links">
+                <li><a href="#">Destinasi</a></li>
+                <li><a href="#">Homestay</a></li>
+                <li><a href="{% url 'products_admin:list' %}">Produk Lokal</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="admin-main">
+        <section class="admin-content-section">
+            <div class="admin-toolbar">
+                <div>
+                    <h2>List Pesanan</h2>
+                    <p>Daftar semua pesanan dari user.</p>
+                </div>
+                <div class="admin-toolbar-actions">
+                    <a href="{% url 'products_admin:list' %}" class="admin-secondary-btn">
+                        <i class="fas fa-arrow-left"></i> Kembali ke Produk
+                    </a>
+                </div>
+            </div>
+
+            <div class="admin-empty-state">
+                <ul class="admin-category-list">
+                    {% for order in orders %}
+                        <li class="admin-category-item">
+                            <span>
+                                #{{ order.pk }} — {{ order.customer_name }} — {{ order.product.name }} — {{ order.get_status_display }}
+                            </span>
+                            <div class="admin-category-actions">
+                                <a href="{% url 'products_admin:order_detail' order.pk %}" class="btn-view">Detail</a>
+                            </div>
+                        </li>
+                    {% empty %}
+                        <li class="admin-category-empty">Belum ada pesanan.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
