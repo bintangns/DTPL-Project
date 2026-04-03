@@ -29,6 +29,29 @@
             <div class="admin-form-card">
                 <h1>Detail Pesanan</h1>
 
+                {% if messages %}
+                    <div style="margin-bottom: 20px;">
+                        {% for message in messages %}
+                            <div style="
+                                padding: 12px 16px;
+                                border-radius: 10px;
+                                margin-bottom: 10px;
+                                {% if message.tags == 'success' %}
+                                    background:#eaf8ee; color:#2f8f5b;
+                                {% elif message.tags == 'warning' %}
+                                    background:#fff8e6; color:#9a6b00;
+                                {% elif message.tags == 'error' %}
+                                    background:#fdeaea; color:#c0392b;
+                                {% else %}
+                                    background:#f4f4f4; color:#333;
+                                {% endif %}
+                            ">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
                 <p><strong>ID Pesanan:</strong> #{{ order.pk }}</p>
                 <p><strong>Produk:</strong> {{ order.product.name }}</p>
                 <p><strong>Nama:</strong> {{ order.customer_name }}</p>
@@ -37,13 +60,41 @@
                 <p><strong>Jumlah:</strong> {{ order.quantity }}</p>
                 <p><strong>Alamat:</strong> {{ order.address }}</p>
                 <p><strong>Catatan:</strong> {{ order.notes|default:"-" }}</p>
-                <p><strong>Status:</strong> {{ order.get_status_display }}</p>
+                <p>
+                    <strong>Status:</strong>
+                    <span class="status-badge
+                        {% if order.status == 'pending' %}status-inactive
+                        {% elif order.status == 'confirmed' %}status-active
+                        {% elif order.status == 'shipping' %}status-active
+                        {% elif order.status == 'completed' %}status-active
+                        {% endif %}">
+                        {{ order.get_status_display }}
+                    </span>
+                </p>
 
                 <div class="admin-form-actions">
                     <a href="{% url 'products_admin:order_list' %}" class="btn-view">Kembali</a>
-                    <a href="{% url 'products_admin:order_confirm' order.pk %}" class="btn-edit">Konfirmasi</a>
-                    <a href="{% url 'products_admin:order_shipping' order.pk %}" class="admin-primary-btn">Sedang Diantar</a>
-                    <a href="{% url 'products_admin:order_complete' order.pk %}" class="btn-delete">Selesai</a>
+
+                    {% if order.status == 'pending' %}
+                        <form method="post" action="{% url 'products_admin:order_confirm' order.pk %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-edit">Konfirmasi</button>
+                        </form>
+                    {% endif %}
+
+                    {% if order.status == 'confirmed' %}
+                        <form method="post" action="{% url 'products_admin:order_shipping' order.pk %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="admin-primary-btn">Sedang Diantar</button>
+                        </form>
+                    {% endif %}
+
+                    {% if order.status == 'shipping' %}
+                        <form method="post" action="{% url 'products_admin:order_complete' order.pk %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-delete">Selesai</button>
+                        </form>
+                    {% endif %}
                 </div>
             </div>
         </section>

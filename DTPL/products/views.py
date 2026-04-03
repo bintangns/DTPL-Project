@@ -1,6 +1,8 @@
 from django.conf import settings
+from django.contrib import messages
 from django.core.mail import send_mail
 from django.shortcuts import render, redirect, get_object_or_404
+
 
 from .forms import ProductForm, ProductCategoryForm, ProductOrderForm
 from .models import Product, ProductCategory, ProductOrder
@@ -19,6 +21,23 @@ def send_order_status_email(order, subject, message):
             fail_silently=False,
         )
 
+def can_transition_order(order, new_status):
+    allowed_transitions = {
+        ProductOrder.STATUS_PENDING: [
+            ProductOrder.STATUS_CONFIRMED,
+            ProductOrder.STATUS_CANCELLED,
+        ],
+        ProductOrder.STATUS_CONFIRMED: [
+            ProductOrder.STATUS_SHIPPING,
+            ProductOrder.STATUS_CANCELLED,
+        ],
+        ProductOrder.STATUS_SHIPPING: [
+            ProductOrder.STATUS_COMPLETED,
+        ],
+        ProductOrder.STATUS_COMPLETED: [],
+        ProductOrder.STATUS_CANCELLED: [],
+    }
+    return new_status in allowed_transitions.get(order.status, [])
 
 # =========================
 # PUBLIC PAGES
@@ -272,20 +291,33 @@ def admin_order_confirm(request, pk):
     if not request.session.get('is_admin_logged_in'):
         return redirect('adminpanel:login')
 
+    if request.method != 'POST':
+        return redirect('products_admin:order_detail', pk=pk)
+
     order = get_object_or_404(ProductOrder, pk=pk)
+
+    if not can_transition_order(order, ProductOrder.STATUS_CONFIRMED):
+        messages.error(request, 'Status pesanan tidak bisa diubah ke Konfirmasi.')
+        return redirect('products_admin:order_detail', pk=order.pk)
+
     order.status = ProductOrder.STATUS_CONFIRMED
     order.save()
 
-    send_order_status_email(
-        order,
-        'Pesanan Anda Telah Dikonfirmasi',
-        (
-            f'Halo {order.customer_name},\n\n'
-            f'Pesanan Anda untuk produk {order.product.name} telah dikonfirmasi.\n'
-            f'Status saat ini: Confirmed.\n\n'
-            f'Terima kasih.'
+    try:
+        send_order_status_email(
+            order,
+            'Pesanan Anda Telah Dikonfirmasi',
+            (
+                f'Halo {order.customer_name},\n\n'
+                f'Pesanan Anda untuk produk {order.product.name} telah dikonfirmasi.\n'
+                f'Status saat ini: Confirmed.\n\n'
+                f'Terima kasih.'
+            )
         )
-    )
+        messages.success(request, 'Pesanan berhasil dikonfirmasi dan email berhasil dikirim.')
+    except Exception as e:
+        messages.warning(request, f'Pesanan berhasil dikonfirmasi, tapi email gagal dikirim: {e}')
+
     return redirect('products_admin:order_detail', pk=order.pk)
 
 
@@ -293,20 +325,33 @@ def admin_order_shipping(request, pk):
     if not request.session.get('is_admin_logged_in'):
         return redirect('adminpanel:login')
 
+    if request.method != 'POST':
+        return redirect('products_admin:order_detail', pk=pk)
+
     order = get_object_or_404(ProductOrder, pk=pk)
+
+    if not can_transition_order(order, ProductOrder.STATUS_SHIPPING):
+        messages.error(request, 'Status pesanan tidak bisa diubah ke Sedang Diantar.')
+        return redirect('products_admin:order_detail', pk=order.pk)
+
     order.status = ProductOrder.STATUS_SHIPPING
     order.save()
 
-    send_order_status_email(
-        order,
-        'Pesanan Anda Sedang Diantar',
-        (
-            f'Halo {order.customer_name},\n\n'
-            f'Pesanan Anda untuk produk {order.product.name} sedang diantar.\n'
-            f'Status saat ini: Shipping.\n\n'
-            f'Terima kasih.'
+    try:
+        send_order_status_email(
+            order,
+            'Pesanan Anda Sedang Diantar',
+            (
+                f'Halo {order.customer_name},\n\n'
+                f'Pesanan Anda untuk produk {order.product.name} sedang diantar.\n'
+                f'Status saat ini: Shipping.\n\n'
+                f'Terima kasih.'
+            )
         )
-    )
+        messages.success(request, 'Status pesanan berhasil diubah ke Sedang Diantar dan email berhasil dikirim.')
+    except Exception as e:
+        messages.warning(request, f'Status berhasil diubah, tapi email gagal dikirim: {e}')
+
     return redirect('products_admin:order_detail', pk=order.pk)
 
 
@@ -314,18 +359,31 @@ def admin_order_complete(request, pk):
     if not request.session.get('is_admin_logged_in'):
         return redirect('adminpanel:login')
 
+    if request.method != 'POST':
+        return redirect('products_admin:order_detail', pk=pk)
+
     order = get_object_or_404(ProductOrder, pk=pk)
+
+    if not can_transition_order(order, ProductOrder.STATUS_COMPLETED):
+        messages.error(request, 'Status pesanan tidak bisa diubah ke Selesai.')
+        return redirect('products_admin:order_detail', pk=order.pk)
+
     order.status = ProductOrder.STATUS_COMPLETED
     order.save()
 
-    send_order_status_email(
-        order,
-        'Pesanan Anda Telah Selesai',
-        (
-            f'Halo {order.customer_name},\n\n'
-            f'Pesanan Anda untuk produk {order.product.name} telah selesai.\n'
-            f'Status saat ini: Completed.\n\n'
-            f'Terima kasih.'
+    try:
+        send_order_status_email(
+            order,
+            'Pesanan Anda Telah Selesai',
+            (
+                f'Halo {order.customer_name},\n\n'
+                f'Pesanan Anda untuk produk {order.product.name} telah selesai.\n'
+                f'Status saat ini: Completed.\n\n'
+                f'Terima kasih.'
+            )
         )
-    )
+        messages.success(request, 'Status pesanan berhasil diubah ke Selesai dan email berhasil dikirim.')
+    except Exception as e:
+        messages.warning(request, f'Status berhasil diubah, tapi email gagal dikirim: {e}')
+
     return redirect('products_admin:order_detail', pk=order.pk)
