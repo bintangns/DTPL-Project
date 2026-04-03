@@ -38,8 +38,9 @@ Dari pusat desa, pengunjung dapat menggunakan kendaraan roda dua atau roda empat
 ---
 
 ## Desa Manud Jaya
-Desa Manud Jaya, Kecamatan Lestari, Kabupaten Hijau  
-Kontak: +62 123 456 7890  
+Desa Manud Jaya, Kecamatan Sukamakmur, Kabupaten Bogor, Provinsi Jawa Barat  
+Kode Pos 16830, Indonesia  
+Kontak: 0812 2345 5678  
 Email: info@manudjaya.id
 
 ---

@@ -38,8 +38,9 @@ Perjalanan dimulai dari basecamp Gunung Api di Dusun Gunung (8 km dari pusat des
 ---
 
 ## Desa Manud Jaya
-Desa Manud Jaya, Kecamatan Lestari, Kabupaten Hijau  
-Kontak: +62 123 456 7890  
+Desa Manud Jaya, Kecamatan Sukamakmur, Kabupaten Bogor, Provinsi Jawa Barat  
+Kode Pos 16830, Indonesia  
+Kontak: 0812 2345 5678  
 Email: info@manudjaya.id
 
 ---

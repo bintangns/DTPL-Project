@@ -7,6 +7,20 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'destinations/css/style.css' %}">
+<style>
+    /* Force navbar to scrolled state on detail pages (white bar behind nav) */
+    .navbar {
+        background: var(--white) !important;
+        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        padding: 0.6rem 0;
+    }
+    .nav-logo { color: var(--primary) !important; }
+    .nav-link { color: var(--text) !important; }
+    .nav-link:hover { color: var(--primary) !important; }
+    .hamburger, .hamburger::before, .hamburger::after {
+        background: var(--text) !important;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
