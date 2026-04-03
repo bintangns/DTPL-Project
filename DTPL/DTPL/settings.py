@@ -156,3 +156,7 @@ SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://focused-expression-staging.up.railway.app",
+]
