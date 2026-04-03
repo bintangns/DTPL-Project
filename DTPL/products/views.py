@@ -1,122 +1,453 @@
-from django.shortcuts import render, get_object_or_404
+from django.conf import settings
+from django.contrib import messages
+from django.core.mail import send_mail
+from django.shortcuts import render, redirect, get_object_or_404
 
+
+from .forms import ProductForm, ProductCategoryForm, ProductOrderForm
+from .models import Product, ProductCategory, ProductOrder
+
+
+# =========================
+# EMAIL HELPER
+# =========================
+def send_order_status_email(order, subject, message):
+    if order.email:
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@example.com'),
+            recipient_list=[order.email],
+            fail_silently=False,
+        )
+
+def can_transition_order(order, new_status):
+    allowed_transitions = {
+        ProductOrder.STATUS_PENDING: [
+            ProductOrder.STATUS_CONFIRMED,
+            ProductOrder.STATUS_CANCELLED,
+        ],
+        ProductOrder.STATUS_CONFIRMED: [
+            ProductOrder.STATUS_READY_PICKUP,
+            ProductOrder.STATUS_SHIPPING,
+            ProductOrder.STATUS_CANCELLED,
+        ],
+        ProductOrder.STATUS_READY_PICKUP: [
+            ProductOrder.STATUS_COMPLETED,
+        ],
+        ProductOrder.STATUS_SHIPPING: [
+            ProductOrder.STATUS_COMPLETED,
+        ],
+        ProductOrder.STATUS_COMPLETED: [],
+        ProductOrder.STATUS_CANCELLED: [],
+    }
+    return new_status in allowed_transitions.get(order.status, [])
+
+# =========================
+# PUBLIC PAGES
+# =========================
 def product_list(request):
-    category = request.GET.get('category')
+    category_slug = request.GET.get('category')
 
-    products = [
-        {
-            'name': 'Kopi Arabika Manud Jaya',
-            'slug': 'kopi-arabika-manud-jaya',
-            'category': 'kopi',
-            'category_display': 'Kopi',
-            'price': 50000,
-            'stock': 20,
-            'short_description': 'Kopi arabika khas desa dengan aroma yang harum.',
-            'image': 'https://via.placeholder.com/300x200?text=Kopi+Arabika',
-        },
-        {
-            'name': 'Kopi Robusta Tradisional',
-            'slug': 'kopi-robusta-tradisional',
-            'category': 'kopi',
-            'category_display': 'Kopi',
-            'price': 45000,
-            'stock': 15,
-            'short_description': 'Kopi robusta dengan cita rasa kuat dan khas.',
-            'image': 'https://via.placeholder.com/300x200?text=Kopi+Robusta',
-        },
-        {
-            'name': 'Cokelat Batang Premium',
-            'slug': 'cokelat-batang-premium',
-            'category': 'cokelat',
-            'category_display': 'Cokelat',
-            'price': 35000,
-            'stock': 12,
-            'short_description': 'Cokelat batang premium dari kakao lokal pilihan.',
-            'image': 'https://via.placeholder.com/300x200?text=Cokelat+Batang',
-        },
-        {
-            'name': 'Bubuk Kakao Organik',
-            'slug': 'bubuk-kakao-organik',
-            'category': 'cokelat',
-            'category_display': 'Cokelat',
-            'price': 40000,
-            'stock': 8,
-            'short_description': 'Bubuk kakao organik untuk minuman dan baking.',
-            'image': 'https://via.placeholder.com/300x200?text=Bubuk+Kakao',
-        },
-        
-    ]
+    products = Product.objects.filter(is_active=True).select_related('category')
 
-    categories = []
-    seen = set()
+    if category_slug:
+        products = products.filter(category__slug=category_slug)
 
-    for product in products:
-        if product['category'] not in seen:
-            categories.append({
-                'value': product['category'],
-                'label': product['category_display'],
-            })
-            seen.add(product['category'])
-
-    if category:
-        products = [p for p in products if p['category'] == category]
+    categories = ProductCategory.objects.all()
 
     context = {
         'products': products,
         'categories': categories,
-        'selected_category': category,
+        'selected_category': category_slug,
     }
     return render(request, 'products/product_list.html', context)
 
 
 def product_detail(request, slug):
-    products = [
-        {
-            'name': 'Kopi Arabika Manud Jaya',
-            'slug': 'kopi-arabika-manud-jaya',
-            'category': 'kopi',
-            'category_display': 'Kopi',
-            'price': 50000,
-            'stock': 20,
-            'short_description': 'Kopi arabika khas desa dengan aroma yang harum.',
-            'description': 'Kopi arabika berkualitas tinggi yang diolah langsung oleh masyarakat desa.',
-            'image': 'https://via.placeholder.com/500x300?text=Kopi+Arabika',
-        },
-        {
-            'name': 'Kopi Robusta Tradisional',
-            'slug': 'kopi-robusta-tradisional',
-            'category': 'kopi',
-            'category_display': 'Kopi',
-            'price': 45000,
-            'stock': 15,
-            'short_description': 'Kopi robusta dengan cita rasa kuat dan khas.',
-            'description': 'Kopi robusta tradisional dengan rasa pekat dan cocok untuk penikmat kopi asli.',
-            'image': 'https://via.placeholder.com/500x300?text=Kopi+Robusta',
-        },
-        {
-            'name': 'Cokelat Batang Premium',
-            'slug': 'cokelat-batang-premium',
-            'category': 'cokelat',
-            'category_display': 'Cokelat',
-            'price': 35000,
-            'stock': 12,
-            'short_description': 'Cokelat batang premium dari kakao lokal pilihan.',
-            'description': 'Produk cokelat lokal premium dengan rasa autentik dan tekstur lembut.',
-            'image': 'https://via.placeholder.com/500x300?text=Cokelat+Batang',
-        },
-        {
-            'name': 'Bubuk Kakao Organik',
-            'slug': 'bubuk-kakao-organik',
-            'category': 'cokelat',
-            'category_display': 'Cokelat',
-            'price': 40000,
-            'stock': 8,
-            'short_description': 'Bubuk kakao organik untuk minuman dan baking.',
-            'description': 'Bubuk kakao organik hasil olahan masyarakat desa, cocok untuk minuman sehat.',
-            'image': 'https://via.placeholder.com/500x300?text=Bubuk+Kakao',
-        },
-    ]
-
-    product = next((p for p in products if p['slug'] == slug), None)
-
+    product = get_object_or_404(
+        Product.objects.select_related('category'),
+        slug=slug,
+        is_active=True
+    )
     return render(request, 'products/product_detail.html', {'product': product})
+
+
+def product_order_create(request, slug):
+    product = get_object_or_404(
+        Product.objects.select_related('category'),
+        slug=slug,
+        is_active=True
+    )
+
+    if request.method == 'POST':
+        form = ProductOrderForm(request.POST, request.FILES, product=product)
+        if form.is_valid():
+            order = form.save(commit=False)
+            order.product = product
+            order.status = ProductOrder.STATUS_PENDING
+            order.save()
+
+            subject = 'Pesanan Anda Telah Diterima'
+            message = (
+                f'Halo {order.customer_name},\n\n'
+                f'Terima kasih, pesanan Anda telah kami terima.\n\n'
+                f'Detail pesanan:\n'
+                f'Produk: {order.product.name}\n'
+                f'Jumlah: {order.quantity}\n'
+                f'Metode: {order.get_fulfillment_method_display()}\n'
+                f'Email: {order.email}\n'
+                f'No. Telepon: {order.phone_number}\n'
+                f'Alamat: {order.address if order.address else "-"}\n'
+                f'Status: Pending\n\n'
+                f'Pesanan Anda sedang kami proses.'
+            )
+            send_order_status_email(order, subject, message)
+
+            return redirect('products:order_success', pk=order.pk)
+    else:
+        form = ProductOrderForm(product=product)
+
+    return render(request, 'products/order_form.html', {
+        'product': product,
+        'form': form,
+    })
+
+
+def product_order_success(request, pk):
+    order = get_object_or_404(ProductOrder.objects.select_related('product'), pk=pk)
+    return render(request, 'products/order_success.html', {
+        'order': order,
+    })
+
+
+# =========================
+# ADMIN PRODUCT
+# =========================
+def admin_product_list(request):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    category_slug = request.GET.get('category')
+    products = Product.objects.select_related('category').all()
+
+    if category_slug:
+        products = products.filter(category__slug=category_slug)
+
+    categories = ProductCategory.objects.all()
+
+    context = {
+        'products': products,
+        'categories': categories,
+        'selected_category': category_slug,
+    }
+    return render(request, 'products/admin_dashboard.html', context)
+
+
+def admin_product_create(request):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    if request.method == 'POST':
+        form = ProductForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('products_admin:list')
+    else:
+        form = ProductForm()
+
+    return render(request, 'products/admin_product_form.html', {
+        'form': form,
+        'page_title': 'Tambah Produk',
+        'submit_label': 'Simpan Produk',
+    })
+
+
+def admin_product_edit(request, pk):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    product = get_object_or_404(Product, pk=pk)
+
+    if request.method == 'POST':
+        form = ProductForm(request.POST, instance=product)
+        if form.is_valid():
+            form.save()
+            return redirect('products_admin:list')
+    else:
+        form = ProductForm(instance=product)
+
+    return render(request, 'products/admin_product_form.html', {
+        'form': form,
+        'page_title': 'Edit Produk',
+        'submit_label': 'Update Produk',
+    })
+
+
+def admin_product_delete(request, pk):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    product = get_object_or_404(Product, pk=pk)
+
+    if request.method == 'POST':
+        product.delete()
+        return redirect('products_admin:list')
+
+    return render(request, 'products/admin_product_delete.html', {
+        'product': product,
+    })
+
+
+# =========================
+# ADMIN CATEGORY
+# =========================
+def admin_category_list(request):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    categories = ProductCategory.objects.all()
+    return render(request, 'products/admin_category_list.html', {
+        'categories': categories,
+    })
+
+
+def admin_category_create(request):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    if request.method == 'POST':
+        form = ProductCategoryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('products_admin:category_list')
+    else:
+        form = ProductCategoryForm()
+
+    return render(request, 'products/admin_category_form.html', {
+        'form': form,
+        'page_title': 'Tambah Category',
+        'submit_label': 'Simpan Category',
+    })
+
+
+def admin_category_edit(request, pk):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    category = get_object_or_404(ProductCategory, pk=pk)
+
+    if request.method == 'POST':
+        form = ProductCategoryForm(request.POST, instance=category)
+        if form.is_valid():
+            form.save()
+            return redirect('products_admin:category_list')
+    else:
+        form = ProductCategoryForm(instance=category)
+
+    return render(request, 'products/admin_category_form.html', {
+        'form': form,
+        'page_title': 'Edit Category',
+        'submit_label': 'Update Category',
+    })
+
+
+def admin_category_delete(request, pk):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    category = get_object_or_404(ProductCategory, pk=pk)
+
+    if request.method == 'POST':
+        category.delete()
+        return redirect('products_admin:category_list')
+
+    return render(request, 'products/admin_category_delete.html', {
+        'category': category,
+    })
+
+
+# =========================
+# ADMIN ORDER
+# =========================
+def admin_order_list(request):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    orders = ProductOrder.objects.select_related('product').all()
+
+    return render(request, 'products/admin_order_list.html', {
+        'orders': orders,
+    })
+
+
+def admin_order_detail(request, pk):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    order = get_object_or_404(ProductOrder.objects.select_related('product'), pk=pk)
+
+    return render(request, 'products/admin_order_detail.html', {
+        'order': order,
+    })
+
+
+def admin_order_confirm(request, pk):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    if request.method != 'POST':
+        return redirect('products_admin:order_detail', pk=pk)
+
+    order = get_object_or_404(ProductOrder.objects.select_related('product'), pk=pk)
+
+    if not can_transition_order(order, ProductOrder.STATUS_CONFIRMED):
+        messages.error(request, 'Status pesanan tidak bisa diubah ke Konfirmasi.')
+        return redirect('products_admin:order_detail', pk=order.pk)
+
+    if not order.stock_deducted:
+        if order.product.stock < order.quantity:
+            messages.error(request, 'Stok produk tidak mencukupi untuk mengonfirmasi pesanan ini.')
+            return redirect('products_admin:order_detail', pk=order.pk)
+
+        order.product.stock -= order.quantity
+        order.product.save()
+        order.stock_deducted = True
+
+    order.status = ProductOrder.STATUS_CONFIRMED
+    order.save()
+
+    try:
+        extra_message = ''
+        if order.fulfillment_method == ProductOrder.METHOD_PICKUP:
+            extra_message = '\nPesanan Anda akan disiapkan untuk diambil di toko pusat oleh-oleh desa.'
+        else:
+            extra_message = '\nPesanan Anda telah dikonfirmasi dan akan diproses untuk pengiriman.'
+
+        send_order_status_email(
+            order,
+            'Pesanan Anda Telah Dikonfirmasi',
+            (
+                f'Halo {order.customer_name},\n\n'
+                f'Pesanan Anda untuk produk {order.product.name} telah dikonfirmasi.\n'
+                f'Status saat ini: Confirmed.\n'
+                f'Metode: {order.get_fulfillment_method_display()}\n'
+                f'Ongkir: Rp {order.shipping_cost if order.shipping_cost else 0}\n'
+                f'{extra_message}\n\n'
+                f'Terima kasih.'
+            )
+        )
+        messages.success(request, 'Pesanan berhasil dikonfirmasi dan email berhasil dikirim.')
+    except Exception as e:
+        messages.warning(request, f'Pesanan berhasil dikonfirmasi, tapi email gagal dikirim: {e}')
+
+    return redirect('products_admin:order_detail', pk=order.pk)
+
+def admin_order_shipping(request, pk):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    if request.method != 'POST':
+        return redirect('products_admin:order_detail', pk=pk)
+
+    order = get_object_or_404(ProductOrder, pk=pk)
+
+    if order.fulfillment_method != ProductOrder.METHOD_DELIVERY:
+        messages.error(request, 'Pesanan ini bukan untuk pengiriman.')
+        return redirect('products_admin:order_detail', pk=order.pk)
+
+    if not can_transition_order(order, ProductOrder.STATUS_SHIPPING):
+        messages.error(request, 'Status pesanan tidak bisa diubah ke Sedang Diantar.')
+        return redirect('products_admin:order_detail', pk=order.pk)
+
+    order.status = ProductOrder.STATUS_SHIPPING
+    order.save()
+
+    try:
+        send_order_status_email(
+            order,
+            'Pesanan Anda Sedang Diantar',
+            (
+                f'Halo {order.customer_name},\n\n'
+                f'Pesanan Anda untuk produk {order.product.name} sedang diantar.\n'
+                f'Alamat pengiriman: {order.address}\n'
+                f'Estimasi biaya pengiriman: Rp {order.shipping_cost if order.shipping_cost else 0}\n\n'
+                f'Terima kasih.'
+            )
+        )
+        messages.success(request, 'Status pesanan berhasil diubah ke Sedang Diantar dan email berhasil dikirim.')
+    except Exception as e:
+        messages.warning(request, f'Status berhasil diubah, tapi email gagal dikirim: {e}')
+
+    return redirect('products_admin:order_detail', pk=order.pk)
+
+def admin_order_ready_pickup(request, pk):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    if request.method != 'POST':
+        return redirect('products_admin:order_detail', pk=pk)
+
+    order = get_object_or_404(ProductOrder, pk=pk)
+
+    if order.fulfillment_method != ProductOrder.METHOD_PICKUP:
+        messages.error(request, 'Pesanan ini bukan untuk pengambilan di tempat.')
+        return redirect('products_admin:order_detail', pk=order.pk)
+
+    if not can_transition_order(order, ProductOrder.STATUS_READY_PICKUP):
+        messages.error(request, 'Status pesanan tidak bisa diubah ke Siap Diambil.')
+        return redirect('products_admin:order_detail', pk=order.pk)
+
+    order.status = ProductOrder.STATUS_READY_PICKUP
+    order.save()
+
+    try:
+        send_order_status_email(
+            order,
+            'Pesanan Anda Siap Diambil',
+            (
+                f'Halo {order.customer_name},\n\n'
+                f'Pesanan Anda untuk produk {order.product.name} sudah siap diambil.\n'
+                f'Silakan ambil di toko pusat oleh-oleh desa.\n\n'
+                f'Terima kasih.'
+            )
+        )
+        messages.success(request, 'Status pesanan berhasil diubah ke Siap Diambil dan email berhasil dikirim.')
+    except Exception as e:
+        messages.warning(request, f'Status berhasil diubah, tapi email gagal dikirim: {e}')
+
+    return redirect('products_admin:order_detail', pk=order.pk)
+
+
+def admin_order_complete(request, pk):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+
+    if request.method != 'POST':
+        return redirect('products_admin:order_detail', pk=pk)
+
+    order = get_object_or_404(ProductOrder, pk=pk)
+
+    if not can_transition_order(order, ProductOrder.STATUS_COMPLETED):
+        messages.error(request, 'Status pesanan tidak bisa diubah ke Selesai.')
+        return redirect('products_admin:order_detail', pk=order.pk)
+
+    order.status = ProductOrder.STATUS_COMPLETED
+    order.save()
+
+    try:
+        send_order_status_email(
+            order,
+            'Pesanan Anda Telah Selesai',
+            (
+                f'Halo {order.customer_name},\n\n'
+                f'Pesanan Anda untuk produk {order.product.name} telah selesai.\n'
+                f'Status saat ini: Completed.\n\n'
+                f'Terima kasih.'
+            )
+        )
+        messages.success(request, 'Status pesanan berhasil diubah ke Selesai dan email berhasil dikirim.')
+    except Exception as e:
+        messages.warning(request, f'Status berhasil diubah, tapi email gagal dikirim: {e}')
+
+    return redirect('products_admin:order_detail', pk=order.pk)

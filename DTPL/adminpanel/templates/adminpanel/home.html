@@ -1,0 +1,67 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin — Desa Manud Jaya</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'adminpanel/css/style.css' %}">
+</head>
+<body class="admin-body">
+
+    <nav class="admin-navbar">
+        <div class="admin-nav-container">
+            <a href="{% url 'adminpanel:home' %}" class="admin-logo">Manud Jaya Admin</a>
+
+            <ul class="admin-nav-links">
+                <li><a href="#">Destinasi</a></li>
+                <li><a href="#">Homestay</a></li>
+                <li><a href="{% url 'products_admin:list' %}">Produk Lokal</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="admin-main">
+        <section class="admin-hero">
+            <div class="admin-hero-content">
+                <h1>Dashboard Admin</h1>
+                <p>
+                    Panel admin sederhana untuk mengelola konten Desa Manud Jaya.
+                    Nantinya halaman ini akan dikembangkan untuk fitur CRUD.
+                </p>
+            </div>
+        </section>
+
+        <section class="admin-cards-section">
+            <div class="admin-cards-grid">
+                <div class="admin-feature-card">
+                    <div class="feature-icon"><i class="fas fa-map-marked-alt"></i></div>
+                    <h3>Destinasi</h3>
+                    <p>Kelola data destinasi wisata desa.</p>
+                    <a href="#">Lihat Menu</a>
+                </div>
+
+                <div class="admin-feature-card">
+                    <div class="feature-icon"><i class="fas fa-home"></i></div>
+                    <h3>Homestay</h3>
+                    <p>Kelola daftar penginapan dan fasilitas.</p>
+                    <a href="#">Lihat Menu</a>
+                </div>
+
+                <div class="admin-feature-card">
+                    <div class="feature-icon"><i class="fas fa-box-open"></i></div>
+                    <h3>Produk Lokal</h3>
+                    <p>Kelola produk lokal dan siapkan fitur CRUD admin.</p>
+                    <a href="{% url 'products_admin:list' %}">Kelola Produk</a>
+                    <br><br>
+                    <a href="{% url 'products_admin:order_list' %}">Lihat Pesanan</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+</body>
+</html>
