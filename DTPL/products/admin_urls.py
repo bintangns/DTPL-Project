@@ -19,4 +19,5 @@ urlpatterns = [
     path('orders/<int:pk>/confirm/', views.admin_order_confirm, name='order_confirm'),
     path('orders/<int:pk>/shipping/', views.admin_order_shipping, name='order_shipping'),
     path('orders/<int:pk>/complete/', views.admin_order_complete, name='order_complete'),
+    path('orders/<int:pk>/ready-pickup/', views.admin_order_ready_pickup, name='order_ready_pickup'),
 ]

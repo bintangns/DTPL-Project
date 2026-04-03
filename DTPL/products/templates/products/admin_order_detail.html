@@ -60,7 +60,18 @@
                 <p><strong>Jumlah:</strong> {{ order.quantity }}</p>
                 <p><strong>Alamat:</strong> {{ order.address }}</p>
                 <p><strong>Catatan:</strong> {{ order.notes|default:"-" }}</p>
+                <p><strong>Metode Pesanan:</strong> {{ order.get_fulfillment_method_display }}</p>
+                <p><strong>Biaya Pengiriman:</strong> Rp {{ order.shipping_cost|default:0 }}</p>
                 <p>
+                {% if order.payment_proof %}
+                    <p><strong>Bukti Pembayaran:</strong></p>
+                    <p>
+                        <a href="{{ order.payment_proof.url }}" target="_blank">Lihat Bukti Pembayaran</a>
+                    </p>
+                    <p>
+                        <img src="{{ order.payment_proof.url }}" alt="Bukti Pembayaran" style="max-width:300px; border-radius:12px;">
+                    </p>
+                {% endif %}
                     <strong>Status:</strong>
                     <span class="status-badge
                         {% if order.status == 'pending' %}status-inactive
@@ -73,29 +84,35 @@
                 </p>
 
                 <div class="admin-form-actions">
-                    <a href="{% url 'products_admin:order_list' %}" class="btn-view">Kembali</a>
+                <a href="{% url 'products_admin:order_list' %}" class="btn-view">Kembali</a>
 
-                    {% if order.status == 'pending' %}
-                        <form method="post" action="{% url 'products_admin:order_confirm' order.pk %}" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn-edit">Konfirmasi</button>
-                        </form>
-                    {% endif %}
+                {% if order.status == 'pending' %}
+                    <form method="post" action="{% url 'products_admin:order_confirm' order.pk %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-edit">Konfirmasi</button>
+                    </form>
+                {% endif %}
 
-                    {% if order.status == 'confirmed' %}
-                        <form method="post" action="{% url 'products_admin:order_shipping' order.pk %}" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="admin-primary-btn">Sedang Diantar</button>
-                        </form>
-                    {% endif %}
+                {% if order.status == 'confirmed' and order.fulfillment_method == 'pickup' %}
+                    <form method="post" action="{% url 'products_admin:order_ready_pickup' order.pk %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="admin-primary-btn">Siap Diambil</button>
+                    </form>
+                {% endif %}
 
-                    {% if order.status == 'shipping' %}
-                        <form method="post" action="{% url 'products_admin:order_complete' order.pk %}" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn-delete">Selesai</button>
-                        </form>
-                    {% endif %}
-                </div>
+                {% if order.status == 'confirmed' and order.fulfillment_method == 'delivery' %}
+                    <form method="post" action="{% url 'products_admin:order_shipping' order.pk %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="admin-primary-btn">Sedang Diantar</button>
+                    </form>
+                {% endif %}
+
+                {% if order.status == 'ready_pickup' or order.status == 'shipping' %}
+                    <form method="post" action="{% url 'products_admin:order_complete' order.pk %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-delete">Selesai</button>
+                    </form>
+                {% endif %}
             </div>
         </section>
     </main>

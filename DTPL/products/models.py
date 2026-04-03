@@ -51,6 +51,7 @@ class Product(models.Model):
 class ProductOrder(models.Model):
     STATUS_PENDING = 'pending'
     STATUS_CONFIRMED = 'confirmed'
+    STATUS_READY_PICKUP = 'ready_pickup'
     STATUS_SHIPPING = 'shipping'
     STATUS_COMPLETED = 'completed'
     STATUS_CANCELLED = 'cancelled'
@@ -58,9 +59,17 @@ class ProductOrder(models.Model):
     STATUS_CHOICES = [
         (STATUS_PENDING, 'Pending'),
         (STATUS_CONFIRMED, 'Confirmed'),
+        (STATUS_READY_PICKUP, 'Ready for Pickup'),
         (STATUS_SHIPPING, 'Shipping'),
         (STATUS_COMPLETED, 'Completed'),
         (STATUS_CANCELLED, 'Cancelled'),
+    ]
+
+    METHOD_PICKUP = 'pickup'
+    METHOD_DELIVERY = 'delivery'
+    FULFILLMENT_CHOICES = [
+        (METHOD_PICKUP, 'Pengambilan di Toko Pusat Oleh-Oleh Desa'),
+        (METHOD_DELIVERY, 'Dikirim ke Alamat Pemesan'),
     ]
 
     product = models.ForeignKey(
@@ -72,13 +81,27 @@ class ProductOrder(models.Model):
     email = models.EmailField()
     phone_number = models.CharField(max_length=30)
     quantity = models.PositiveIntegerField(default=1)
-    address = models.TextField()
+
+    fulfillment_method = models.CharField(
+        max_length=20,
+        choices=FULFILLMENT_CHOICES,
+        default=METHOD_PICKUP
+    )
+
+    address = models.TextField(blank=True)
+    shipping_cost = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+
     notes = models.TextField(blank=True)
+    payment_proof = models.ImageField(upload_to='payment_proofs/', blank=True, null=True)
+
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
         default=STATUS_PENDING
     )
+
+    stock_deducted = models.BooleanField(default=False)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

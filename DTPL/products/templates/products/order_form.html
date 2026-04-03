@@ -8,18 +8,138 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'products/css/style.css' %}">
 <link rel="stylesheet" href="{% static 'products/css/admin.css' %}">
+
+<style>
+    /* Navbar selalu solid di halaman order */
+    #navbar {
+        background: rgba(20, 34, 24, 0.96) !important;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    #navbar .nav-logo,
+    #navbar .nav-link {
+        color: #ffffff !important;
+    }
+
+    #navbar .nav-link.active {
+        color: #7ee6b7 !important;
+        border-bottom-color: #7ee6b7 !important;
+    }
+
+    #navbar.scrolled {
+        background: rgba(20, 34, 24, 0.96) !important;
+    }
+
+    /* Override menu mobile */
+    @media (max-width: 768px) {
+        #navLinks {
+            background: rgba(20, 34, 24, 0.98) !important;
+            backdrop-filter: blur(12px);
+            border-radius: 18px;
+            padding: 16px !important;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+        }
+
+        #navLinks .nav-link {
+            color: #ffffff !important;
+            display: block;
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 12px;
+        }
+
+        #navLinks .nav-link:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        #navLinks .nav-link.active {
+            background: rgba(126, 230, 183, 0.14);
+            color: #7ee6b7 !important;
+        }
+
+        #navToggle,
+        #navToggle .hamburger {
+            z-index: 1001;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block content %}
 <section class="detail-content-section" style="padding-top:140px;">
     <div class="admin-form-card">
         <h1>Pesan Produk</h1>
-        <p><strong>Produk:</strong> {{ product.name }}</p>
-        <p><strong>Harga:</strong> Rp {{ product.price }}</p>
 
-        <form method="post" class="admin-form">
+        <div style="margin-bottom: 24px;">
+            <p><strong>Produk:</strong> {{ product.name }}</p>
+            <p><strong>Harga Satuan:</strong> Rp <span id="product-price">{{ product.price }}</span></p>
+            <p><strong>Stok Tersedia:</strong> {{ product.stock }}</p>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="admin-form">
             {% csrf_token %}
-            {{ form.as_p }}
+
+            <p>
+                <label for="{{ form.customer_name.id_for_label }}">Nama</label>
+                {{ form.customer_name }}
+            </p>
+
+            <p>
+                <label for="{{ form.email.id_for_label }}">Email</label>
+                {{ form.email }}
+            </p>
+
+            <p>
+                <label for="{{ form.phone_number.id_for_label }}">Nomor Telepon</label>
+                {{ form.phone_number }}
+            </p>
+
+            <p>
+                <label for="{{ form.quantity.id_for_label }}">Jumlah Pesanan</label>
+                {{ form.quantity }}
+                {% if form.quantity.errors %}
+                    <span style="color:red;">{{ form.quantity.errors }}</span>
+                {% endif %}
+            </p>
+
+            <div style="
+                background:#f8faf8;
+                border:1px solid #dfe9e2;
+                border-radius:14px;
+                padding:16px;
+                margin-bottom:20px;
+            ">
+                <p style="margin:0 0 8px;"><strong>Total Harga</strong></p>
+                <p style="margin:0; font-size:1.4rem; font-weight:700; color:#2f8f5b;">
+                    Rp <span id="total-price">{{ product.price }}</span>
+                </p>
+            </div>
+
+            <p>
+                <label for="{{ form.fulfillment_method.id_for_label }}">Metode Pesanan</label>
+                {{ form.fulfillment_method }}
+            </p>
+
+            <div id="address-wrapper">
+                <p>
+                    <label for="{{ form.address.id_for_label }}">Alamat Pemesan</label>
+                    {{ form.address }}
+                    <small style="display:block; margin-top:6px; color:#666;">
+                        Wajib diisi jika memilih pengiriman.
+                    </small>
+                </p>
+            </div>
+
+            <p>
+                <label for="{{ form.notes.id_for_label }}">Catatan</label>
+                {{ form.notes }}
+            </p>
+
+            <p>
+                <label for="{{ form.payment_proof.id_for_label }}">Bukti Pembayaran</label>
+                {{ form.payment_proof }}
+            </p>
 
             <div class="admin-form-actions">
                 <a href="{% url 'products:detail' product.slug %}" class="btn-view">Batal</a>
@@ -28,4 +148,52 @@
         </form>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const quantityInput = document.getElementById('{{ form.quantity.id_for_label }}');
+    const methodInput = document.getElementById('{{ form.fulfillment_method.id_for_label }}');
+    const totalPriceEl = document.getElementById('total-price');
+    const addressWrapper = document.getElementById('address-wrapper');
+
+    const unitPrice = parseFloat('{{ product.price|floatformat:2 }}');
+
+    function formatRupiah(number) {
+        return new Intl.NumberFormat('id-ID').format(number);
+    }
+
+    function updateTotalPrice() {
+        let qty = parseInt(quantityInput.value || 1);
+
+        if (isNaN(qty) || qty < 1) {
+            qty = 1;
+        }
+
+        const total = unitPrice * qty;
+        totalPriceEl.textContent = formatRupiah(total);
+    }
+
+    function toggleAddressField() {
+        if (methodInput.value === 'delivery') {
+            addressWrapper.style.display = 'block';
+        } else {
+            addressWrapper.style.display = 'none';
+        }
+    }
+
+    if (quantityInput) {
+        quantityInput.addEventListener('input', updateTotalPrice);
+        quantityInput.addEventListener('change', updateTotalPrice);
+    }
+
+    if (methodInput) {
+        methodInput.addEventListener('change', toggleAddressField);
+    }
+
+    updateTotalPrice();
+    toggleAddressField();
+});
+</script>
 {% endblock %}

@@ -153,3 +153,6 @@ DEFAULT_FROM_EMAIL = os.getenv(
     'Desa Manud Jaya <desamanudjaya5@gmail.com>'
 )
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
