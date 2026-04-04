@@ -6,28 +6,218 @@ margin:auto;
 padding:0 20px;
 }
 
-
-/* ===== HERO SECTION LIST PAGE ===== */
-
-.homestay-hero{
-background:#16a34a;
-color:white;
-padding:70px 0;
+/* ===== ADMIN FORM REPAIR ===== */
+.admin-form-card {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    max-width: 900px;
+    margin: 20px auto;
 }
 
-.homestay-hero h1{
-font-size:42px;
-font-weight:700;
-margin-bottom:10px;
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Gunakan 2 kolom agar lebih lega */
+    gap: 20px;
 }
 
-.homestay-hero p{
-max-width:650px;
-line-height:1.6;
-opacity:.95;
+/* Sesuai permintaan: Image hanya input teks URL dan Kapasitas input teks */
+.form-group.full-width {
+    grid-column: 1 / -1;
 }
 
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #374151;
+    font-size: 14px;
+}
 
+.admin-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.admin-input:focus {
+    outline: none;
+    border-color: #16a34a;
+    box-shadow: 0 0 0 3px rgba(22,163,74,0.1);
+}
+
+.admin-textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 12px 15px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    resize: vertical;
+}
+
+/* ===== STATUS BADGE (CARD) ===== */
+.status-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px; /* Di sisi kiri, berlawanan dengan eco-badge */
+    font-size: 11px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    z-index: 5;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.status-badge.available {
+    background: #22c55e; /* Hijau Sukses */
+    color: white;
+}
+
+.status-badge.booked {
+    background: #ef4444; /* Merah Penuh */
+    color: white;
+}
+
+/* Efek visual jika homestay sedang penuh */
+.homestay-card.is-booked {
+    opacity: 0.85;
+}
+
+.homestay-card.is-booked img {
+    filter: grayscale(20%);
+}
+
+/* ===== CUSTOM FLATPICKR STYLE (KALENDER) ===== */
+
+/* Warna untuk tanggal yang sudah di-disable (Booked) */
+.flatpickr-day.flatpickr-disabled, 
+.flatpickr-day.flatpickr-disabled:hover {
+    background: #fee2e2 !important; /* Merah muda halus */
+    color: #ef4444 !important;    /* Teks merah */
+    text-decoration: line-through;
+    cursor: not-allowed;
+    border-color: transparent !important;
+}
+
+/* Warna saat tanggal dipilih (Range) */
+.flatpickr-day.selected, 
+.flatpickr-day.startRange, 
+.flatpickr-day.endRange {
+    background: #16a34a !important; /* Hijau Desa Manud */
+    border-color: #16a34a !important;
+}
+
+/* Input form check-in/out agar konsisten dengan desain */
+.form-input {
+    width: 100%;
+    height: 44px;
+    padding: 0 14px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    margin-bottom: 15px;
+    font-family: inherit;
+}
+
+/* 1. Definisikan Keyframes di paling atas area ini */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 2. Perbaiki Hero Styling */
+.homestay-hero {
+   /* Gunakan warna fallback jika variable CSS kamu belum didefinisikan */
+   background: linear-gradient(135deg, #15803d 0%, #16a34a 50%, #22c55e 100%);
+   padding: 7rem 2rem 3rem;
+   color: white;
+   overflow: hidden; /* Mencegah scrollbar muncul saat animasi */
+}
+
+/* 3. Terapkan Animasi per Elemen agar terasa 'hidup' */
+.homestay-hero h1 {
+    opacity: 0; /* Mulai dari tidak terlihat */
+    animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.homestay-hero p {
+    opacity: 0;
+    /* Tambahkan delay 0.3s supaya muncul setelah Judul */
+    animation: fadeInUp 0.8s ease-out 0.3s forwards;
+    max-width: 800px;
+}
+
+.homestay-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 80px 20px;
+    background: #f9fafb;
+    border-radius: 14px;
+    border: 2px dashed #e5e7eb;
+}
+
+.homestay-empty i {
+    font-size: 50px;
+    color: #9ca3af;
+    margin-bottom: 20px;
+    display: block;
+}
+
+.homestay-empty h3 {
+    color: #374151;
+    margin-bottom: 10px;
+}
+
+.form-actions {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.btn-save {
+    background: #16a34a;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-save:hover {
+    background: #15803d;
+}
+
+.btn-cancel {
+    background: #f3f4f6;
+    color: #4b5563;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.btn-cancel:hover {
+    background: #e5e7eb;
+}
 
 /* ===== FILTER SECTION ===== */
 
@@ -134,7 +324,7 @@ padding-bottom:50px;
 
 .homestay-grid{
 display:grid;
-grid-template-columns:repeat(3,1fr);
+grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
 gap:25px;
 }
 
@@ -482,6 +672,31 @@ font-size:15px;
 color:#16a34a;
 }
 
+/* ===== FACILITY CHECKBOXES ===== */
+.facilities-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Bagi jadi 3 kolom centang */
+    gap: 10px;
+    background: #f9fafb;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #f3f4f6;
+}
+
+.facilities-container label {
+    font-weight: 400;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.facilities-container input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #16a34a;
+}
 
 
 /* ================================

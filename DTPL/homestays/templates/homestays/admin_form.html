@@ -1,0 +1,143 @@
+{% extends "adminpanel/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} — Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-row">
+        <div>
+            <h1>{{ title }}</h1>
+            <p>Kelola data unit homestay Desa Manud Jaya dengan detail lengkap.</p>
+        </div>
+        <a href="{% url 'homestays_admin:list' %}" class="admin-secondary-btn">
+            <i class="fas fa-arrow-left"></i> Kembali
+        </a>
+    </div>
+</div>
+
+<div class="admin-card" style="max-width: 900px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+    <form method="POST" id="homestayForm" class="admin-form">
+        {% csrf_token %}
+
+        <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            
+            <div class="form-group">
+                <label>Nama Homestay</label>
+                <input type="text" name="name" class="admin-input" value="{{ homestay.name|default:'' }}" placeholder="Contoh: Rumah Modern Pak Budi" required>
+            </div>
+
+            <div class="form-group">
+                <label>Slug (URL Link)</label>
+                <input type="text" name="slug" class="admin-input" value="{{ homestay.slug|default:'' }}" placeholder="rumah-modern-pak-budi">
+            </div>
+
+            <div class="form-group">
+                <label>Pemilik (Owner)</label>
+                <input type="text" name="owner" class="admin-input" value="{{ homestay.owner|default:'' }}" placeholder="Nama Lengkap Pemilik">
+            </div>
+
+            <div class="form-group">
+                <label>Harga per Malam (Rp)</label>
+                <input type="number" name="price_per_night" class="admin-input" value="{{ homestay.price_per_night|floatformat:0|default:'' }}" placeholder="250000">
+            </div>
+
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label>URL Foto Homestay</label>
+                <input type="text" name="image_url" class="admin-input" value="{{ homestay.image_url|default:'' }}" placeholder="https://images.unsplash.com/photo-...">
+            </div>
+
+            <div class="form-group">
+                <label>Kapasitas (Orang)</label>
+                <input type="text" name="capacity" class="admin-input" value="{{ homestay.capacity|default:'' }}" placeholder="Contoh: 4">
+            </div>
+
+            <div class="form-row-nested" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="form-group">
+                    <label>Bedrooms</label>
+                    <input type="number" name="bedrooms" class="admin-input" value="{{ homestay.bedrooms|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label>Bathrooms</label>
+                    <input type="number" name="bathrooms" class="admin-input" value="{{ homestay.bathrooms|default:'' }}">
+                </div>
+            </div>
+
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label>Alamat</label>
+                <input type="text" name="address" class="admin-input" value="{{ homestay.address|default:'' }}" placeholder="Dusun Manud, 2 km dari pusat desa">
+            </div>
+
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label>Deskripsi</label>
+                <textarea name="description" class="admin-textarea" placeholder="Ceritakan tentang arsitektur atau suasana homestay...">{{ homestay.description|default:'' }}</textarea>
+            </div>
+
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    Fasilitas (Klik Tambah untuk input baru)
+                    <button type="button" id="addFacility" class="btn-sm" style="background: #16a34a; color: white; border: none; border-radius: 6px; cursor: pointer; padding: 6px 12px; font-size: 12px;">
+                        <i class="fas fa-plus"></i> Tambah Fasilitas
+                    </button>
+                </label>
+                
+                <div id="facilityContainer" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    {% if homestay.get_facilities_list %}
+                        {% for facility in homestay.get_facilities_list %}
+                        <div class="facility-row" style="display: flex; gap: 8px;">
+                            <input type="text" name="facilities[]" class="admin-input" value="{{ facility }}">
+                            <button type="button" class="remove-facility" style="background: #ef4444; color: white; border: none; border-radius: 8px; width: 45px; cursor: pointer;">&times;</button>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="facility-row" style="display: flex; gap: 8px;">
+                            <input type="text" name="facilities[]" class="admin-input" placeholder="Contoh: WiFi">
+                            <button type="button" class="remove-facility" style="background: #ef4444; color: white; border: none; border-radius: 8px; width: 45px; cursor: pointer;">&times;</button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+
+        <div class="form-actions" style="margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px; display: flex; justify-content: flex-end; gap: 12px;">
+            <a href="{% url 'homestays_admin:list' %}" class="btn-cancel">Batal</a>
+            <button type="submit" class="btn-save">
+                <i class="fas fa-save"></i> Simpan Homestay
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.getElementById('addFacility').addEventListener('click', function() {
+        const container = document.getElementById('facilityContainer');
+        const newRow = document.createElement('div');
+        newRow.className = 'facility-row';
+        newRow.style.display = 'flex';
+        newRow.style.gap = '8px';
+        newRow.innerHTML = `
+            <input type="text" name="facilities[]" class="admin-input" placeholder="Nama fasilitas">
+            <button type="button" class="remove-facility" style="background: #ef4444; color: white; border: none; border-radius: 8px; width: 45px; cursor: pointer;">&times;</button>
+        `;
+        container.appendChild(newRow);
+    });
+
+    document.getElementById('facilityContainer').addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-facility')) {
+            e.target.parentElement.remove();
+        }
+    });
+</script>
+
+<style>
+    .admin-input, .admin-textarea {
+        width: 100%; padding: 12px 15px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; margin-top: 5px; transition: 0.3s;
+    }
+    .admin-input:focus, .admin-textarea:focus { border-color: #16a34a; outline: none; box-shadow: 0 0 0 3px rgba(22,163,74,0.1); }
+    .admin-textarea { height: 100px; resize: vertical; }
+    .btn-save { background: #16a34a; color: white; padding: 12px 30px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; }
+    .btn-cancel { background: #f3f4f6; color: #4b5563; padding: 12px 30px; border-radius: 8px; text-decoration: none; font-weight: 600; text-align: center; }
+    .form-group label { font-weight: 600; color: #374151; font-size: 14px; }
+</style>
+{% endblock %}

@@ -1,4 +1,5 @@
 {% extends "adminpanel/base.html" %}
+{% load static %}
 
 {% block title %}Manajemen Homestay — Admin{% endblock %}
 
@@ -9,13 +10,12 @@
             <h1>Manajemen Homestay</h1>
             <p>Kelola data homestay di Desa Manud Jaya</p>
         </div>
-        <a href="#" class="admin-primary-btn" onclick="alert('Fitur ini sedang dikembangkan oleh developer lain.')">
+        <a href="{% url 'homestays_admin:create' %}" class="admin-primary-btn">
             <i class="fas fa-plus"></i> Tambah Homestay
         </a>
     </div>
 </div>
 
-<!-- Stat Cards -->
 <div class="stats-row">
     <div class="stat-card">
         <div class="stat-icon icon-blue">
@@ -32,8 +32,8 @@
             <i class="fas fa-leaf"></i>
         </div>
         <div class="stat-info">
-            <h3>{{ eco_friendly_count }}</h3>
-            <p>Eco-Friendly</p>
+            <h3>{{ homestays.count }}</h3> 
+            <p>Unit Terdaftar</p>
         </div>
     </div>
 
@@ -49,51 +49,67 @@
 
     <div class="stat-card">
         <div class="stat-icon icon-purple">
-            <i class="fas fa-tag"></i>
+            <i class="fas fa-door-open"></i>
         </div>
         <div class="stat-info">
-            <h3>{{ avg_price }}</h3>
-            <p>Rata-rata Harga</p>
+            <h3>{{ available_now }}</h3>
+            <p>Tersedia Hari Ini</p>
         </div>
     </div>
 </div>
 
-<!-- Search -->
-<div class="search-filter-bar">
+<form method="GET" action="{% url 'homestays_admin:list' %}" class="search-filter-bar">
     <div class="search-input-wrapper">
         <i class="fas fa-search"></i>
-        <input type="text" class="search-input" placeholder="Cari nama homestay, pemilik, atau lokasi...">
+        <input type="text" name="search" class="search-input" placeholder="Cari nama homestay atau pemilik..." value="{{ request.GET.search }}">
     </div>
-</div>
+    <button type="submit" class="admin-primary-btn" style="padding: 0 20px;">Cari</button>
+</form>
 
-<!-- Homestay Cards -->
 <div class="card-grid">
-    {% for homestay in homestays %}
-    <div class="admin-card">
-        <div class="admin-card-img">
-            <img src="{{ homestay.image_url }}" alt="{{ homestay.name }}">
-            {% if homestay.eco_friendly %}
-            <div class="admin-card-badge">
-                <span class="badge badge-eco">Eco-Friendly</span>
+    {% if homestays %}
+        {% for homestay in homestays %}
+        <div class="admin-card">
+            <div class="admin-card-img">
+                <img src="{{ homestay.image_url }}" alt="{{ homestay.name }}">
+                <div class="admin-card-badge">
+                    <span class="badge badge-eco">Verified</span>
+                </div>
             </div>
-            {% endif %}
+            <div class="admin-card-body">
+                <h3>{{ homestay.name }}</h3>
+                <p class="admin-card-owner"><i class="fas fa-user"></i> {{ homestay.owner }}</p>
+                <p class="admin-card-desc">{{ homestay.description|truncatewords:15 }}</p>
+                
+                <div class="admin-card-meta">
+                    <span><i class="fas fa-users"></i> {{ homestay.capacity }} tamu</span>
+                    <span><i class="fas fa-bed"></i> {{ homestay.bedrooms }} BR</span>
+                    <span><i class="fas fa-bath"></i> {{ homestay.bathrooms }} BA</span>
+                </div>
+                
+                <p class="admin-card-price">Rp {{ homestay.price_per_night|floatformat:0 }} <small>/malam</small></p>
+                
+                <div class="admin-card-actions">
+                    <a href="{% url 'homestays_admin:update' homestay.pk %}" class="btn-sm btn-edit">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    
+                    <form action="{% url 'homestays_admin:delete' homestay.pk %}" method="POST" style="display:inline;" onsubmit="return confirm('Yakin ingin menghapus homestay {{ homestay.name }}?')">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-sm btn-delete" style="border:none; cursor:pointer;">
+                            <i class="fas fa-trash"></i> Hapus
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
-        <div class="admin-card-body">
-            <h3>{{ homestay.name }}</h3>
-            <p class="admin-card-owner"><i class="fas fa-user"></i> {{ homestay.owner }}</p>
-            <p>{{ homestay.description }}</p>
-            <div class="admin-card-meta">
-                <span><i class="fas fa-users"></i> {{ homestay.capacity }} orang</span>
-                <span><i class="fas fa-bed"></i> {{ homestay.bedrooms }} kamar</span>
-                <span><i class="fas fa-bath"></i> {{ homestay.bathrooms }} kamar mandi</span>
-            </div>
-            <p class="admin-card-price">Rp {{ homestay.price_per_night|floatformat:0 }} <small>/malam</small></p>
-            <div class="admin-card-actions">
-                <a href="#" class="btn-sm btn-edit" onclick="alert('Fitur sedang dikembangkan.')"><i class="fas fa-edit"></i> Edit</a>
-                <a href="#" class="btn-sm btn-delete" onclick="alert('Fitur sedang dikembangkan.')"><i class="fas fa-trash"></i> Hapus</a>
-            </div>
+        {% endfor %}
+    {% else %}
+        <div class="homestay-empty" style="grid-column: 1 / -1; text-align: center; padding: 50px;">
+            <i class="fas fa-home" style="font-size: 50px; color: #ddd; margin-bottom: 20px; display: block;"></i>
+            <h3>Belum ada homestay</h3>
+            <p>Silakan klik tombol "Tambah Homestay" untuk memulai.</p>
         </div>
-    </div>
-    {% endfor %}
+    {% endif %}
 </div>
 {% endblock %}
