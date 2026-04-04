@@ -1,0 +1,103 @@
+{% extends 'adminpanel/base.html' %}
+{% load static %}
+
+{% block title %}Manajemen Destinasi — Admin Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'destinations/css/admin.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="dest-admin-header">
+    <div class="dest-admin-header-text">
+        <h1>Manajemen Destinasi</h1>
+        <p>Kelola destinasi wisata di Desa Manud Jaya</p>
+    </div>
+    <a href="{% url 'destinations_admin:create' %}" class="btn-add-dest" id="btn-add-destination">
+        <i class="fas fa-plus"></i> Tambah Destinasi
+    </a>
+</div>
+
+<!-- Stat Cards -->
+<div class="dest-stat-cards">
+    <div class="dest-stat-card stat-total">
+        <div class="stat-value">{{ total_destinations }}</div>
+        <div class="stat-label">Total Destinasi</div>
+    </div>
+    <div class="dest-stat-card stat-alam">
+        <div class="stat-value">{{ total_alam }}</div>
+        <div class="stat-label">Wisata Alam</div>
+    </div>
+    <div class="dest-stat-card stat-budaya">
+        <div class="stat-value">{{ total_budaya }}</div>
+        <div class="stat-label">Wisata Budaya</div>
+    </div>
+    <div class="dest-stat-card stat-eco">
+        <div class="stat-value">{{ total_eco }}</div>
+        <div class="stat-label">Eco-Friendly</div>
+    </div>
+</div>
+
+<!-- Search Bar -->
+<div class="dest-search-bar">
+    <form method="get" action="" class="dest-search-form" id="dest-search-form">
+        <div class="search-input-wrapper">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" name="q" value="{{ search_query }}" placeholder="Cari nama, lokasi, atau kategori..." class="search-input" id="dest-search-input">
+        </div>
+    </form>
+</div>
+
+<!-- Destination Cards Grid -->
+<div class="dest-admin-grid">
+    {% for dest in destinations %}
+    <div class="dest-admin-card" id="dest-card-{{ dest.pk }}">
+        <div class="dest-admin-card-img">
+            {% if dest.image_url %}
+            <img src="{{ dest.image_url }}" alt="{{ dest.name }}" loading="lazy">
+            {% else %}
+            <div class="dest-img-placeholder">
+                <i class="fas fa-image"></i>
+            </div>
+            {% endif %}
+            <div class="dest-admin-badges">
+                {% if dest.category %}
+                <span class="badge badge-category">{{ dest.category.name }}</span>
+                {% endif %}
+                {% if dest.is_eco_friendly %}
+                <span class="badge badge-eco"><i class="fas fa-leaf"></i> Eco</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="dest-admin-card-body">
+            <h3 class="dest-admin-card-title">{{ dest.name }}</h3>
+            <p class="dest-admin-card-location">
+                <i class="fas fa-map-marker-alt"></i> {{ dest.location }}
+            </p>
+            <p class="dest-admin-card-desc">{{ dest.short_description|truncatewords:20 }}</p>
+            <div class="dest-admin-card-meta">
+                <span><i class="fas fa-clock"></i> {{ dest.duration }}</span>
+                {% if dest.difficulty %}
+                <span class="meta-difficulty">{{ dest.difficulty }}</span>
+                {% endif %}
+            </div>
+            <div class="dest-admin-card-actions">
+                <a href="{% url 'destinations_admin:edit' dest.pk %}" class="btn-edit" id="btn-edit-{{ dest.pk }}">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <a href="{% url 'destinations_admin:delete' dest.pk %}" class="btn-delete" id="btn-delete-{{ dest.pk }}">
+                    <i class="fas fa-trash-alt"></i> Hapus
+                </a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="dest-empty-state">
+        <i class="fas fa-map-marked-alt"></i>
+        <h3>Belum ada destinasi</h3>
+        <p>Klik tombol "Tambah Destinasi" untuk menambahkan destinasi wisata baru.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

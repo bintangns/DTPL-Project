@@ -13,6 +13,7 @@ urlpatterns = [
     path('admin/', include('adminpanel.urls')),
     path('admin/dashboard/', include('dashboard.urls')),
     path('admin/products/', include('products.admin_urls')),
+    path('admin/destinations/', include('destinations.admin_urls')),
     path('admin/homestays/', include('homestays.admin_urls')),
 
     path('', include('home.urls')),

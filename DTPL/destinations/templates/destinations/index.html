@@ -28,15 +28,21 @@
         {% for dest in destinations %}
         <article class="dest-card" id="dest-card-{{ dest.slug }}">
             <div class="dest-card-img">
-                <img src="{% static dest.image %}" alt="{{ dest.name }}" loading="lazy">
+                {% if dest.image_url %}
+                <img src="{{ dest.image_url }}" alt="{{ dest.name }}" loading="lazy">
+                {% else %}
+                <img src="{% static 'destinations/images/placeholder.jpg' %}" alt="{{ dest.name }}" loading="lazy">
+                {% endif %}
                 <div class="dest-card-badges">
                     <span class="badge badge-difficulty">{{ dest.difficulty }}</span>
-                    <span class="badge badge-category"><i class="fas fa-heart"></i> {{ dest.category }}</span>
+                    {% if dest.category %}
+                    <span class="badge badge-category"><i class="fas fa-heart"></i> {{ dest.category.name }}</span>
+                    {% endif %}
                 </div>
             </div>
             <div class="dest-card-body">
                 <h3 class="dest-card-title">{{ dest.name }}</h3>
-                <p class="dest-card-desc">{{ dest.tagline|truncatewords:25 }}</p>
+                <p class="dest-card-desc">{{ dest.short_description|truncatewords:25 }}</p>
                 <div class="dest-card-meta">
                     <span><i class="fas fa-map-marker-alt"></i> {{ dest.location }}</span>
                     <span><i class="fas fa-clock"></i> {{ dest.duration }}</span>
