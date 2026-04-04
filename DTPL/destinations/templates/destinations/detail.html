@@ -34,15 +34,17 @@
 </div>
 
 <!-- ===== HERO IMAGE ===== -->
-<section class="detail-hero" style="background-image: url('{% static dest.image %}');">
+<section class="detail-hero" {% if dest.image_url %}style="background-image: url('{{ dest.image_url }}');"{% endif %}>
     <div class="detail-hero-overlay"></div>
     <div class="detail-hero-content">
         <div class="detail-badges">
-            <span class="badge badge-category"><i class="fas fa-heart"></i> {{ dest.category }}</span>
+            {% if dest.category %}
+            <span class="badge badge-category"><i class="fas fa-heart"></i> {{ dest.category.name }}</span>
+            {% endif %}
             <span class="badge badge-difficulty">{{ dest.difficulty }}</span>
         </div>
         <h1 class="detail-hero-title">{{ dest.name }}</h1>
-        <p class="detail-hero-desc">{{ dest.tagline }}</p>
+        <p class="detail-hero-desc">{{ dest.short_description }}</p>
     </div>
 </section>
 
@@ -54,22 +56,25 @@
             <h2 class="detail-section-title">Tentang Destinasi</h2>
             <p class="detail-description">{{ dest.description }}</p>
 
-            <!-- Cara Akses Card -->
-            <div class="detail-access-card">
-                <div class="access-header">
-                    <div class="access-icon"><i class="fas fa-route"></i></div>
-                    <h3>Cara Akses</h3>
-                </div>
-                <p>{{ dest.access }}</p>
-            </div>
-
-            <!-- Fasilitas -->
-            <h2 class="detail-section-title">Fasilitas Tersedia</h2>
+            <!-- Fasilitas / Fitur -->
+            {% if dest.features_list %}
+            <h2 class="detail-section-title">Fasilitas & Fitur</h2>
             <ul class="detail-facilities">
-                {% for facility in dest.facilities %}
-                <li><i class="fas fa-check-circle"></i> {{ facility }}</li>
+                {% for feature in dest.features_list %}
+                <li><i class="fas fa-check-circle"></i> {{ feature }}</li>
                 {% endfor %}
             </ul>
+            {% endif %}
+
+            <!-- Aktivitas -->
+            {% if dest.activities_list %}
+            <h2 class="detail-section-title">Aktivitas</h2>
+            <ul class="detail-facilities">
+                {% for activity in dest.activities_list %}
+                <li><i class="fas fa-check-circle"></i> {{ activity }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
         </div>
 
         <!-- RIGHT SIDEBAR -->
@@ -110,6 +115,7 @@
             </div>
 
             <!-- Ecotourism Card -->
+            {% if dest.is_eco_friendly %}
             <div class="sidebar-card eco-sidebar-card">
                 <h3 class="sidebar-card-title"><i class="fas fa-leaf"></i> Destinasi Ecotourism</h3>
                 <p>
@@ -118,6 +124,7 @@
                     digunakan untuk konservasi dan kesejahteraan warga desa.
                 </p>
             </div>
+            {% endif %}
         </aside>
     </div>
 </section>

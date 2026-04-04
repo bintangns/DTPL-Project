@@ -1,0 +1,152 @@
+{% extends 'adminpanel/base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} — Admin Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'destinations/css/admin.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dest-form-page">
+    <!-- Page Header -->
+    <div class="dest-form-header">
+        <h1>{{ page_title }}</h1>
+        <a href="{% url 'destinations_admin:list' %}" class="btn-back">
+            <i class="fas fa-times"></i>
+        </a>
+    </div>
+
+    <form method="post" class="dest-form" id="destination-form" novalidate>
+        {% csrf_token %}
+
+        {% if form.errors %}
+        <div class="form-errors">
+            <p><strong>Terdapat kesalahan pada form:</strong></p>
+            <ul>
+                {% for field in form %}
+                    {% for error in field.errors %}
+                    <li>{{ field.label }}: {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- Row 1: Nama + Slug -->
+        <div class="form-row">
+            <div class="form-group">
+                <label for="{{ form.name.id_for_label }}">{{ form.name.label }} <span class="required">*</span></label>
+                {{ form.name }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.slug.id_for_label }}">{{ form.slug.label }}</label>
+                {{ form.slug }}
+            </div>
+        </div>
+
+        <!-- Row 2: Kategori + Lokasi -->
+        <div class="form-row">
+            <div class="form-group">
+                <label for="{{ form.category.id_for_label }}">{{ form.category.label }} <span class="required">*</span></label>
+                {{ form.category }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.location.id_for_label }}">{{ form.location.label }} <span class="required">*</span></label>
+                {{ form.location }}
+            </div>
+        </div>
+
+        <!-- Deskripsi Singkat -->
+        <div class="form-group full-width">
+            <label for="{{ form.short_description.id_for_label }}">{{ form.short_description.label }} <span class="required">*</span></label>
+            {{ form.short_description }}
+        </div>
+
+        <!-- Deskripsi Lengkap -->
+        <div class="form-group full-width">
+            <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+            {{ form.description }}
+        </div>
+
+        <!-- URL Foto -->
+        <div class="form-group full-width">
+            <label for="{{ form.image_url.id_for_label }}">{{ form.image_url.label }}</label>
+            {{ form.image_url }}
+            <small class="form-help">Masukkan URL foto dari Unsplash atau sumber lain</small>
+            <div class="image-preview" id="image-preview">
+                {% if form.instance.image_url %}
+                <img src="{{ form.instance.image_url }}" alt="Preview" id="preview-img">
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Row 3: Durasi + Tingkat Kesulitan -->
+        <div class="form-row">
+            <div class="form-group">
+                <label for="{{ form.duration.id_for_label }}">{{ form.duration.label }}</label>
+                {{ form.duration }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.difficulty.id_for_label }}">{{ form.difficulty.label }}</label>
+                {{ form.difficulty }}
+            </div>
+        </div>
+
+        <!-- Waktu Terbaik -->
+        <div class="form-group full-width">
+            <label for="{{ form.best_time.id_for_label }}">{{ form.best_time.label }}</label>
+            {{ form.best_time }}
+        </div>
+
+        <!-- Fitur -->
+        <div class="form-group full-width">
+            <label for="{{ form.features.id_for_label }}">{{ form.features.label }}</label>
+            {{ form.features }}
+        </div>
+
+        <!-- Aktivitas -->
+        <div class="form-group full-width">
+            <label for="{{ form.activities.id_for_label }}">{{ form.activities.label }}</label>
+            {{ form.activities }}
+        </div>
+
+        <!-- Eco-friendly checkbox -->
+        <div class="form-group full-width form-check-group">
+            <label class="form-check-label">
+                {{ form.is_eco_friendly }}
+                <span><i class="fas fa-leaf"></i> {{ form.is_eco_friendly.label }}</span>
+            </label>
+        </div>
+
+        <!-- Buttons -->
+        <div class="form-actions">
+            <a href="{% url 'destinations_admin:list' %}" class="btn-cancel">Batal</a>
+            <button type="submit" class="btn-submit" id="btn-submit">
+                <i class="fas fa-save"></i> {{ submit_label }}
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Image preview script -->
+<script>
+(function() {
+    var urlInput = document.getElementById('{{ form.image_url.id_for_label }}');
+    var preview = document.getElementById('image-preview');
+    if (urlInput) {
+        urlInput.addEventListener('input', function() {
+            var url = this.value.trim();
+            if (url) {
+                preview.innerHTML = '<img src="' + url + '" alt="Preview" id="preview-img" onerror="this.style.display=\'none\'">';
+            } else {
+                preview.innerHTML = '';
+            }
+        });
+    }
+})();
+</script>
+{% endblock %}
