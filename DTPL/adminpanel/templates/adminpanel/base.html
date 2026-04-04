@@ -12,6 +12,9 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body class="admin-body">
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
     <!-- Sidebar -->
     <aside class="admin-sidebar">
         <div class="sidebar-header">
@@ -24,6 +27,9 @@
                     <span class="sidebar-logo-subtitle">Desa Manud Jaya</span>
                 </div>
             </div>
+            <button class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Close Sidebar">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
 
         <nav class="sidebar-nav">
@@ -59,7 +65,9 @@
         <!-- Top Header -->
         <header class="admin-topbar">
             <div class="topbar-left">
-                <!-- Placeholder for breadcrumb or page context -->
+                <button class="admin-sidebar-toggle" id="adminSidebarToggle" aria-label="Toggle Sidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
             </div>
             <div class="topbar-right">
                 <a href="{% url 'home:home' %}" class="topbar-link" target="_blank">
@@ -82,5 +90,30 @@
             {% block content %}{% endblock %}
         </main>
     </div>
+
+    <!-- Mobile Sidebar Toggle Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.getElementById('adminSidebarToggle');
+            const sidebarClose = document.getElementById('sidebarCloseBtn');
+            const sidebar = document.querySelector('.admin-sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            function toggleSidebar() {
+                sidebar.classList.toggle('active');
+                if (overlay) overlay.classList.toggle('active');
+            }
+
+            if (sidebarToggle && sidebar) {
+                sidebarToggle.addEventListener('click', toggleSidebar);
+            }
+            if (sidebarClose && sidebar) {
+                sidebarClose.addEventListener('click', toggleSidebar);
+            }
+            if (overlay) {
+                overlay.addEventListener('click', toggleSidebar);
+            }
+        });
+    </script>
 </body>
 </html>
