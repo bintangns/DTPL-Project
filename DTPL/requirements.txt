@@ -9,3 +9,5 @@ Pillow
 certifi
 gunicorn
 requests
+psycopg[binary]
+dj-database-url
