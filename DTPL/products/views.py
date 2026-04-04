@@ -1,7 +1,8 @@
 from django.conf import settings
 from django.contrib import messages
-from django.core.mail import send_mail
 from django.shortcuts import render, redirect, get_object_or_404
+import requests
+
 
 
 from .forms import ProductForm, ProductCategoryForm, ProductOrderForm
@@ -11,15 +12,51 @@ from .models import Product, ProductCategory, ProductOrder
 # =========================
 # EMAIL HELPER
 # =========================
+import requests
+from django.conf import settings
+
 def send_order_status_email(order, subject, message):
-    if order.email:
-        send_mail(
-            subject=subject,
-            message=message,
-            from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@example.com'),
-            recipient_list=[order.email],
-            fail_silently=False,
-        )
+    if not order.email:
+        return
+
+    sender_email = settings.DEFAULT_FROM_EMAIL
+    sender_name = "Desa Manud Jaya"
+
+    # Kalau format DEFAULT_FROM_EMAIL = "DTPL UI <email@domain.com>"
+    if "<" in sender_email and ">" in sender_email:
+        sender_name = sender_email.split("<")[0].strip()
+        sender_email = sender_email.split("<")[1].replace(">", "").strip()
+
+    payload = {
+        "sender": {
+            "name": sender_name,
+            "email": sender_email,
+        },
+        "to": [
+            {
+                "email": order.email,
+                "name": order.customer_name,
+            }
+        ],
+        "subject": subject,
+        "textContent": message,
+    }
+
+    headers = {
+        "accept": "application/json",
+        "api-key": settings.BREVO_API_KEY,
+        "content-type": "application/json",
+    }
+
+    response = requests.post(
+        "https://api.brevo.com/v3/smtp/email",
+        json=payload,
+        headers=headers,
+        timeout=30,
+    )
+
+    response.raise_for_status()
+    return response.json()
 
 def can_transition_order(order, new_status):
     allowed_transitions = {
