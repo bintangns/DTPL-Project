@@ -1,109 +1,132 @@
 {% extends "adminpanel/base.html" %}
+{% load static %}
 
 {% block title %}Pemesanan Homestay — Admin{% endblock %}
 
 {% block content %}
 <div class="page-header">
     <h1>Pemesanan Homestay</h1>
-    <p>Kelola semua pemesanan homestay</p>
+    <p>Kelola dan konfirmasi semua pemesanan homestay</p>
 </div>
 
-<!-- Stat Cards -->
 <div class="stats-row">
     <div class="stat-card">
-        <div class="stat-icon icon-blue">
-            <i class="fas fa-clipboard-list"></i>
-        </div>
+        <div class="stat-icon icon-blue"><i class="fas fa-clipboard-list"></i></div>
         <div class="stat-info">
             <h3>{{ total_bookings }}</h3>
             <p>Total Pemesanan</p>
         </div>
     </div>
-
     <div class="stat-card">
-        <div class="stat-icon" style="background: #fef3c7; color: #d97706;">
-            <i class="fas fa-clock"></i>
-        </div>
+        <div class="stat-icon" style="background: #fef3c7; color: #d97706;"><i class="fas fa-clock"></i></div>
         <div class="stat-info">
             <h3>{{ bookings_pending }}</h3>
-            <p>Pending</p>
+            <p>Menunggu Konfirmasi</p>
         </div>
     </div>
-
     <div class="stat-card">
-        <div class="stat-icon icon-green">
-            <i class="fas fa-check-circle"></i>
-        </div>
+        <div class="stat-icon icon-green"><i class="fas fa-check-circle"></i></div>
         <div class="stat-info">
             <h3>{{ bookings_confirmed }}</h3>
-            <p>Dikonfirmasi</p>
-        </div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-icon" style="background: #dcfce7; color: #16a34a;">
-            <i class="fas fa-flag-checkered"></i>
-        </div>
-        <div class="stat-info">
-            <h3>{{ bookings_completed }}</h3>
-            <p>Selesai</p>
+            <p>Sudah Dipesan (Booked)</p>
         </div>
     </div>
 </div>
 
-<!-- Search -->
-<div class="search-filter-bar">
-    <div class="search-input-wrapper">
-        <i class="fas fa-search"></i>
-        <input type="text" class="search-input" placeholder="Cari nama, email, atau kode pemesanan...">
+<form method="GET" class="search-filter-bar" style="display: flex; gap: 10px; margin-bottom: 20px;">
+    <div class="search-input-wrapper" style="flex-grow: 1; position: relative;">
+        <i class="fas fa-search" style="position: absolute; left: 12px; top: 12px; color: #9ca3af;"></i>
+        <input type="text" name="search" class="search-input" 
+               style="width: 100%; padding: 10px 10px 10px 40px; border: 1px solid #e5e7eb; border-radius: 8px;" 
+               placeholder="Cari nama tamu atau email..." value="{{ request.GET.search|default:'' }}">
     </div>
-    <select class="filter-select">
+    <select name="status" class="filter-select" onchange="this.form.submit()" 
+            style="padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; background: white;">
         <option value="">Semua Status</option>
-        <option value="pending">Pending</option>
-        <option value="confirmed">Dikonfirmasi</option>
-        <option value="completed">Selesai</option>
+        <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
+        <option value="confirmed" {% if request.GET.status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+        <option value="cancelled" {% if request.GET.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
     </select>
-</div>
+    {% if request.GET.search or request.GET.status %}
+        <a href="{% url 'homestays_admin:booking_list' %}" style="padding: 10px; color: #ef4444; text-decoration: none; font-size: 14px;">Reset</a>
+    {% endif %}
+</form>
 
-<!-- Booking Table -->
 <div class="data-table-wrapper">
     <table class="data-table">
         <thead>
             <tr>
-                <th>Kode</th>
                 <th>Tamu</th>
                 <th>Homestay</th>
                 <th>Check In - Out</th>
-                <th>Total</th>
-                <th>Status</th>
+                <th>Bukti Bayar</th>
+                <th>Catatan</th>
+                <th style="text-align: center;">Status</th>
                 <th>Aksi</th>
             </tr>
         </thead>
         <tbody>
             {% for booking in bookings %}
             <tr>
-                <td><strong>{{ booking.code }}</strong></td>
                 <td>
                     <div class="table-customer">
-                        <span class="name">{{ booking.guest_name }}</span>
-                        <span class="email">{{ booking.email }}</span>
+                        <strong>{{ booking.customer_name }}</strong><br>
+                        <small style="color: #6b7280;">{{ booking.email }}</small><br>
+                        <small style="color: #6b7280;">{{ booking.phone_number }}</small>
                     </div>
                 </td>
-                <td>{{ booking.homestay_name }}</td>
-                <td>{{ booking.check_in }} - {{ booking.check_out }}</td>
-                <td><strong>Rp {{ booking.total|floatformat:0 }}</strong></td>
+                <td>{{ booking.homestay.name }}</td>
                 <td>
-                    <span class="badge {% if booking.status == 'confirmed' %}badge-confirmed{% elif booking.status == 'pending' %}badge-pending{% else %}badge-completed{% endif %}">
-                        {{ booking.status_display }}
-                    </span>
+                    <div style="font-size: 13px;">
+                        {{ booking.check_in|date:"d M Y" }} - <br>
+                        {{ booking.check_out|date:"d M Y" }}
+                    </div>
                 </td>
                 <td>
-                    <a href="#" class="table-link"><i class="fas fa-eye"></i> Detail</a>
+                    {% if booking.payment_proof %}
+                        <a href="{{ booking.payment_proof.url }}" target="_blank" class="btn-sm" 
+                           style="text-decoration: none; background: #e0f2fe; color: #0369a1; padding: 5px 10px; border-radius: 6px; font-size: 12px;">
+                            <i class="fas fa-image"></i> Lihat Bukti
+                        </a>
+                    {% else %}
+                        <span style="color: #ef4444; font-size: 12px;"><i class="fas fa-times-circle"></i> No File</span>
+                    {% endif %}
+                </td>
+                <td><small title="{{ booking.notes }}">{{ booking.notes|default:"-"|truncatechars:15 }}</small></td>
+                
+                <td style="text-align: center;">
+                    {% if booking.status == 'confirmed' %}
+                        <span style="color: #16a34a; background: #f0fff4; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;" title="Confirmed">
+                            <i class="fas fa-check-circle"></i>
+                        </span>
+                    {% elif booking.status == 'pending' %}
+                        <span style="color: #f59e0b; background: #fffbeb; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;" title="Pending">
+                            <i class="fas fa-clock"></i>
+                        </span>
+                    {% else %}
+                        <span style="color: #ef4444; background: #fef2f2; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;" title="Cancelled">
+                            <i class="fas fa-times-circle"></i>
+                        </span>
+                    {% endif %}
+                </td>
+
+                <td>
+                    <form action="{% url 'homestays_admin:booking_update' booking.pk %}" method="POST" style="display: flex; gap: 5px;">
+                        {% csrf_token %}
+                        <select name="status" style="font-size: 11px; padding: 4px; border-radius: 6px; border: 1px solid #d1d5db;">
+                            <option value="pending" {% if booking.status == 'pending' %}selected{% endif %}>Pending</option>
+                            <option value="confirmed" {% if booking.status == 'confirmed' %}selected{% endif %}>Confirm</option>
+                            <option value="cancelled" {% if booking.status == 'cancelled' %}selected{% endif %}>Cancel</option>
+                        </select>
+                        <button type="submit" style="background: #16a34a; color: white; border: none; border-radius: 6px; width: 28px; height: 28px; cursor: pointer;">
+                            <i class="fas fa-save" style="font-size: 12px;"></i>
+                        </button>
+                    </form>
                 </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="7" style="text-align: center; color: #999; padding: 32px;">Belum ada pemesanan.</td>
+                <td colspan="7" style="text-align: center; color: #9ca3af; padding: 40px;">Data tidak ditemukan.</td>
             </tr>
             {% endfor %}
         </tbody>
