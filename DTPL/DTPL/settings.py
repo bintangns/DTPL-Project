@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     'homestays',
     'about',
     'adminpanel',
+    'dashboard',
+    'bookings',
 ]
 
 MIDDLEWARE = [

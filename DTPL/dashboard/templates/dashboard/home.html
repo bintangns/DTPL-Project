@@ -1,0 +1,147 @@
+{% extends "adminpanel/base.html" %}
+
+{% block title %}Dashboard — Admin Desa Manud Jaya{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Dashboard</h1>
+    <p>Ringkasan statistik Platform Wisata Desa Manud Jaya</p>
+</div>
+
+<!-- Stat Cards -->
+<div class="stats-row">
+    <div class="stat-card stat-green">
+        <div class="stat-icon">
+            <i class="fas fa-chart-line"></i>
+        </div>
+        <div class="stat-info">
+            <h3>{{ total_revenue_formatted }}</h3>
+            <p>Total Pendapatan</p>
+            <small>Seluruh →</small>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon icon-blue">
+            <i class="fas fa-home"></i>
+        </div>
+        <div class="stat-info">
+            <h3>{{ total_homestays }}</h3>
+            <p>Total Homestay</p>
+            <small>Kelola →</small>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon icon-orange">
+            <i class="fas fa-box-open"></i>
+        </div>
+        <div class="stat-info">
+            <h3>{{ total_products }}</h3>
+            <p>Total Produk</p>
+            <small>Kelola →</small>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon icon-purple">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-info">
+            <h3>{{ total_transactions }}</h3>
+            <p>Total Transaksi</p>
+            <small>{{ total_homestay_bookings }} Homestay, {{ total_product_orders }} Produk</small>
+        </div>
+    </div>
+</div>
+
+<!-- Status Sections -->
+<div class="dashboard-grid-2">
+    <!-- Homestay Booking Status -->
+    <div class="status-card">
+        <h3><i class="fas fa-calendar-check"></i> Status Pemesanan Homestay</h3>
+        <div class="status-row">
+            <span class="status-dot dot-yellow"></span>
+            <span>Pending</span>
+            <strong>{{ homestay_bookings_pending }}</strong>
+        </div>
+        <div class="status-row">
+            <span class="status-dot dot-green"></span>
+            <span>Dikonfirmasi</span>
+            <strong>{{ homestay_bookings_confirmed }}</strong>
+        </div>
+        <div class="status-row">
+            <span class="status-dot dot-blue"></span>
+            <span>Total</span>
+            <strong>{{ total_homestay_bookings }}</strong>
+        </div>
+        <a href="{% url 'homestays_admin:booking_list' %}" class="status-link">Lihat Semua Pemesanan →</a>
+    </div>
+
+    <!-- Product Order Status -->
+    <div class="status-card">
+        <h3><i class="fas fa-receipt"></i> Status Pemesanan Produk</h3>
+        <div class="status-row">
+            <span class="status-dot dot-yellow"></span>
+            <span>Pending</span>
+            <strong>{{ product_orders_pending }}</strong>
+        </div>
+        <div class="status-row">
+            <span class="status-dot dot-green"></span>
+            <span>Dikonfirmasi</span>
+            <strong>{{ product_orders_confirmed }}</strong>
+        </div>
+        <div class="status-row">
+            <span class="status-dot dot-blue"></span>
+            <span>Total</span>
+            <strong>{{ total_product_orders }}</strong>
+        </div>
+        <a href="{% url 'products_admin:order_list' %}" class="status-link">Lihat Semua Pesanan →</a>
+    </div>
+</div>
+
+<!-- Recent Orders -->
+<div class="dashboard-grid-2">
+    <!-- Recent Homestay Bookings -->
+    <div class="status-card">
+        <h3><i class="fas fa-bed"></i> Pemesanan Homestay Terbaru</h3>
+        {% for booking in recent_homestay_bookings %}
+        <div class="recent-order-item">
+            <div class="recent-order-info">
+                <p class="name">{{ booking.guest_name }}</p>
+                <p class="detail">{{ booking.homestay_name }}</p>
+            </div>
+            <div class="recent-order-right">
+                <span class="badge {% if booking.status == 'confirmed' %}badge-confirmed{% elif booking.status == 'pending' %}badge-pending{% else %}badge-completed{% endif %}">
+                    {{ booking.status_display }}
+                </span>
+                <span class="price">Rp {{ booking.total|floatformat:0 }}</span>
+            </div>
+        </div>
+        {% empty %}
+        <p style="color: #999; font-size: 0.88rem;">Belum ada pemesanan.</p>
+        {% endfor %}
+    </div>
+
+    <!-- Recent Product Orders -->
+    <div class="status-card">
+        <h3><i class="fas fa-shopping-bag"></i> Pemesanan Produk Terbaru</h3>
+        {% for order in recent_product_orders %}
+        <div class="recent-order-item">
+            <div class="recent-order-info">
+                <p class="name">{{ order.customer_name }}</p>
+                <p class="detail">{{ order.product.name }}</p>
+            </div>
+            <div class="recent-order-right">
+                <span class="badge {% if order.status == 'confirmed' %}badge-confirmed{% elif order.status == 'pending' %}badge-pending{% elif order.status == 'completed' %}badge-completed{% else %}badge-shipping{% endif %}">
+                    {{ order.get_status_display }}
+                </span>
+                <span class="price">Rp {{ order.product.price|floatformat:0 }}</span>
+            </div>
+        </div>
+        {% empty %}
+        <p style="color: #999; font-size: 0.88rem;">Belum ada pesanan.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

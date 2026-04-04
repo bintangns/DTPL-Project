@@ -1,0 +1,99 @@
+{% extends "adminpanel/base.html" %}
+
+{% block title %}Manajemen Homestay — Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-row">
+        <div>
+            <h1>Manajemen Homestay</h1>
+            <p>Kelola data homestay di Desa Manud Jaya</p>
+        </div>
+        <a href="#" class="admin-primary-btn" onclick="alert('Fitur ini sedang dikembangkan oleh developer lain.')">
+            <i class="fas fa-plus"></i> Tambah Homestay
+        </a>
+    </div>
+</div>
+
+<!-- Stat Cards -->
+<div class="stats-row">
+    <div class="stat-card">
+        <div class="stat-icon icon-blue">
+            <i class="fas fa-home"></i>
+        </div>
+        <div class="stat-info">
+            <h3>{{ total_homestays }}</h3>
+            <p>Total Homestay</p>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon icon-green">
+            <i class="fas fa-leaf"></i>
+        </div>
+        <div class="stat-info">
+            <h3>{{ eco_friendly_count }}</h3>
+            <p>Eco-Friendly</p>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon icon-orange">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-info">
+            <h3>{{ total_capacity }}</h3>
+            <p>Total Kapasitas</p>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon icon-purple">
+            <i class="fas fa-tag"></i>
+        </div>
+        <div class="stat-info">
+            <h3>{{ avg_price }}</h3>
+            <p>Rata-rata Harga</p>
+        </div>
+    </div>
+</div>
+
+<!-- Search -->
+<div class="search-filter-bar">
+    <div class="search-input-wrapper">
+        <i class="fas fa-search"></i>
+        <input type="text" class="search-input" placeholder="Cari nama homestay, pemilik, atau lokasi...">
+    </div>
+</div>
+
+<!-- Homestay Cards -->
+<div class="card-grid">
+    {% for homestay in homestays %}
+    <div class="admin-card">
+        <div class="admin-card-img">
+            <img src="{{ homestay.image_url }}" alt="{{ homestay.name }}">
+            {% if homestay.eco_friendly %}
+            <div class="admin-card-badge">
+                <span class="badge badge-eco">Eco-Friendly</span>
+            </div>
+            {% endif %}
+        </div>
+        <div class="admin-card-body">
+            <h3>{{ homestay.name }}</h3>
+            <p class="admin-card-owner"><i class="fas fa-user"></i> {{ homestay.owner }}</p>
+            <p>{{ homestay.description }}</p>
+            <div class="admin-card-meta">
+                <span><i class="fas fa-users"></i> {{ homestay.capacity }} orang</span>
+                <span><i class="fas fa-bed"></i> {{ homestay.bedrooms }} kamar</span>
+                <span><i class="fas fa-bath"></i> {{ homestay.bathrooms }} kamar mandi</span>
+            </div>
+            <p class="admin-card-price">Rp {{ homestay.price_per_night|floatformat:0 }} <small>/malam</small></p>
+            <div class="admin-card-actions">
+                <a href="#" class="btn-sm btn-edit" onclick="alert('Fitur sedang dikembangkan.')"><i class="fas fa-edit"></i> Edit</a>
+                <a href="#" class="btn-sm btn-delete" onclick="alert('Fitur sedang dikembangkan.')"><i class="fas fa-trash"></i> Hapus</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

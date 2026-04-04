@@ -134,6 +134,31 @@ img {
     color: var(--primary);
 }
 
+/* Admin Login Button in Navbar */
+.nav-admin-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    background: var(--primary);
+    color: var(--white) !important;
+    border-radius: 50px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.nav-admin-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(45, 106, 79, 0.3);
+}
+
+.nav-admin-btn i {
+    font-size: 0.78rem;
+}
+
 /* Hamburger */
 .nav-toggle {
     display: none;

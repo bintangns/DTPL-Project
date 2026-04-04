@@ -1,0 +1,82 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Dashboard — Desa Manud Jaya{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'adminpanel/css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="admin-body">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <div class="sidebar-logo-text">
+                    <span class="sidebar-logo-title">Admin Dashboard</span>
+                    <span class="sidebar-logo-subtitle">Desa Manud Jaya</span>
+                </div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="{% url 'dashboard:home' %}" class="sidebar-link {% if active_nav == 'dashboard' %}active{% endif %}">
+                <i class="fas fa-th-large"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{% url 'homestays_admin:list' %}" class="sidebar-link {% if active_nav == 'homestay' %}active{% endif %}">
+                <i class="fas fa-home"></i>
+                <span>Homestay</span>
+            </a>
+            <a href="{% url 'products_admin:list' %}" class="sidebar-link {% if active_nav == 'produk' %}active{% endif %}">
+                <i class="fas fa-box-open"></i>
+                <span>Produk Lokal</span>
+            </a>
+            <a href="{% url 'homestays_admin:booking_list' %}" class="sidebar-link {% if active_nav == 'pemesanan_homestay' %}active{% endif %}">
+                <i class="fas fa-calendar-check"></i>
+                <span>Pemesanan Homestay</span>
+            </a>
+            <a href="{% url 'products_admin:order_list' %}" class="sidebar-link {% if active_nav == 'pemesanan_produk' %}active{% endif %}">
+                <i class="fas fa-receipt"></i>
+                <span>Pemesanan Produk</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="admin-main-wrapper">
+        <!-- Top Header -->
+        <header class="admin-topbar">
+            <div class="topbar-left">
+                <!-- Placeholder for breadcrumb or page context -->
+            </div>
+            <div class="topbar-right">
+                <a href="{% url 'home:home' %}" class="topbar-link" target="_blank">
+                    <i class="fas fa-external-link-alt"></i> Lihat Website
+                </a>
+                <div class="topbar-divider"></div>
+                <div class="topbar-user">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Admin Pokdarwis Manud Jaya</span>
+                    <small>admin</small>
+                </div>
+                <a href="{% url 'adminpanel:logout' %}" class="topbar-logout">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="admin-content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>
