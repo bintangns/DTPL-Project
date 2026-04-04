@@ -1,263 +1,143 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar Produk Lokal</title>
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+{% extends 'base.html' %}
+{% load static %}
 
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f7f7f7;
-            color: #222;
-        }
+{% block title %}Produk Lokal — Desa Manud Jaya{% endblock %}
+{% block nav_home %}{% endblock %}
+{% block nav_produk %}active{% endblock %}
 
-        .container {
-            width: 90%;
-            max-width: 1200px;
-            margin: 40px auto;
-        }
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'products/css/style.css' %}">
+{% endblock %}
 
-        .page-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
+{% block content %}
+<!-- ===== HERO SECTION ===== -->
+<section class="product-hero" id="product-hero">
+    <div class="product-hero-content reveal-up">
+        <h1 class="product-hero-title">Produk Lokal</h1>
+        <p class="product-hero-desc">
+            Temukan berbagai produk olahan khas Desa Manud Jaya, mulai dari kopi
+            hingga cokelat, yang diproduksi oleh masyarakat lokal sebagai bagian
+            dari pengembangan ekonomi kreatif desa.
+        </p>
+    </div>
+</section>
 
-        .page-header h1 {
-            margin: 0 0 10px;
-            font-size: 36px;
-            color: #2f5d3a;
-        }
+<!-- ===== FILTER SECTION ===== -->
+<section class="product-filter-section">
+    <div class="product-filter-wrapper reveal-up">
+        <a href="{% url 'products:list' %}"
+           class="filter-btn {% if not selected_category %}active{% endif %}">
+            Semua
+        </a>
 
-        .page-header p {
-            margin: 0;
-            color: #666;
-            font-size: 16px;
-        }
-
-        .filter-menu {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 30px;
-        }
-
-        .filter-menu a {
-            display: inline-block;
-            padding: 10px 18px;
-            text-decoration: none;
-            background: #ffffff;
-            color: #2f5d3a;
-            border: 1px solid #d7e3d9;
-            border-radius: 999px;
-            font-weight: 600;
-            transition: all 0.2s ease;
-        }
-
-        .filter-menu a:hover {
-            background: #eaf4ec;
-            border-color: #b8d3be;
-        }
-
-        .filter-menu a.active {
-            background: #2f5d3a;
-            color: white;
-            border-color: #2f5d3a;
-        }
-
-        .product-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 24px;
-        }
-
-        .product-card {
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-        }
-
-        .product-card img {
-            width: 100%;
-            height: 190px;
-            object-fit: cover;
-            display: block;
-        }
-
-        .product-content {
-            padding: 18px;
-        }
-
-        .category-badge {
-            display: inline-block;
-            margin-bottom: 12px;
-            padding: 6px 12px;
-            background: #eef3ef;
-            color: #2f5d3a;
-            border-radius: 999px;
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .product-content h3 {
-            margin: 0 0 10px;
-            font-size: 20px;
-            line-height: 1.4;
-            color: #222;
-        }
-
-        .product-description {
-            margin: 0 0 14px;
-            color: #666;
-            font-size: 14px;
-            line-height: 1.6;
-            min-height: 45px;
-        }
-
-        .price {
-            margin: 0 0 10px;
-            font-size: 20px;
-            font-weight: bold;
-            color: #1f7a35;
-        }
-
-        .stock {
-            margin: 0 0 16px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .stock.available {
-            color: #2e7d32;
-        }
-
-        .stock.out-of-stock {
-            color: #c62828;
-        }
-
-        .detail-btn {
-            display: inline-block;
-            width: 100%;
-            padding: 12px 16px;
-            text-align: center;
-            background: #2f5d3a;
-            color: white;
-            text-decoration: none;
-            border-radius: 10px;
-            font-weight: 600;
-            transition: background 0.2s ease;
-        }
-
-        .detail-btn:hover {
-            background: #24492d;
-        }
-
-        .empty-message {
-            text-align: center;
-            padding: 50px 20px;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-        }
-
-        .empty-message h3 {
-            margin: 0 0 10px;
-            color: #2f5d3a;
-        }
-
-        .empty-message p {
-            margin: 0;
-            color: #666;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                width: 92%;
-                margin: 24px auto;
-            }
-
-            .page-header h1 {
-                font-size: 28px;
-            }
-
-            .page-header p {
-                font-size: 14px;
-            }
-
-            .product-card img {
-                height: 180px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="page-header">
-            <h1>Daftar Produk Lokal</h1>
-            <p>Temukan berbagai produk olahan kopi dan cokelat khas desa</p>
-        </div>
-
-        <div class="filter-menu">
-            <a href="{% url 'products:list' %}" class="{% if not selected_category %}active{% endif %}">
-                Semua
+        {% for category in categories %}
+            <a href="{% url 'products:list' %}?category={{ category.slug }}"
+               class="filter-btn {% if selected_category == category.slug %}active{% endif %}">
+                {{ category.name }}
             </a>
+        {% endfor %}
+    </div>
+</section>
 
-            {% for category in categories %}
-                <a href="{% url 'products:list' %}?category={{ category.value }}"
-                   class="{% if selected_category == category.value %}active{% endif %}">
-                    {{ category.label }}
-                </a>
+<!-- ===== PRODUCT CARDS GRID ===== -->
+<section class="product-grid-section">
+    {% if products %}
+        <div class="product-grid">
+            {% for product in products %}
+            <article class="product-card reveal-up" id="product-card-{{ product.slug }}">
+                <div class="product-card-img">
+                    {% if product.image_url %}
+                        <img src="{{ product.image_url }}" alt="{{ product.name }}" loading="lazy">
+                    {% else %}
+                        <img src="https://via.placeholder.com/500x300?text=Produk+Lokal" alt="{{ product.name }}" loading="lazy">
+                    {% endif %}
+
+                    <div class="product-card-badges">
+                        <span class="badge badge-category">{{ product.category.name }}</span>
+
+                        {% if product.stock > 0 %}
+                            <span class="badge badge-stock">Stok: {{ product.stock }}</span>
+                        {% else %}
+                            <span class="badge badge-stock-out">Habis</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="product-card-body">
+                    <h3 class="product-card-title">{{ product.name }}</h3>
+                    <p class="product-card-desc">{{ product.short_description|truncatewords:20 }}</p>
+
+                    <div class="product-card-meta">
+                        <span><i class="fas fa-tags"></i> {{ product.category.name }}</span>
+                        <span>
+                            <i class="fas fa-box"></i>
+                            {% if product.stock > 0 %}
+                                Tersedia
+                            {% else %}
+                                Kosong
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <div class="product-card-price">
+                        Rp {{ product.price }}
+                    </div>
+
+                    <a href="{% url 'products:detail' product.slug %}" class="product-card-link">
+                        Lihat Detail <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </article>
             {% endfor %}
         </div>
+    {% else %}
+        <div class="product-empty-card reveal-up">
+            <h3>Produk tidak ditemukan</h3>
+            <p>Belum ada produk yang tampil untuk kategori ini.</p>
+        </div>
+    {% endif %}
+</section>
 
-        {% if products %}
-            <div class="product-grid">
-                {% for product in products %}
-                    <div class="product-card">
-                        <img src="{{ product.image }}" alt="{{ product.name }}">
+<!-- ===== INFO SECTION ===== -->
+<section class="product-info-section">
+    <div class="product-info-card reveal-up">
+        <div class="info-header">
+            <div class="info-icon"><i class="fas fa-store"></i></div>
+            <h2>Produk UMKM Desa</h2>
+        </div>
 
-                        <div class="product-content">
-                            <span class="category-badge">{{ product.category_display }}</span>
+        <p class="info-desc">
+            Produk lokal Desa Manud Jaya merupakan hasil olahan masyarakat desa
+            yang dikembangkan untuk memperkuat ekonomi kreatif sekaligus
+            memperkenalkan potensi unggulan desa kepada wisatawan.
+        </p>
 
-                            <h3>{{ product.name }}</h3>
-
-                            <p class="product-description">
-                                {{ product.short_description }}
-                            </p>
-
-                            <p class="price">Rp {{ product.price }}</p>
-
-                            {% if product.stock > 0 %}
-                                <p class="stock available">Stok tersedia: {{ product.stock }}</p>
-                            {% else %}
-                                <p class="stock out-of-stock">Stok habis</p>
-                            {% endif %}
-
-                            <a class="detail-btn" href="{% url 'products:detail' product.slug %}">
-                                Lihat Detail
-                            </a>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="empty-message">
-                <h3>Produk tidak ditemukan</h3>
-                <p>Belum ada produk yang tampil untuk kategori ini.</p>
-            </div>
-        {% endif %}
+        <ul class="info-list">
+            <li><strong>Kopi Lokal:</strong> diolah dari biji kopi pilihan dengan cita rasa khas daerah</li>
+            <li><strong>Cokelat Lokal:</strong> dibuat dari hasil kakao lokal berkualitas</li>
+            <li><strong>Ekonomi Kreatif:</strong> mendukung pemberdayaan masyarakat desa secara langsung</li>
+        </ul>
     </div>
-</body>
-</html>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const items = document.querySelectorAll(".reveal-up");
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add("show");
+            }
+        });
+    }, { threshold: 0.12 });
+
+    items.forEach((item, index) => {
+        item.style.transitionDelay = `${index * 0.06}s`;
+        observer.observe(item);
+    });
+});
+</script>
+{% endblock %}
