@@ -1,60 +1,125 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>List Pesanan — Admin Produk</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'products/css/admin.css' %}">
-</head>
-<body class="admin-body">
+{% extends "adminpanel/base.html" %}
 
-    <nav class="admin-navbar">
-        <div class="admin-nav-container">
-            <a href="{% url 'adminpanel:home' %}" class="admin-logo">Manud Jaya Admin</a>
+{% block title %}Pemesanan Produk — Admin{% endblock %}
 
-            <ul class="admin-nav-links">
-                <li><a href="#">Destinasi</a></li>
-                <li><a href="#">Homestay</a></li>
-                <li><a href="{% url 'products_admin:list' %}">Produk Lokal</a></li>
-            </ul>
+{% block content %}
+<div class="page-header">
+    <h1>Pemesanan Produk</h1>
+    <p>Kelola semua pemesanan produk lokal</p>
+</div>
+
+<!-- Stat Cards -->
+<div class="stats-row">
+    <div class="stat-card">
+        <div class="stat-icon icon-blue">
+            <i class="fas fa-clipboard-list"></i>
         </div>
-    </nav>
+        <div class="stat-info">
+            <h3>{{ total_orders }}</h3>
+            <p>Total Pesanan</p>
+        </div>
+    </div>
 
-    <main class="admin-main">
-        <section class="admin-content-section">
-            <div class="admin-toolbar">
-                <div>
-                    <h2>List Pesanan</h2>
-                    <p>Daftar semua pesanan dari user.</p>
-                </div>
-                <div class="admin-toolbar-actions">
-                    <a href="{% url 'products_admin:list' %}" class="admin-secondary-btn">
-                        <i class="fas fa-arrow-left"></i> Kembali ke Produk
-                    </a>
-                </div>
-            </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #fef3c7; color: #d97706;">
+            <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-info">
+            <h3>{{ orders_pending }}</h3>
+            <p>Pending</p>
+        </div>
+    </div>
 
-            <div class="admin-empty-state">
-                <ul class="admin-category-list">
-                    {% for order in orders %}
-                        <li class="admin-category-item">
-                            <span>
-                                #{{ order.pk }} — {{ order.customer_name }} — {{ order.product.name }} — {{ order.get_status_display }}
-                            </span>
-                            <div class="admin-category-actions">
-                                <a href="{% url 'products_admin:order_detail' order.pk %}" class="btn-view">Detail</a>
-                            </div>
-                        </li>
-                    {% empty %}
-                        <li class="admin-category-empty">Belum ada pesanan.</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </section>
-    </main>
-</body>
-</html>
+    <div class="stat-card">
+        <div class="stat-icon icon-green">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-info">
+            <h3>{{ orders_confirmed }}</h3>
+            <p>Dikonfirmasi</p>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #dcfce7; color: #16a34a;">
+            <i class="fas fa-flag-checkered"></i>
+        </div>
+        <div class="stat-info">
+            <h3>{{ orders_completed }}</h3>
+            <p>Selesai</p>
+        </div>
+    </div>
+</div>
+
+<!-- Search -->
+<div class="search-filter-bar">
+    <div class="search-input-wrapper">
+        <i class="fas fa-search"></i>
+        <input type="text" class="search-input" placeholder="Cari nama, email, atau kode pesanan...">
+    </div>
+    <select class="filter-select">
+        <option value="">Semua Status</option>
+        <option value="pending">Pending</option>
+        <option value="confirmed">Dikonfirmasi</option>
+        <option value="completed">Selesai</option>
+    </select>
+</div>
+
+<!-- Order Table -->
+<div class="data-table-wrapper">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Kode</th>
+                <th>Pelanggan</th>
+                <th>Produk</th>
+                <th>Metode</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td><strong>PO-2026-{{ order.pk|stringformat:"03d" }}</strong></td>
+                <td>
+                    <div class="table-customer">
+                        <span class="name">{{ order.customer_name }}</span>
+                        <span class="email">{{ order.email }}</span>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-product">
+                        <span class="product-name">{{ order.product.name }}</span>
+                        <span class="product-qty">Qty: {{ order.quantity }}</span>
+                    </div>
+                </td>
+                <td>
+                    <div class="table-method">
+                        {% if order.fulfillment_method == 'pickup' %}
+                        <i class="fas fa-store"></i> Ambil
+                        {% else %}
+                        <i class="fas fa-truck"></i> Kirim
+                        {% endif %}
+                    </div>
+                </td>
+                <td><strong>Rp {{ order.product.price|floatformat:0 }}</strong></td>
+                <td>
+                    <span class="badge {% if order.status == 'confirmed' %}badge-confirmed{% elif order.status == 'pending' %}badge-pending{% elif order.status == 'completed' %}badge-completed{% elif order.status == 'shipping' %}badge-shipping{% else %}badge-cancelled{% endif %}">
+                        {{ order.get_status_display }}
+                    </span>
+                </td>
+                <td>
+                    <a href="{% url 'products_admin:order_detail' order.pk %}" class="table-link"><i class="fas fa-eye"></i> Detail</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align: center; color: #999; padding: 32px;">Belum ada pesanan.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

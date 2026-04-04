@@ -1,0 +1,112 @@
+{% extends "adminpanel/base.html" %}
+
+{% block title %}Pemesanan Homestay — Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Pemesanan Homestay</h1>
+    <p>Kelola semua pemesanan homestay</p>
+</div>
+
+<!-- Stat Cards -->
+<div class="stats-row">
+    <div class="stat-card">
+        <div class="stat-icon icon-blue">
+            <i class="fas fa-clipboard-list"></i>
+        </div>
+        <div class="stat-info">
+            <h3>{{ total_bookings }}</h3>
+            <p>Total Pemesanan</p>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #fef3c7; color: #d97706;">
+            <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-info">
+            <h3>{{ bookings_pending }}</h3>
+            <p>Pending</p>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon icon-green">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-info">
+            <h3>{{ bookings_confirmed }}</h3>
+            <p>Dikonfirmasi</p>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #dcfce7; color: #16a34a;">
+            <i class="fas fa-flag-checkered"></i>
+        </div>
+        <div class="stat-info">
+            <h3>{{ bookings_completed }}</h3>
+            <p>Selesai</p>
+        </div>
+    </div>
+</div>
+
+<!-- Search -->
+<div class="search-filter-bar">
+    <div class="search-input-wrapper">
+        <i class="fas fa-search"></i>
+        <input type="text" class="search-input" placeholder="Cari nama, email, atau kode pemesanan...">
+    </div>
+    <select class="filter-select">
+        <option value="">Semua Status</option>
+        <option value="pending">Pending</option>
+        <option value="confirmed">Dikonfirmasi</option>
+        <option value="completed">Selesai</option>
+    </select>
+</div>
+
+<!-- Booking Table -->
+<div class="data-table-wrapper">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Kode</th>
+                <th>Tamu</th>
+                <th>Homestay</th>
+                <th>Check In - Out</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in bookings %}
+            <tr>
+                <td><strong>{{ booking.code }}</strong></td>
+                <td>
+                    <div class="table-customer">
+                        <span class="name">{{ booking.guest_name }}</span>
+                        <span class="email">{{ booking.email }}</span>
+                    </div>
+                </td>
+                <td>{{ booking.homestay_name }}</td>
+                <td>{{ booking.check_in }} - {{ booking.check_out }}</td>
+                <td><strong>Rp {{ booking.total|floatformat:0 }}</strong></td>
+                <td>
+                    <span class="badge {% if booking.status == 'confirmed' %}badge-confirmed{% elif booking.status == 'pending' %}badge-pending{% else %}badge-completed{% endif %}">
+                        {{ booking.status_display }}
+                    </span>
+                </td>
+                <td>
+                    <a href="#" class="table-link"><i class="fas fa-eye"></i> Detail</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align: center; color: #999; padding: 32px;">Belum ada pemesanan.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

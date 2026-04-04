@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.db import models
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.shortcuts import render, redirect, get_object_or_404
@@ -134,12 +135,19 @@ def admin_product_list(request):
     if category_slug:
         products = products.filter(category__slug=category_slug)
 
-    categories = ProductCategory.objects.all()
+    categories = ProductCategory.objects.annotate(
+        product_count=models.Count('products')
+    ).all()
+    total_products = Product.objects.count()
+    total_stock = Product.objects.aggregate(total=models.Sum('stock'))['total'] or 0
 
     context = {
+        'active_nav': 'produk',
         'products': products,
         'categories': categories,
         'selected_category': category_slug,
+        'total_products': total_products,
+        'total_stock': total_stock,
     }
     return render(request, 'products/admin_dashboard.html', context)
 
@@ -157,6 +165,7 @@ def admin_product_create(request):
         form = ProductForm()
 
     return render(request, 'products/admin_product_form.html', {
+        'active_nav': 'produk',
         'form': form,
         'page_title': 'Tambah Produk',
         'submit_label': 'Simpan Produk',
@@ -178,6 +187,7 @@ def admin_product_edit(request, pk):
         form = ProductForm(instance=product)
 
     return render(request, 'products/admin_product_form.html', {
+        'active_nav': 'produk',
         'form': form,
         'page_title': 'Edit Produk',
         'submit_label': 'Update Produk',
@@ -195,6 +205,7 @@ def admin_product_delete(request, pk):
         return redirect('products_admin:list')
 
     return render(request, 'products/admin_product_delete.html', {
+        'active_nav': 'produk',
         'product': product,
     })
 
@@ -208,6 +219,7 @@ def admin_category_list(request):
 
     categories = ProductCategory.objects.all()
     return render(request, 'products/admin_category_list.html', {
+        'active_nav': 'produk',
         'categories': categories,
     })
 
@@ -225,6 +237,7 @@ def admin_category_create(request):
         form = ProductCategoryForm()
 
     return render(request, 'products/admin_category_form.html', {
+        'active_nav': 'produk',
         'form': form,
         'page_title': 'Tambah Category',
         'submit_label': 'Simpan Category',
@@ -246,6 +259,7 @@ def admin_category_edit(request, pk):
         form = ProductCategoryForm(instance=category)
 
     return render(request, 'products/admin_category_form.html', {
+        'active_nav': 'produk',
         'form': form,
         'page_title': 'Edit Category',
         'submit_label': 'Update Category',
@@ -263,6 +277,7 @@ def admin_category_delete(request, pk):
         return redirect('products_admin:category_list')
 
     return render(request, 'products/admin_category_delete.html', {
+        'active_nav': 'produk',
         'category': category,
     })
 
@@ -275,9 +290,18 @@ def admin_order_list(request):
         return redirect('adminpanel:login')
 
     orders = ProductOrder.objects.select_related('product').all()
+    total_orders = orders.count()
+    orders_pending = orders.filter(status=ProductOrder.STATUS_PENDING).count()
+    orders_confirmed = orders.filter(status=ProductOrder.STATUS_CONFIRMED).count()
+    orders_completed = orders.filter(status=ProductOrder.STATUS_COMPLETED).count()
 
     return render(request, 'products/admin_order_list.html', {
+        'active_nav': 'pemesanan_produk',
         'orders': orders,
+        'total_orders': total_orders,
+        'orders_pending': orders_pending,
+        'orders_confirmed': orders_confirmed,
+        'orders_completed': orders_completed,
     })
 
 
@@ -288,6 +312,7 @@ def admin_order_detail(request, pk):
     order = get_object_or_404(ProductOrder.objects.select_related('product'), pk=pk)
 
     return render(request, 'products/admin_order_detail.html', {
+        'active_nav': 'pemesanan_produk',
         'order': order,
     })
 

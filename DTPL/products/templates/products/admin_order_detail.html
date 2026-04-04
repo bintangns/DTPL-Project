@@ -1,120 +1,126 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detail Pesanan — Admin Produk</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'products/css/admin.css' %}">
-</head>
-<body class="admin-body">
+{% extends "adminpanel/base.html" %}
 
-    <nav class="admin-navbar">
-        <div class="admin-nav-container">
-            <a href="{% url 'adminpanel:home' %}" class="admin-logo">Manud Jaya Admin</a>
+{% block title %}Detail Pesanan — Admin{% endblock %}
 
-            <ul class="admin-nav-links">
-                <li><a href="#">Destinasi</a></li>
-                <li><a href="#">Homestay</a></li>
-                <li><a href="{% url 'products_admin:list' %}">Produk Lokal</a></li>
-            </ul>
+{% block content %}
+<div class="page-header">
+    <div class="page-header-row">
+        <div>
+            <h1>Detail Pesanan #{{ order.pk }}</h1>
+            <p>Detail pemesanan produk</p>
         </div>
-    </nav>
+        <a href="{% url 'products_admin:order_list' %}" class="admin-secondary-btn">
+            <i class="fas fa-arrow-left"></i> Kembali
+        </a>
+    </div>
+</div>
 
-    <main class="admin-main">
-        <section class="admin-content-section">
-            <div class="admin-form-card">
-                <h1>Detail Pesanan</h1>
+{% if messages %}
+<div class="messages-container">
+    {% for message in messages %}
+    <div class="message-alert {% if message.tags == 'success' %}message-success{% elif message.tags == 'warning' %}message-warning{% elif message.tags == 'error' %}message-error{% endif %}">
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
 
-                {% if messages %}
-                    <div style="margin-bottom: 20px;">
-                        {% for message in messages %}
-                            <div style="
-                                padding: 12px 16px;
-                                border-radius: 10px;
-                                margin-bottom: 10px;
-                                {% if message.tags == 'success' %}
-                                    background:#eaf8ee; color:#2f8f5b;
-                                {% elif message.tags == 'warning' %}
-                                    background:#fff8e6; color:#9a6b00;
-                                {% elif message.tags == 'error' %}
-                                    background:#fdeaea; color:#c0392b;
-                                {% else %}
-                                    background:#f4f4f4; color:#333;
-                                {% endif %}
-                            ">
-                                {{ message }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
+<div class="admin-form-card">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+        <div>
+            <p style="color: #999; font-size: 0.82rem; margin: 0 0 4px;">ID Pesanan</p>
+            <p style="font-weight: 600; margin: 0;">#{{ order.pk }}</p>
+        </div>
+        <div>
+            <p style="color: #999; font-size: 0.82rem; margin: 0 0 4px;">Produk</p>
+            <p style="font-weight: 600; margin: 0;">{{ order.product.name }}</p>
+        </div>
+        <div>
+            <p style="color: #999; font-size: 0.82rem; margin: 0 0 4px;">Nama Pelanggan</p>
+            <p style="font-weight: 600; margin: 0;">{{ order.customer_name }}</p>
+        </div>
+        <div>
+            <p style="color: #999; font-size: 0.82rem; margin: 0 0 4px;">Email</p>
+            <p style="font-weight: 600; margin: 0;">{{ order.email }}</p>
+        </div>
+        <div>
+            <p style="color: #999; font-size: 0.82rem; margin: 0 0 4px;">No. Telepon</p>
+            <p style="font-weight: 600; margin: 0;">{{ order.phone_number }}</p>
+        </div>
+        <div>
+            <p style="color: #999; font-size: 0.82rem; margin: 0 0 4px;">Jumlah</p>
+            <p style="font-weight: 600; margin: 0;">{{ order.quantity }}</p>
+        </div>
+        <div>
+            <p style="color: #999; font-size: 0.82rem; margin: 0 0 4px;">Metode Pesanan</p>
+            <p style="font-weight: 600; margin: 0;">{{ order.get_fulfillment_method_display }}</p>
+        </div>
+        <div>
+            <p style="color: #999; font-size: 0.82rem; margin: 0 0 4px;">Biaya Pengiriman</p>
+            <p style="font-weight: 600; margin: 0;">Rp {{ order.shipping_cost|default:0 }}</p>
+        </div>
+        <div style="grid-column: 1 / -1;">
+            <p style="color: #999; font-size: 0.82rem; margin: 0 0 4px;">Alamat</p>
+            <p style="font-weight: 600; margin: 0;">{{ order.address|default:"-" }}</p>
+        </div>
+        <div style="grid-column: 1 / -1;">
+            <p style="color: #999; font-size: 0.82rem; margin: 0 0 4px;">Catatan</p>
+            <p style="font-weight: 600; margin: 0;">{{ order.notes|default:"-" }}</p>
+        </div>
+    </div>
 
-                <p><strong>ID Pesanan:</strong> #{{ order.pk }}</p>
-                <p><strong>Produk:</strong> {{ order.product.name }}</p>
-                <p><strong>Nama:</strong> {{ order.customer_name }}</p>
-                <p><strong>Email:</strong> {{ order.email }}</p>
-                <p><strong>No. Telepon:</strong> {{ order.phone_number }}</p>
-                <p><strong>Jumlah:</strong> {{ order.quantity }}</p>
-                <p><strong>Alamat:</strong> {{ order.address }}</p>
-                <p><strong>Catatan:</strong> {{ order.notes|default:"-" }}</p>
-                <p><strong>Metode Pesanan:</strong> {{ order.get_fulfillment_method_display }}</p>
-                <p><strong>Biaya Pengiriman:</strong> Rp {{ order.shipping_cost|default:0 }}</p>
-                <p>
-                {% if order.payment_proof %}
-                    <p><strong>Bukti Pembayaran:</strong></p>
-                    <p>
-                        <a href="{{ order.payment_proof.url }}" target="_blank">Lihat Bukti Pembayaran</a>
-                    </p>
-                    <p>
-                        <img src="{{ order.payment_proof.url }}" alt="Bukti Pembayaran" style="max-width:300px; border-radius:12px;">
-                    </p>
-                {% endif %}
-                    <strong>Status:</strong>
-                    <span class="status-badge
-                        {% if order.status == 'pending' %}status-inactive
-                        {% elif order.status == 'confirmed' %}status-active
-                        {% elif order.status == 'shipping' %}status-active
-                        {% elif order.status == 'completed' %}status-active
-                        {% endif %}">
-                        {{ order.get_status_display }}
-                    </span>
-                </p>
+    {% if order.payment_proof %}
+    <div style="margin-bottom: 20px;">
+        <p style="color: #999; font-size: 0.82rem; margin: 0 0 8px;">Bukti Pembayaran</p>
+        <a href="{{ order.payment_proof.url }}" target="_blank">
+            <img src="{{ order.payment_proof.url }}" alt="Bukti Pembayaran" style="max-width: 300px; border-radius: 12px; border: 1px solid #e0e0e0;">
+        </a>
+    </div>
+    {% endif %}
 
-                <div class="admin-form-actions">
-                <a href="{% url 'products_admin:order_list' %}" class="btn-view">Kembali</a>
+    <div style="margin-bottom: 20px;">
+        <p style="color: #999; font-size: 0.82rem; margin: 0 0 4px;">Status</p>
+        <span class="badge {% if order.status == 'confirmed' %}badge-confirmed{% elif order.status == 'pending' %}badge-pending{% elif order.status == 'completed' %}badge-completed{% elif order.status == 'shipping' %}badge-shipping{% else %}badge-cancelled{% endif %}" style="font-size: 0.88rem; padding: 6px 14px;">
+            {{ order.get_status_display }}
+        </span>
+    </div>
 
-                {% if order.status == 'pending' %}
-                    <form method="post" action="{% url 'products_admin:order_confirm' order.pk %}" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn-edit">Konfirmasi</button>
-                    </form>
-                {% endif %}
+    <div class="admin-form-actions">
+        {% if order.status == 'pending' %}
+        <form method="post" action="{% url 'products_admin:order_confirm' order.pk %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="admin-primary-btn">
+                <i class="fas fa-check"></i> Konfirmasi
+            </button>
+        </form>
+        {% endif %}
 
-                {% if order.status == 'confirmed' and order.fulfillment_method == 'pickup' %}
-                    <form method="post" action="{% url 'products_admin:order_ready_pickup' order.pk %}" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="admin-primary-btn">Siap Diambil</button>
-                    </form>
-                {% endif %}
+        {% if order.status == 'confirmed' and order.fulfillment_method == 'pickup' %}
+        <form method="post" action="{% url 'products_admin:order_ready_pickup' order.pk %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="admin-primary-btn">
+                <i class="fas fa-box"></i> Siap Diambil
+            </button>
+        </form>
+        {% endif %}
 
-                {% if order.status == 'confirmed' and order.fulfillment_method == 'delivery' %}
-                    <form method="post" action="{% url 'products_admin:order_shipping' order.pk %}" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="admin-primary-btn">Sedang Diantar</button>
-                    </form>
-                {% endif %}
+        {% if order.status == 'confirmed' and order.fulfillment_method == 'delivery' %}
+        <form method="post" action="{% url 'products_admin:order_shipping' order.pk %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="admin-primary-btn">
+                <i class="fas fa-truck"></i> Sedang Diantar
+            </button>
+        </form>
+        {% endif %}
 
-                {% if order.status == 'ready_pickup' or order.status == 'shipping' %}
-                    <form method="post" action="{% url 'products_admin:order_complete' order.pk %}" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn-delete">Selesai</button>
-                    </form>
-                {% endif %}
-            </div>
-        </section>
-    </main>
-</body>
-</html>
+        {% if order.status == 'ready_pickup' or order.status == 'shipping' %}
+        <form method="post" action="{% url 'products_admin:order_complete' order.pk %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn-sm btn-edit">
+                <i class="fas fa-flag-checkered"></i> Selesai
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,123 +1,118 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Produk — Desa Manud Jaya</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'products/css/admin.css' %}">
-</head>
-<body class="admin-body">
+{% extends "adminpanel/base.html" %}
 
-    <nav class="admin-navbar">
-        <div class="admin-nav-container">
-            <a href="{% url 'adminpanel:home' %}" class="admin-logo">Manud Jaya Admin</a>
+{% block title %}Manajemen Produk — Admin{% endblock %}
 
-            <ul class="admin-nav-links">
-                <li><a href="#">Destinasi</a></li>
-                <li><a href="#">Homestay</a></li>
-                <li><a href="{% url 'products_admin:list' %}">Produk Lokal</a></li>
-            </ul>
+{% block content %}
+<div class="page-header">
+    <div class="page-header-row">
+        <div>
+            <h1>Manajemen Produk</h1>
+            <p>Kelola produk lokal kopi dan cokelat</p>
         </div>
-    </nav>
-
-    <main class="admin-main">
-        <section class="admin-hero">
-            <div class="admin-hero-content">
-                <h1>Admin Produk Lokal</h1>
-                <p>
-                    Kelola data produk lokal desa. Perubahan yang dilakukan di halaman admin
-                    akan langsung memengaruhi data produk pada halaman publik.
-                </p>
-            </div>
-        </section>
-
-        <section class="admin-content-section">
-            <div class="admin-toolbar">
-                <div>
-                    <h2>Manajemen Produk</h2>
-                    <p>Daftar produk lokal yang dapat dikelola oleh admin.</p>
-                </div>
-
-                <div class="admin-toolbar-actions">
-    <a href="{% url 'products_admin:create' %}" class="admin-primary-btn">
-        <i class="fas fa-plus"></i> Tambah Produk
-    </a>
-
-    <a href="{% url 'products_admin:category_list' %}" class="admin-secondary-btn">
-        <i class="fas fa-tags"></i> Kelola Category
-    </a>
-
-    <a href="{% url 'products_admin:order_list' %}" class="admin-secondary-btn">
-        <i class="fas fa-receipt"></i> List Pesanan
-    </a>
+        <div style="display: flex; gap: 10px;">
+            <a href="{% url 'products_admin:create' %}" class="admin-primary-btn">
+                <i class="fas fa-plus"></i> Tambah Produk
+            </a>
+        </div>
+    </div>
 </div>
-            </div>
 
-            <div class="admin-filter-row">
-                <a href="{% url 'products_admin:list' %}"
-                   class="admin-filter-btn {% if not selected_category %}active{% endif %}">
-                    Semua
-                </a>
+<!-- Stat Cards -->
+<div class="stats-row">
+    <div class="stat-card">
+        <div class="stat-icon icon-blue">
+            <i class="fas fa-box-open"></i>
+        </div>
+        <div class="stat-info">
+            <h3>{{ total_products }}</h3>
+            <p>Total Produk</p>
+        </div>
+    </div>
 
-                {% for category in categories %}
-                    <a href="{% url 'products_admin:list' %}?category={{ category.slug }}"
-                       class="admin-filter-btn {% if selected_category == category.slug %}active{% endif %}">
-                        {{ category.name }}
-                    </a>
-                {% endfor %}
-            </div>
+    {% for cat in categories %}
+    <div class="stat-card">
+        <div class="stat-icon icon-orange">
+            <i class="fas fa-tag"></i>
+        </div>
+        <div class="stat-info">
+            <h3>{{ cat.product_count }}</h3>
+            <p>Produk {{ cat.name }}</p>
+        </div>
+    </div>
+    {% endfor %}
 
-            {% if products %}
-                <div class="admin-product-grid">
-                    {% for product in products %}
-                        <article class="admin-product-card">
-                            <div class="admin-product-image">
-                                {% if product.image_url %}
-                                    <img src="{{ product.image_url }}" alt="{{ product.name }}">
-                                {% else %}
-                                    <img src="https://via.placeholder.com/500x300?text=Produk+Lokal" alt="{{ product.name }}">
-                                {% endif %}
-                            </div>
+    <div class="stat-card">
+        <div class="stat-icon icon-purple">
+            <i class="fas fa-warehouse"></i>
+        </div>
+        <div class="stat-info">
+            <h3>{{ total_stock }}</h3>
+            <p>Total Stok</p>
+        </div>
+    </div>
+</div>
 
-                            <div class="admin-product-body">
-                                <span class="admin-badge">{{ product.category.name }}</span>
+<!-- Search & Filter -->
+<div class="search-filter-bar">
+    <div class="search-input-wrapper">
+        <i class="fas fa-search"></i>
+        <input type="text" class="search-input" placeholder="Cari nama produk atau produsen...">
+    </div>
+    <select class="filter-select" onchange="if(this.value) window.location=this.value">
+        <option value="{% url 'products_admin:list' %}" {% if not selected_category %}selected{% endif %}>Semua Kategori</option>
+        {% for cat in categories %}
+        <option value="{% url 'products_admin:list' %}?category={{ cat.slug }}" {% if selected_category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
+        {% endfor %}
+    </select>
+</div>
 
-                                <h3>{{ product.name }}</h3>
-                                <p>{{ product.short_description }}</p>
+<!-- Filter Pills -->
+<div class="filter-pills">
+    <a href="{% url 'products_admin:list' %}" class="filter-pill {% if not selected_category %}active{% endif %}">Semua</a>
+    {% for cat in categories %}
+    <a href="{% url 'products_admin:list' %}?category={{ cat.slug }}" class="filter-pill {% if selected_category == cat.slug %}active{% endif %}">{{ cat.name }}</a>
+    {% endfor %}
+    <a href="{% url 'products_admin:category_list' %}" class="filter-pill" style="border-style: dashed;"><i class="fas fa-tags"></i> Kelola Kategori</a>
+</div>
 
-                                <div class="admin-product-meta">
-                                    <span>Rp {{ product.price }}</span>
-                                    <span>Stok: {{ product.stock }}</span>
-                                </div>
-
-                                <div class="admin-product-status">
-                                    {% if product.is_active %}
-                                        <span class="status-badge status-active">Aktif</span>
-                                    {% else %}
-                                        <span class="status-badge status-inactive">Nonaktif</span>
-                                    {% endif %}
-                                </div>
-
-                                <div class="admin-product-actions">
-                                    <a href="{% url 'products:detail' product.slug %}" class="btn-view">View</a>
-                                    <a href="{% url 'products_admin:edit' product.pk %}" class="btn-edit">Edit</a>
-                                    <a href="{% url 'products_admin:delete' product.pk %}" class="btn-delete">Delete</a>
-                                </div>
-                            </div>
-                        </article>
-                    {% endfor %}
-                </div>
+<!-- Product Cards -->
+{% if products %}
+<div class="card-grid">
+    {% for product in products %}
+    <div class="admin-card">
+        <div class="admin-card-img">
+            {% if product.image_url %}
+            <img src="{{ product.image_url }}" alt="{{ product.name }}">
             {% else %}
-                <div class="admin-empty-state">
-                    <h3>Produk tidak ditemukan</h3>
-                    <p>Belum ada produk untuk kategori ini.</p>
-                </div>
+            <img src="https://via.placeholder.com/500x300?text=Produk+Lokal" alt="{{ product.name }}">
             {% endif %}
-        </section>
-    </main>
-</body>
-</html>
+            <div class="admin-card-badge">
+                <span class="badge {% if product.category.slug == 'kopi' %}badge-kopi{% else %}badge-cokelat{% endif %}">
+                    {{ product.category.name }}
+                </span>
+            </div>
+            <span class="admin-card-stock">Stok: {{ product.stock }}</span>
+        </div>
+        <div class="admin-card-body">
+            <h3>{{ product.name }}</h3>
+            <p class="admin-card-owner"><i class="fas fa-store"></i> {{ product.short_description|truncatechars:40 }}</p>
+            <p>{{ product.description|truncatechars:80 }}</p>
+            <div class="admin-card-meta">
+                <span><i class="fas fa-weight-hanging"></i> {{ product.short_description|truncatechars:20 }}</span>
+            </div>
+            <p class="admin-card-price">Rp {{ product.price|floatformat:0 }}</p>
+            <div class="admin-card-actions">
+                <a href="{% url 'products_admin:edit' product.pk %}" class="btn-sm btn-edit"><i class="fas fa-edit"></i> Edit</a>
+                <a href="{% url 'products_admin:delete' product.pk %}" class="btn-sm btn-delete"><i class="fas fa-trash"></i> Hapus</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="admin-empty-state">
+    <h3>Produk tidak ditemukan</h3>
+    <p>Belum ada produk untuk kategori ini.</p>
+</div>
+{% endif %}
+{% endblock %}
