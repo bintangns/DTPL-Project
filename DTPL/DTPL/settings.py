@@ -32,6 +32,7 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     "localhost",
     "focused-expression-staging.up.railway.app",
+    "https://api.brevo.com/v3/smtp/email"
 ]
 
 
@@ -150,6 +151,10 @@ EMAIL_USE_SSL = False
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 
+
+
+BREVO_API_KEY = os.getenv("BREVO_API_KEY", "")
+
 DEFAULT_FROM_EMAIL = os.getenv(
     'DEFAULT_FROM_EMAIL',
     'Desa Manud Jaya <desamanudjaya5@gmail.com>'
@@ -158,3 +163,7 @@ SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://focused-expression-staging.up.railway.app",
+]
