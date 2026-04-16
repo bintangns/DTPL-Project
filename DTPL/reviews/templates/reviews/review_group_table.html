@@ -1,0 +1,55 @@
+<div style="background: white; border: 1px solid #e5e7eb; border-radius: 20px; margin-bottom: 20px; overflow: hidden;">
+    <div style="padding: 18px 22px; background: #f9fafb; border-bottom: 1px solid #e5e7eb;">
+        <strong style="font-size: 20px;">{{ item_name }}</strong>
+        <span style="margin-left: 10px; color: #6b7280;">({{ reviews|length }} review)</span>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead style="background: #ffffff;">
+                <tr>
+                    <th style="padding: 16px; text-align: left;">Nama</th>
+                    <th style="padding: 16px; text-align: left;">Email</th>
+                    <th style="padding: 16px; text-align: left;">Rating</th>
+                    <th style="padding: 16px; text-align: left;">Komentar</th>
+                    <th style="padding: 16px; text-align: left;">Status</th>
+                    <th style="padding: 16px; text-align: left;">Balasan</th>
+                    <th style="padding: 16px; text-align: left;">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for review in reviews %}
+                <tr style="border-top: 1px solid #e5e7eb;">
+                    <td style="padding: 16px;">{{ review.name }}</td>
+                    <td style="padding: 16px;">{{ review.email }}</td>
+                    <td style="padding: 16px;">{{ review.rating }}/5</td>
+                    <td style="padding: 16px; max-width: 280px;">{{ review.comment|truncatechars:80 }}</td>
+                    <td style="padding: 16px;">
+                        {% if review.is_approved %}
+                            <span style="color: #16a34a; font-weight: 600;">Approved</span>
+                        {% else %}
+                            <span style="color: #d97706; font-weight: 600;">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 16px;">
+                        {% if review.admin_reply %}
+                            {{ review.admin_reply|truncatechars:50 }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td style="padding: 16px;">
+                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                            {% if not review.is_approved %}
+                            <a href="{% url 'reviews:approve' review.id %}" style="background:#16a34a; color:white; padding:8px 12px; border-radius:10px; text-decoration:none;">Approve</a>
+                            {% endif %}
+                            <a href="{% url 'reviews:reply' review.id %}" style="background:#2563eb; color:white; padding:8px 12px; border-radius:10px; text-decoration:none;">Reply</a>
+                            <a href="{% url 'reviews:delete' review.id %}" onclick="return confirm('Yakin ingin menghapus review ini?')" style="background:#dc2626; color:white; padding:8px 12px; border-radius:10px; text-decoration:none;">Hapus</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

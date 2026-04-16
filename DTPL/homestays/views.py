@@ -5,7 +5,8 @@ from django.db.models import Q
 from django.utils import timezone
 from .models import Homestay, HomestayBooking
 from .forms import HomestayForm, PublicBookingForm
-
+from reviews.forms import ReviewForm
+from reviews.services import get_review_summary_for_instance
 # =========================
 # EMAIL HELPER
 # =========================
@@ -92,24 +93,28 @@ def homestay_list(request):
 
 def homestay_detail(request, slug):
     homestay = get_object_or_404(Homestay, slug=slug)
-    form = PublicBookingForm() # Form kosong untuk ditampilkan di page detail
+    form = PublicBookingForm()
 
-    # Ambil data tanggal yang sudah 'confirmed' untuk kalender merah
     booked_ranges = HomestayBooking.objects.filter(
-        homestay=homestay, 
+        homestay=homestay,
         status='confirmed',
         check_out__gte=timezone.now().date()
     ).values('check_in', 'check_out')
-    
+
     booked_dates_json = json.dumps([
-        {'from': b['check_in'].isoformat(), 'to': b['check_out'].isoformat()} 
+        {'from': b['check_in'].isoformat(), 'to': b['check_out'].isoformat()}
         for b in booked_ranges
     ])
 
     return render(request, "homestays/homestay_detail.html", {
-        "homestay": homestay, 
+        "homestay": homestay,
         "form": form,
-        "booked_dates_json": booked_dates_json
+        "booked_dates_json": booked_dates_json,
+        "review_form": ReviewForm(),
+        "review_summary": get_review_summary_for_instance(homestay),
+        "review_type": "homestay",
+        "object_slug": homestay.slug,
+        "object_name": homestay.name,
     })
 
 

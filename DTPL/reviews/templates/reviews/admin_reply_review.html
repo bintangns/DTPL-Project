@@ -1,0 +1,48 @@
+{% extends 'adminpanel/base.html' %}
+
+{% block title %}Balas Review{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 800px; margin: 40px auto;">
+    <h1 style="margin-bottom: 24px;">Balas Review</h1>
+
+        <div style="background: white; padding: 24px; border-radius: 20px; border: 1px solid #e5e7eb; margin-bottom: 20px;">
+        <p><strong>Nama:</strong> {{ review.name }}</p>
+        <p><strong>Email:</strong> {{ review.email }}</p>
+
+        <p>
+            <strong>Untuk:</strong>
+            <span style="text-transform: capitalize;">{{ review.content_type.model }}</span>
+            —
+            {% if review.content_object %}
+                {% if review.content_object.name %}
+                    {{ review.content_object.name }}
+                {% elif review.content_object.title %}
+                    {{ review.content_object.title }}
+                {% else %}
+                    {{ review.content_object }}
+                {% endif %}
+            {% else %}
+                Item tidak ditemukan
+            {% endif %}
+        </p>
+
+        <p><strong>Rating:</strong> {{ review.rating }}/5</p>
+        <p><strong>Komentar:</strong><br>{{ review.comment }}</p>
+    </div>
+
+    <form method="POST" style="background: white; padding: 24px; border-radius: 16px;">
+        {% csrf_token %}
+        <div style="margin-bottom: 16px;">
+            <label for="{{ form.admin_reply.id_for_label }}" style="display: block; font-weight: 600; margin-bottom: 8px;">
+                Balasan Admin
+            </label>
+            {{ form.admin_reply }}
+        </div>
+
+        <button type="submit" style="background: #16a34a; color: white; border: none; padding: 12px 20px; border-radius: 10px; cursor: pointer;">
+            Simpan Balasan
+        </button>
+    </form>
+</div>
+{% endblock %}

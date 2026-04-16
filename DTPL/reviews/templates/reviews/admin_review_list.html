@@ -1,0 +1,54 @@
+{% extends 'adminpanel/base.html' %}
+
+{% block title %}Kelola Review{% endblock %}
+{% block menu_reviews %}active{% endblock %}
+
+{% block content %}
+<div>
+    <div style="margin-bottom: 24px;">
+        <h1 style="margin: 0; font-size: 28px;">Kelola Review</h1>
+        <p style="margin: 8px 0 0; color: #6b7280;">
+            Review dikelompokkan berdasarkan kategori dan item.
+        </p>
+    </div>
+
+    <section style="margin-bottom: 40px;">
+        <h2 style="margin-bottom: 16px;">Produk Lokal</h2>
+        {% if grouped_products %}
+            {% for item_name, reviews in grouped_products.items %}
+                {% include 'reviews/review_group_table.html' with item_name=item_name reviews=reviews %}
+            {% endfor %}
+        {% else %}
+            <div style="background:white; padding:20px; border-radius:16px; border:1px solid #e5e7eb; color:#6b7280;">
+                Belum ada review untuk produk lokal.
+            </div>
+        {% endif %}
+    </section>
+
+    <section style="margin-bottom: 40px;">
+        <h2 style="margin-bottom: 16px;">Destinasi Wisata</h2>
+        {% if grouped_destinations %}
+            {% for item_name, reviews in grouped_destinations.items %}
+                {% include 'reviews/review_group_table.html' with item_name=item_name reviews=reviews %}
+            {% endfor %}
+        {% else %}
+            <div style="background:white; padding:20px; border-radius:16px; border:1px solid #e5e7eb; color:#6b7280;">
+                Belum ada review untuk destinasi wisata.
+            </div>
+        {% endif %}
+    </section>
+
+    <section>
+        <h2 style="margin-bottom: 16px;">Homestay</h2>
+        {% if grouped_homestays %}
+            {% for item_name, reviews in grouped_homestays.items %}
+                {% include 'reviews/review_group_table.html' with item_name=item_name reviews=reviews %}
+            {% endfor %}
+        {% else %}
+            <div style="background:white; padding:20px; border-radius:16px; border:1px solid #e5e7eb; color:#6b7280;">
+                Belum ada review untuk homestay.
+            </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

@@ -3,6 +3,8 @@ from django.db import models
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 import requests
+from reviews.forms import ReviewForm
+from reviews.services import get_review_summary_for_instance
 
 
 
@@ -108,7 +110,15 @@ def product_detail(request, slug):
         slug=slug,
         is_active=True
     )
-    return render(request, 'products/product_detail.html', {'product': product})
+    review_summary = get_review_summary_for_instance(product)
+    return render(request, 'products/product_detail.html', {
+        'product': product,
+        'review_form': ReviewForm(),
+        'review_summary': review_summary,
+        'review_type': 'product',
+        'object_slug': product.slug,
+        'object_name': product.name,
+    })
 
 
 def product_order_create(request, slug):

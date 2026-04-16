@@ -16,6 +16,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'home/css/style.css' %}">
     {% block extra_css %}{% endblock %}
+
+    <style>
+    .site-messages {max-width: 1200px; margin: 18px auto 0; padding: 0 20px;}
+    .site-message {padding: 14px 16px; border-radius: 12px; margin-bottom: 10px; font-size: 14px; font-weight: 500;}
+    .site-message.success {background: #ecfdf3; color: #166534; border: 1px solid #bbf7d0;}
+    .site-message.error {background: #fef2f2; color: #991b1b; border: 1px solid #fecaca;}
+    .site-message.warning {background: #fffbeb; color: #92400e; border: 1px solid #fde68a;}
+    .site-message.info {background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;}
+    </style>
 </head>
 
 <body>
@@ -50,6 +59,7 @@
             </ul>
         </div>
     </nav>
+
 
     <!-- Main Content -->
     <main>

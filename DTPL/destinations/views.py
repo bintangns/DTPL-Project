@@ -4,6 +4,8 @@ from django.http import Http404
 
 from .models import Destination, DestinationCategory
 from .forms import DestinationForm
+from reviews.forms import ReviewForm
+from reviews.services import get_review_summary_for_instance
 
 
 # =========================
@@ -19,13 +21,19 @@ def destination_list(request):
 
 
 def destination_detail(request, slug):
-    """Render a single destination detail page by slug."""
     destination = get_object_or_404(
         Destination.objects.select_related('category'),
         slug=slug,
         is_active=True,
     )
-    context = {'dest': destination}
+    context = {
+        'dest': destination,
+        'review_form': ReviewForm(),
+        'review_summary': get_review_summary_for_instance(destination),
+        'review_type': 'destination',
+        'object_slug': destination.slug,
+        'object_name': destination.name,
+    }
     return render(request, 'destinations/detail.html', context)
 
 
