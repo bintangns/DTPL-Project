@@ -1,0 +1,401 @@
+{% load review_extras %}
+
+<style>
+.review-section {
+    background: #fff;
+    border-radius: 24px;
+    padding: 28px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+.review-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.review-section-header h2 {
+    margin: 0;
+    font-size: 28px;
+    color: #1f2937;
+}
+
+.review-section-header p {
+    margin: 6px 0 0;
+    color: #6b7280;
+}
+
+.review-open-btn,
+.review-submit-btn {
+    background: #16a34a;
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 12px 22px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.review-summary-card {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 24px;
+    background: #f8fafc;
+    border-radius: 20px;
+    padding: 22px;
+    margin-bottom: 24px;
+}
+
+.review-summary-score {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.review-summary-score strong {
+    font-size: 48px;
+    line-height: 1;
+    color: #111827;
+}
+
+.review-summary-score span {
+    color: #6b7280;
+    margin-top: 8px;
+}
+
+.review-stars-display {
+    display: flex;
+    gap: 4px;
+    color: #f59e0b;
+    margin-top: 10px;
+    font-size: 24px;
+    line-height: 1;
+}
+
+.review-stars-display.is-small {
+    margin-top: 0;
+    font-size: 18px;
+}
+
+.review-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: center;
+}
+
+.review-breakdown-row {
+    display: grid;
+    grid-template-columns: 50px 1fr 36px;
+    gap: 12px;
+    align-items: center;
+    font-size: 14px;
+    color: #374151;
+}
+
+.review-bar-track {
+    height: 10px;
+    background: #e5e7eb;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.review-bar-fill {
+    height: 100%;
+    background: #f59e0b;
+    border-radius: 999px;
+}
+
+.review-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.review-item {
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    padding: 18px 20px;
+}
+
+.review-item-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.review-item-header h4 {
+    margin: 0 0 4px;
+    color: #111827;
+}
+
+.review-item-header small {
+    color: #6b7280;
+}
+
+.review-item p {
+    margin: 0;
+    color: #374151;
+    line-height: 1.7;
+}
+
+.review-empty-state {
+    border: 1px dashed #cbd5e1;
+    border-radius: 18px;
+    padding: 22px;
+    text-align: center;
+    color: #64748b;
+    background: #f8fafc;
+}
+
+.review-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.review-modal-card {
+    background: #fff;
+    width: 100%;
+    max-width: 560px;
+    border-radius: 24px;
+    padding: 28px;
+    position: relative;
+}
+
+.review-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: #64748b;
+}
+
+.review-modal-card h3 {
+    margin: 0 0 6px;
+    font-size: 24px;
+}
+
+.review-modal-subtitle {
+    margin: 0 0 20px;
+    color: #6b7280;
+}
+
+.review-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.review-form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.review-form-group input[type="text"],
+.review-form-group input[type="email"],
+.review-form-group textarea {
+    width: 100%;
+    border: 1px solid #d1d5db;
+    border-radius: 14px;
+    padding: 12px 14px;
+    font-family: inherit;
+}
+
+.star-rating-input {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.star-rating-input input {
+    display: none;
+}
+
+.star-rating-input label {
+    font-size: 30px;
+    color: #d1d5db;
+    cursor: pointer;
+    margin: 0;
+    line-height: 1;
+}
+
+.star-rating-input label:hover,
+.star-rating-input label:hover ~ label,
+.star-rating-input input:checked ~ label {
+    color: #f59e0b;
+}
+
+@media (max-width: 768px) {
+    .review-summary-card {
+        grid-template-columns: 1fr;
+    }
+
+    .review-item-header {
+        flex-direction: column;
+    }
+
+    .review-section {
+        padding: 20px;
+    }
+}
+</style>
+
+<section class="review-section">
+    <div class="review-section-header">
+        <div>
+            <h2>Ulasan Pengunjung</h2>
+            <p>Lihat penilaian dan pengalaman dari pengunjung lainnya.</p>
+        </div>
+        <button type="button" class="review-open-btn" onclick="openReviewModal()">
+            <i class="fas fa-star"></i> Ulasan
+        </button>
+    </div>
+
+    <div class="review-summary-card">
+        <div class="review-summary-score">
+            <strong>{{ review_summary.avg_rating|floatformat:1 }}</strong>
+            <div class="review-stars-display">
+                {% for _ in review_summary.avg_rating_int|star_range %}
+                    <i class="fas fa-star"></i>
+                {% endfor %}
+                {% for _ in review_summary.avg_rating_int|empty_star_range %}
+                    <i class="far fa-star"></i>
+                {% endfor %}
+            </div>
+            <span>{{ review_summary.total_reviews }} ulasan</span>
+        </div>
+
+        <div class="review-breakdown">
+            {% for star, total in review_summary.rating_breakdown.items %}
+            <div class="review-breakdown-row">
+                <span>{{ star }} <i class="fas fa-star"></i></span>
+                <div class="review-bar-track">
+                    <div class="review-bar-fill"
+                         style="width: {% if review_summary.total_reviews %}{% widthratio total review_summary.total_reviews 100 %}{% else %}0{% endif %}%;"></div>
+                </div>
+                <span>{{ total }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="review-list">
+        {% for review in review_summary.reviews %}
+        <div class="review-item">
+            <div class="review-item-header">
+                <div>
+                    <h4>{{ review.name }}</h4>
+                    <small>{{ review.created_at|date:"d M Y" }}</small>
+                </div>
+                <div class="review-stars-display is-small">
+                    {% for _ in review.rating|star_range %}
+                        <i class="fas fa-star"></i>
+                    {% endfor %}
+                    {% for _ in review.rating|empty_star_range %}
+                        <i class="far fa-star"></i>
+                    {% endfor %}
+                </div>
+            </div>
+            <p>{{ review.comment }}</p>
+
+{% if review.admin_reply %}
+<div style="margin-top: 14px; background: #f0fdf4; border-left: 4px solid #16a34a; padding: 12px 14px; border-radius: 10px;">
+    <strong style="display:block; margin-bottom:6px; color:#166534;">Balasan Admin</strong>
+    <p style="margin:0; color:#374151;">{{ review.admin_reply }}</p>
+</div>
+{% endif %}
+        </div>
+        {% empty %}
+        <div class="review-empty-state">
+            Belum ada ulasan. Jadilah yang pertama memberi rating.
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<div class="review-modal-overlay" id="reviewModalOverlay">
+    <div class="review-modal-card">
+        <button type="button" class="review-modal-close" onclick="closeReviewModal()">&times;</button>
+        <h3>Kirim Ulasan</h3>
+        <p class="review-modal-subtitle">Bagikan pengalaman Anda untuk {{ object_name }}.</p>
+
+        <form method="POST" action="{% url 'reviews:create' review_type object_slug %}" class="review-form">
+            {% csrf_token %}
+
+            <div class="review-form-group">
+                <label for="review_name">Nama</label>
+                <input type="text" id="review_name" name="name" required>
+            </div>
+
+            <div class="review-form-group">
+                <label for="review_email">Email</label>
+                <input type="email" id="review_email" name="email" required>
+            </div>
+
+            <div class="review-form-group">
+                <label>Rating</label>
+                <div class="star-rating-input">
+                    <input type="radio" id="star5" name="rating" value="5" required>
+                    <label for="star5" title="5 bintang"><i class="fas fa-star"></i></label>
+
+                    <input type="radio" id="star4" name="rating" value="4" required>
+                    <label for="star4" title="4 bintang"><i class="fas fa-star"></i></label>
+
+                    <input type="radio" id="star3" name="rating" value="3" required>
+                    <label for="star3" title="3 bintang"><i class="fas fa-star"></i></label>
+
+                    <input type="radio" id="star2" name="rating" value="2" required>
+                    <label for="star2" title="2 bintang"><i class="fas fa-star"></i></label>
+
+                    <input type="radio" id="star1" name="rating" value="1" required>
+                    <label for="star1" title="1 bintang"><i class="fas fa-star"></i></label>
+                </div>
+            </div>
+
+            <div class="review-form-group">
+                <label for="review_comment">Komentar</label>
+                <textarea id="review_comment" name="comment" rows="4" required></textarea>
+            </div>
+
+            <button type="submit" class="review-submit-btn">Kirim Ulasan</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function openReviewModal() {
+    const modal = document.getElementById('reviewModalOverlay');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeReviewModal() {
+    const modal = document.getElementById('reviewModalOverlay');
+    if (modal) modal.style.display = 'none';
+}
+
+window.addEventListener('click', function(event) {
+    const modal = document.getElementById('reviewModalOverlay');
+    if (event.target === modal) {
+        closeReviewModal();
+    }
+});
+</script>
