@@ -1,24 +1,43 @@
 {% extends "adminpanel/base.html" %}
+{% load static %}
 
 {% block title %}Hapus Pemandu — Admin{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'destinations/css/admin.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="page-header">
-    <h1>Hapus Pemandu Wisata</h1>
-</div>
-
-<div class="content-card" style="max-width:600px;">
-    <p style="margin-bottom:20px;">
-        Apakah Anda yakin ingin menghapus pemandu wisata <strong>{{ guide.name }}</strong>?
-        Tindakan ini tidak dapat dibatalkan.
-    </p>
-
-    <form method="POST">
-        {% csrf_token %}
-        <div style="display:flex;gap:12px;">
-            <button type="submit" class="btn-danger">Ya, Hapus</button>
-            <a href="{% url 'guide_admin:guide_list' %}" class="btn-secondary">Batal</a>
+<div class="dest-delete-page">
+    <div class="dest-delete-card">
+        <div class="delete-icon">
+            <i class="fas fa-exclamation-triangle"></i>
         </div>
-    </form>
+        <h2>Konfirmasi Hapus Pemandu</h2>
+        <p>Apakah Anda yakin ingin menghapus pemandu wisata berikut?</p>
+
+        <div class="delete-dest-info">
+            {% if guide.profile_picture %}
+            <img src="{{ guide.profile_picture.url }}" alt="{{ guide.name }}" class="delete-dest-img" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto 12px;display:block;">
+            {% endif %}
+            <h3>{{ guide.name }}</h3>
+            <p class="delete-dest-location"><i class="fas fa-globe"></i> {{ guide.get_category_display }} — {{ guide.languages }}</p>
+        </div>
+
+        <p class="delete-warning">
+            <i class="fas fa-info-circle"></i>
+            Tindakan ini <strong>tidak dapat dibatalkan</strong>. Semua data pemandu akan dihapus secara permanen.
+        </p>
+
+        <div class="delete-actions">
+            <a href="{% url 'guide_admin:guide_list' %}" class="btn-cancel">Batal</a>
+            <form method="POST" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn-confirm-delete">
+                    <i class="fas fa-trash-alt"></i> Hapus Pemandu
+                </button>
+            </form>
+        </div>
+    </div>
 </div>
 {% endblock %}

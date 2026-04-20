@@ -1,15 +1,43 @@
 {% extends "adminpanel/base.html" %}
+{% load static %}
+
 {% block title %}Hapus Paket — Admin{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'destinations/css/admin.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="page-header"><h1>Hapus Paket Wisata</h1></div>
-<div class="content-card" style="max-width:600px;">
-    <p style="margin-bottom:20px;">Apakah Anda yakin ingin menghapus paket <strong>{{ package.name }}</strong>?</p>
-    <form method="POST">
-        {% csrf_token %}
-        <div style="display:flex;gap:12px;">
-            <button type="submit" class="btn-danger">Ya, Hapus</button>
-            <a href="{% url 'guide_admin:package_list' %}" class="btn-secondary">Batal</a>
+<div class="dest-delete-page">
+    <div class="dest-delete-card">
+        <div class="delete-icon">
+            <i class="fas fa-exclamation-triangle"></i>
         </div>
-    </form>
+        <h2>Konfirmasi Hapus Paket Wisata</h2>
+        <p>Apakah Anda yakin ingin menghapus paket wisata berikut?</p>
+
+        <div class="delete-dest-info">
+            {% if package.image_url %}
+            <img src="{{ package.image_url }}" alt="{{ package.name }}" class="delete-dest-img">
+            {% endif %}
+            <h3>{{ package.name }}</h3>
+            <p class="delete-dest-location"><i class="fas fa-map-marker-alt"></i> {{ package.destination.name }}</p>
+        </div>
+
+        <p class="delete-warning">
+            <i class="fas fa-info-circle"></i>
+            Tindakan ini <strong>tidak dapat dibatalkan</strong>. Paket wisata dan semua data terkait akan dihapus secara permanen.
+        </p>
+
+        <div class="delete-actions">
+            <a href="{% url 'guide_admin:package_list' %}" class="btn-cancel">Batal</a>
+            <form method="POST" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn-confirm-delete">
+                    <i class="fas fa-trash-alt"></i> Hapus Paket
+                </button>
+            </form>
+        </div>
+    </div>
 </div>
 {% endblock %}

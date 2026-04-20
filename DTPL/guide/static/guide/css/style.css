@@ -2,15 +2,45 @@
    TOUR PACKAGES SECTION
    ========================= */
 .tour-packages-section {
-    margin-top: 40px;
-    padding-top: 30px;
-    border-top: 1px solid #e5e7eb;
+    background: #fff;
+    border-radius: 24px;
+    padding: 28px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+.tour-packages-section .section-header {
+    margin-bottom: 24px;
+}
+
+.tour-packages-section .section-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 8px;
+}
+
+.tour-packages-section .section-header p {
+    color: #666;
+    font-size: 14px;
+    margin: 0;
 }
 
 .packages-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 24px;
+}
+
+/* Dynamic column sizing: 1 item = 1 col, 2 items = 2 cols, 3+ items = 3 cols max */
+.packages-grid.grid-1 {
+    grid-template-columns: 1fr;
+}
+
+.packages-grid.grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.packages-grid.grid-3 {
+    grid-template-columns: repeat(3, 1fr);
 }
 
 .package-card {
@@ -151,9 +181,9 @@
 }
 
 /* =========================
-   BOOKING MODAL
+   BOOKING MODAL (homestays-compatible)
    ========================= */
-.pkg-modal-overlay {
+.modal-overlay {
     display: none;
     position: fixed;
     inset: 0;
@@ -164,73 +194,82 @@
     backdrop-filter: blur(4px);
 }
 
-.pkg-booking-modal {
+.booking-modal {
     background: white;
     width: 90%;
-    max-width: 520px;
+    max-width: 500px;
     max-height: 90vh;
     overflow-y: auto;
     padding: 30px;
-    border-radius: 16px;
+    border-radius: 15px;
     position: relative;
-    animation: modalFadeIn 0.3s ease;
+    animation: fadeInUp 0.4s ease;
 }
 
-@keyframes modalFadeIn {
+@keyframes fadeInUp {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-.pkg-close-modal {
+.close-modal {
     position: absolute;
     top: 15px;
     right: 20px;
-    font-size: 26px;
+    font-size: 24px;
     cursor: pointer;
     color: #666;
-    line-height: 1;
 }
 
-.pkg-close-modal:hover { color: #333; }
+.close-modal:hover { color: #333; }
 
-.pkg-modal-subtitle {
-    color: #666;
-    font-size: 13px;
-    margin-bottom: 20px;
+.modal-form-group {
+    margin-bottom: 15px;
 }
 
-.pkg-form-group {
-    margin-bottom: 16px;
-}
-
-.pkg-form-group label {
+.modal-form-group label {
     display: block;
-    margin-bottom: 6px;
+    margin-bottom: 5px;
     font-weight: 600;
-    font-size: 13px;
-    color: #333;
+    font-size: 14px;
 }
 
-.pkg-form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-}
-
-.form-control {
+.modal-form-group input,
+.modal-form-group textarea {
     width: 100%;
-    padding: 10px 12px;
+    padding: 10px;
     border: 1px solid #ddd;
     border-radius: 8px;
     font-size: 14px;
-    transition: border-color 0.2s;
     box-sizing: border-box;
 }
 
-.form-control:focus {
+.modal-form-group input:focus,
+.modal-form-group textarea:focus {
     outline: none;
     border-color: #16a34a;
     box-shadow: 0 0 0 3px rgba(22,163,74,0.1);
+}
+
+.booking-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.booking-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(22,163,74,0.3);
 }
 
 /* Tourist Category */
@@ -499,6 +538,25 @@
     color: #374151;
 }
 
+/* =========================
+   RESPONSIVE — TOUR PACKAGES
+   ========================= */
+@media (max-width: 1024px) {
+    .packages-grid.grid-3 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .packages-grid.grid-2,
+    .packages-grid.grid-3 {
+        grid-template-columns: 1fr;
+    }
+    .packages-grid.grid-1 {
+        max-width: 100%;
+    }
+}
+
 .btn-secondary:hover {
     background: #e5e7eb;
 }
@@ -519,7 +577,8 @@
     .packages-grid {
         grid-template-columns: 1fr;
     }
-    .pkg-form-row {
+    .pkg-form-row,
+    .modal-form-group[style*="grid"] {
         grid-template-columns: 1fr;
     }
     .guide-profile-info {

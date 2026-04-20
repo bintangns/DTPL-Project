@@ -2,12 +2,12 @@
 <!-- ===== PAKET WISATA SECTION ===== -->
 {% if tour_packages %}
 <section class="tour-packages-section">
-    <h2 class="detail-section-title"><i class="fas fa-ticket-alt"></i> Paket Wisata Tersedia</h2>
-    <p style="color: #666; margin-bottom: 24px; font-size: 14px;">
-        Pilih paket wisata yang sesuai dengan kebutuhan Anda. Harga sudah termasuk pemandu wisata berpengalaman.
-    </p>
+    <div class="section-header">
+        <h2><i class="fas fa-ticket-alt"></i> Paket Wisata Tersedia</h2>
+        <p>Pilih paket wisata yang sesuai dengan kebutuhan Anda. Harga sudah termasuk pemandu wisata berpengalaman.</p>
+    </div>
 
-    <div class="packages-grid">
+    <div class="packages-grid {% if tour_packages|length == 1 %}grid-1{% elif tour_packages|length == 2 %}grid-2{% else %}grid-3{% endif %}">
         {% for package in tour_packages %}
         <div class="package-card" id="package-{{ package.pk }}">
             {% if package.image_url %}
@@ -62,42 +62,42 @@
 </section>
 
 <!-- ===== BOOKING MODAL ===== -->
-<div class="pkg-modal-overlay" id="pkgModalOverlay">
-    <div class="pkg-booking-modal">
-        <span class="pkg-close-modal" id="pkgCloseModal">&times;</span>
+<div class="modal-overlay" id="pkgModalOverlay">
+    <div class="booking-modal">
+        <span class="close-modal" id="pkgCloseModal">&times;</span>
         <h3><i class="fas fa-ticket-alt"></i> Pemesanan Paket Wisata</h3>
-        <p class="pkg-modal-subtitle" id="pkgModalSubtitle">Paket wisata</p>
+        <p style="font-size: 13px; color: #666; margin-bottom: 20px;" id="pkgModalSubtitle">Paket wisata</p>
 
         <form id="pkgBookingForm" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
 
-            <div class="pkg-form-group">
+            <div class="modal-form-group">
                 <label>Nama Lengkap</label>
-                <input type="text" name="customer_name" required placeholder="Contoh: Bulan Santoso" class="form-control">
+                <input type="text" name="customer_name" required placeholder="Contoh: Bulan Santoso">
             </div>
 
-            <div class="pkg-form-group">
+            <div class="modal-form-group">
                 <label>Email</label>
-                <input type="email" name="email" required placeholder="email@example.com" class="form-control">
+                <input type="email" name="email" required placeholder="email@example.com">
             </div>
 
-            <div class="pkg-form-group">
+            <div class="modal-form-group">
                 <label>No. Telepon (WhatsApp)</label>
-                <input type="text" name="phone_number" required placeholder="0812..." class="form-control">
+                <input type="text" name="phone_number" required placeholder="0812...">
             </div>
 
-            <div class="pkg-form-row">
-                <div class="pkg-form-group">
+            <div class="modal-form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
                     <label>Tanggal Wisata</label>
-                    <input type="text" name="tour_date" id="pkg_tour_date" required readonly placeholder="Pilih tanggal" class="form-control">
+                    <input type="text" name="tour_date" id="pkg_tour_date" required readonly placeholder="Pilih tanggal">
                 </div>
-                <div class="pkg-form-group">
+                <div>
                     <label>Jam Mulai</label>
-                    <input type="time" name="start_time" required class="form-control" value="08:00">
+                    <input type="time" name="start_time" required value="08:00">
                 </div>
             </div>
 
-            <div class="pkg-form-group">
+            <div class="modal-form-group">
                 <label>Kategori Wisatawan</label>
                 <div class="tourist-category-options">
                     <label class="category-option">
@@ -111,9 +111,9 @@
                 </div>
             </div>
 
-            <div class="pkg-form-group">
+            <div class="modal-form-group">
                 <label>Jumlah Peserta</label>
-                <input type="number" name="num_participants" min="1" max="20" value="1" required class="form-control" onchange="updatePrice()" oninput="updatePrice()">
+                <input type="number" name="num_participants" min="1" max="20" value="1" required onchange="updatePrice()" oninput="updatePrice()">
             </div>
 
             <div class="price-preview" id="pricePreview">
@@ -121,17 +121,17 @@
                 <strong id="priceTotal">Rp 0</strong>
             </div>
 
-            <div class="pkg-form-group">
+            <div class="modal-form-group">
                 <label>Bukti Pembayaran (Image)</label>
-                <input type="file" name="payment_proof" accept="image/*" class="form-control">
+                <input type="file" name="payment_proof" accept="image/*">
             </div>
 
-            <div class="pkg-form-group">
+            <div class="modal-form-group">
                 <label>Catatan Tambahan</label>
-                <textarea name="notes" rows="2" placeholder="Ada permintaan khusus?" class="form-control"></textarea>
+                <textarea name="notes" rows="2" placeholder="Ada permintaan khusus?"></textarea>
             </div>
 
-            <button type="submit" class="package-book-btn" style="width:100%;">
+            <button type="submit" class="booking-btn">
                 <i class="fas fa-paper-plane"></i> Kirim Pesanan
             </button>
         </form>

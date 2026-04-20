@@ -1,120 +1,294 @@
 {% extends "adminpanel/base.html" %}
 
-{% block title %}Pemandu Wisata — Admin{% endblock %}
+{% block title %}Manajemen Pemandu Wisata — Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .guide-page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .guide-page-header .page-header {
+        margin-bottom: 0;
+    }
+    .guide-add-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 2px 8px rgba(22,163,74,0.2);
+    }
+    .guide-add-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px rgba(22,163,74,0.3);
+    }
+
+    /* Guide table rows */
+    .guide-name-cell {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .guide-avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+    .guide-avatar-placeholder {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+    .guide-name-info strong {
+        display: block;
+        font-size: 14px;
+        color: #1a1a1a;
+    }
+    .guide-name-info small {
+        color: #999;
+        font-size: 12px;
+    }
+    .specialization-badges {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+    }
+    .spec-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px;
+        height: 26px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+    .spec-badge.spec-1 { background: #fef3c7; color: #d97706; }
+    .spec-badge.spec-2 { background: #dbeafe; color: #2563eb; }
+    .spec-badge.spec-3 { background: #dcfce7; color: #16a34a; }
+    .spec-badge.spec-4 { background: #fce7f3; color: #db2777; }
+    .spec-badge.spec-5 { background: #f3e8ff; color: #7c3aed; }
+
+    .lang-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 500;
+        margin: 2px;
+    }
+    .lang-badge.lang-id { background: #dcfce7; color: #16a34a; }
+    .lang-badge.lang-en { background: #dbeafe; color: #2563eb; }
+    .lang-badge.lang-other { background: #fef3c7; color: #d97706; }
+
+    .guide-status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .status-available { background: #f0fdf4; color: #16a34a; }
+    .status-unavailable { background: #fef2f2; color: #dc2626; }
+    .status-dot-sm {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+    .status-dot-sm.dot-green { background: #22c55e; }
+    .status-dot-sm.dot-red { background: #ef4444; }
+
+    .guide-contact-info {
+        font-size: 13px;
+        color: #555;
+    }
+    .guide-contact-info i {
+        width: 14px;
+        color: #999;
+        margin-right: 4px;
+    }
+
+    .guide-action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 14px;
+        transition: all 0.2s;
+    }
+    .guide-action-btn.btn-edit {
+        background: #f0f9ff;
+        color: #0369a1;
+        border: 1px solid #bae6fd;
+    }
+    .guide-action-btn.btn-edit:hover {
+        background: #e0f2fe;
+    }
+    .guide-action-btn.btn-delete {
+        background: #fef2f2;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+    }
+    .guide-action-btn.btn-delete:hover {
+        background: #fee2e2;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <h1>Pemandu Wisata</h1>
-    <p>Kelola data pemandu wisata Desa Manud Jaya</p>
+<div class="guide-page-header">
+    <div class="page-header">
+        <h1>Manajemen Pemandu Wisata</h1>
+        <p>Kelola data pemandu wisata Karang Taruna Desa Manud Jaya</p>
+    </div>
+    <a href="{% url 'guide_admin:guide_create' %}" class="guide-add-btn">
+        <i class="fas fa-plus"></i> Tambah Pemandu
+    </a>
 </div>
 
 <div class="stats-row">
-    <div class="stat-card stat-green">
-        <div class="stat-icon"><i class="fas fa-users"></i></div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #f0f9ff; color: #3b82f6;"><i class="fas fa-users"></i></div>
         <div class="stat-info">
             <h3>{{ total_guides }}</h3>
             <p>Total Pemandu</p>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon icon-blue"><i class="fas fa-user"></i></div>
-        <div class="stat-info">
-            <h3>{{ total_local }}</h3>
-            <p>Pemandu Lokal</p>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon icon-orange"><i class="fas fa-globe"></i></div>
-        <div class="stat-info">
-            <h3>{{ total_international }}</h3>
-            <p>Pemandu Internasional</p>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon icon-purple"><i class="fas fa-check-circle"></i></div>
+        <div class="stat-icon icon-green"><i class="fas fa-user-check"></i></div>
         <div class="stat-info">
             <h3>{{ total_available }}</h3>
             <p>Tersedia</p>
         </div>
     </div>
-</div>
-
-<div class="content-card">
-    <div class="content-card-header">
-        <h3>Daftar Pemandu Wisata</h3>
-        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-            <form method="get" style="display:flex; gap:8px;">
-                <input type="text" name="q" value="{{ search_query }}" placeholder="Cari pemandu..." class="form-control" style="max-width:220px;">
-                <button type="submit" class="btn-sm btn-primary"><i class="fas fa-search"></i></button>
-            </form>
-            <a href="{% url 'guide_admin:guide_create' %}" class="btn-sm btn-primary">
-                <i class="fas fa-plus"></i> Tambah Pemandu
-            </a>
-            <a href="{% url 'guide_admin:package_list' %}" class="btn-sm" style="background:#f0f9ff;color:#0369a1;border:1px solid #bae6fd;padding:8px 16px;border-radius:8px;text-decoration:none;font-size:13px;">
-                <i class="fas fa-ticket-alt"></i> Kelola Paket Wisata
-            </a>
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #fef3c7; color: #d97706;"><i class="fas fa-globe-americas"></i></div>
+        <div class="stat-info">
+            <h3>{{ total_multilingual }}</h3>
+            <p>Multibahasa</p>
         </div>
     </div>
-
-    <div class="table-responsive">
-        <table class="admin-table">
-            <thead>
-                <tr>
-                    <th>Nama</th>
-                    <th>Kategori</th>
-                    <th>Bahasa</th>
-                    <th>Email</th>
-                    <th>Status</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for guide in guides %}
-                <tr>
-                    <td>
-                        <div style="display:flex;align-items:center;gap:10px;">
-                            {% if guide.profile_picture %}
-                            <img src="{{ guide.profile_picture.url }}" alt="" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">
-                            {% else %}
-                            <div style="width:36px;height:36px;border-radius:50%;background:#e2e8f0;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:14px;">
-                                <i class="fas fa-user"></i>
-                            </div>
-                            {% endif %}
-                            <div>
-                                <strong>{{ guide.name }}</strong>
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        <span class="badge {% if guide.category == 'internasional' %}badge-confirmed{% else %}badge-pending{% endif %}">
-                            {{ guide.get_category_display }}
-                        </span>
-                    </td>
-                    <td style="font-size:13px;">{{ guide.languages }}</td>
-                    <td style="font-size:13px;">{{ guide.email }}</td>
-                    <td>
-                        {% if guide.is_available %}
-                        <span class="badge badge-confirmed">Tersedia</span>
-                        {% else %}
-                        <span class="badge badge-cancelled">Tidak Tersedia</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <a href="{% url 'guide_admin:guide_edit' guide.pk %}" class="btn-sm" style="background:#f0f9ff;color:#0369a1;border:1px solid #bae6fd;padding:6px 12px;border-radius:6px;text-decoration:none;font-size:12px;">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <a href="{% url 'guide_admin:guide_delete' guide.pk %}" class="btn-sm" style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;padding:6px 12px;border-radius:6px;text-decoration:none;font-size:12px;">
-                            <i class="fas fa-trash"></i>
-                        </a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6" style="text-align:center;color:#999;padding:30px;">Belum ada pemandu wisata.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #fce7f3; color: #db2777;"><i class="fas fa-certificate"></i></div>
+        <div class="stat-info">
+            <h3>{{ total_available }}</h3>
+            <p>Bersertifikat</p>
+        </div>
     </div>
+</div>
+
+<div class="data-table-wrapper">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Pemandu</th>
+                <th>Spesialisasi</th>
+                <th>Bahasa</th>
+                <th>Pengalaman</th>
+                <th>Status</th>
+                <th>Kontak</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for guide in guides %}
+            <tr>
+                <td>
+                    <div class="guide-name-cell">
+                        {% if guide.profile_picture %}
+                        <img src="{{ guide.profile_picture.url }}" alt="{{ guide.name }}" class="guide-avatar">
+                        {% else %}
+                        <div class="guide-avatar-placeholder">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        {% endif %}
+                        <div class="guide-name-info">
+                            <strong>{{ guide.name }}</strong>
+                            <small>{{ guide.bio|truncatewords:5|default:"—" }}</small>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="specialization-badges">
+                        {% for lang in guide.languages_list %}
+                        <span class="spec-badge spec-{{ forloop.counter }}">{{ forloop.counter }}</span>
+                        {% endfor %}
+                    </div>
+                </td>
+                <td>
+                    {% for lang in guide.languages_list %}
+                    <span class="lang-badge {% if 'Indonesia' in lang or 'indonesia' in lang %}lang-id{% elif 'English' in lang or 'english' in lang %}lang-en{% else %}lang-other{% endif %}">{{ lang }}</span>
+                    {% endfor %}
+                </td>
+                <td style="font-size: 13px; color: #555;">
+                    {% if guide.bio %}{{ guide.bio|truncatewords:3 }}{% else %}—{% endif %}
+                </td>
+                <td>
+                    {% if guide.is_available %}
+                    <span class="guide-status-badge status-available">
+                        <span class="status-dot-sm dot-green"></span>
+                        {{ guide.get_category_display|title }}
+                    </span>
+                    {% else %}
+                    <span class="guide-status-badge status-unavailable">
+                        <span class="status-dot-sm dot-red"></span>
+                        Tidak Tersedia
+                    </span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="guide-contact-info">
+                        <div><i class="fas fa-phone"></i> {{ guide.phone_number }}</div>
+                    </div>
+                </td>
+                <td>
+                    <div style="display:flex;gap:6px;">
+                        <a href="{% url 'guide_admin:guide_edit' guide.pk %}" class="guide-action-btn btn-edit" title="Edit">
+                            <i class="fas fa-pen"></i>
+                        </a>
+                        <a href="{% url 'guide_admin:guide_delete' guide.pk %}" class="guide-action-btn btn-delete" title="Hapus">
+                            <i class="fas fa-trash-alt"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align:center;color:#999;padding:40px;">
+                    <i class="fas fa-user-slash" style="font-size:24px;margin-bottom:8px;display:block;color:#ddd;"></i>
+                    Belum ada pemandu wisata terdaftar.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}

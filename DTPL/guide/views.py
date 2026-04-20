@@ -164,6 +164,9 @@ def admin_guide_list(request):
     total_local = Guide.objects.filter(category=Guide.CATEGORY_LOCAL).count()
     total_international = Guide.objects.filter(category=Guide.CATEGORY_INTERNATIONAL).count()
     total_available = Guide.objects.filter(is_available=True).count()
+    # Count multilingual guides (those with more than 1 language)
+    all_guides = Guide.objects.all()
+    total_multilingual = sum(1 for g in all_guides if len(g.languages_list) > 1)
 
     return render(request, 'guide/admin_guide_list.html', {
         'active_nav': 'pemandu',
@@ -172,6 +175,7 @@ def admin_guide_list(request):
         'total_local': total_local,
         'total_international': total_international,
         'total_available': total_available,
+        'total_multilingual': total_multilingual,
         'search_query': query,
     })
 
@@ -246,10 +250,16 @@ def admin_package_list(request):
         return redirect('adminpanel:login')
 
     packages = TourPackage.objects.select_related('destination').all()
+    total_active = packages.filter(is_active=True).count()
+    total_inactive = packages.filter(is_active=False).count()
+    destinations_count = packages.values('destination').distinct().count()
     return render(request, 'guide/admin_package_list.html', {
         'active_nav': 'pemandu',
         'packages': packages,
         'total_packages': packages.count(),
+        'total_active': total_active,
+        'total_inactive': total_inactive,
+        'destinations_count': destinations_count,
     })
 
 
@@ -337,12 +347,20 @@ def admin_booking_list(request):
     if status_filter:
         bookings = bookings.filter(status=status_filter)
 
+    all_bookings = PackageBooking.objects.all()
+    from django.db.models import Sum
+    total_revenue = all_bookings.filter(
+        status__in=['confirmed', 'completed']
+    ).aggregate(total=Sum('total_price'))['total'] or 0
+
     return render(request, 'guide/admin_booking_list.html', {
         'active_nav': 'pemesanan_paket',
         'bookings': bookings,
-        'total_bookings': PackageBooking.objects.count(),
-        'bookings_pending': PackageBooking.objects.filter(status='pending').count(),
-        'bookings_confirmed': PackageBooking.objects.filter(status='confirmed').count(),
+        'total_bookings': all_bookings.count(),
+        'bookings_pending': all_bookings.filter(status='pending').count(),
+        'bookings_confirmed': all_bookings.filter(status='confirmed').count(),
+        'bookings_cancelled': all_bookings.filter(status='cancelled').count(),
+        'total_revenue': total_revenue,
     })
 
 

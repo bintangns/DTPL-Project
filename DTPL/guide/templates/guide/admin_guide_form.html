@@ -1,77 +1,110 @@
 {% extends "adminpanel/base.html" %}
+{% load static %}
 
 {% block title %}{{ page_title }} — Admin{% endblock %}
 
-{% block content %}
-<div class="page-header">
-    <h1>{{ page_title }}</h1>
-    <a href="{% url 'guide_admin:guide_list' %}" style="color:#16a34a;text-decoration:none;font-size:14px;">
-        <i class="fas fa-arrow-left"></i> Kembali ke Daftar
-    </a>
-</div>
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'destinations/css/admin.css' %}">
+{% endblock %}
 
-<div class="content-card">
-    <form method="POST" enctype="multipart/form-data">
+{% block content %}
+<div class="dest-form-page">
+    <div class="dest-form-header">
+        <h1>{{ page_title }}</h1>
+        <a href="{% url 'guide_admin:guide_list' %}" class="btn-back">
+            <i class="fas fa-times"></i>
+        </a>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" class="dest-form" novalidate>
         {% csrf_token %}
 
-        <div class="form-grid">
+        {% if form.errors %}
+        <div class="form-errors">
+            <p><strong>Terdapat kesalahan pada form:</strong></p>
+            <ul>
+                {% for field in form %}
+                    {% for error in field.errors %}
+                    <li>{{ field.label }}: {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- Row 1: Nama + Slug -->
+        <div class="form-row">
             <div class="form-group">
-                <label>{{ form.name.label }}</label>
+                <label for="{{ form.name.id_for_label }}">{{ form.name.label }} <span class="required">*</span></label>
                 {{ form.name }}
-                {% if form.name.errors %}<small class="form-error">{{ form.name.errors.0 }}</small>{% endif %}
             </div>
-
             <div class="form-group">
-                <label>{{ form.slug.label }}</label>
+                <label for="{{ form.slug.id_for_label }}">{{ form.slug.label }}</label>
                 {{ form.slug }}
+                <small class="form-help">Kosongkan untuk auto-generate dari nama</small>
             </div>
+        </div>
 
+        <!-- Row 2: Kategori + Bahasa -->
+        <div class="form-row">
             <div class="form-group">
-                <label>{{ form.category.label }}</label>
+                <label for="{{ form.category.id_for_label }}">{{ form.category.label }} <span class="required">*</span></label>
                 {{ form.category }}
             </div>
-
             <div class="form-group">
-                <label>{{ form.languages.label }}</label>
+                <label for="{{ form.languages.id_for_label }}">{{ form.languages.label }} <span class="required">*</span></label>
                 {{ form.languages }}
+                <small class="form-help">Pisahkan dengan koma, contoh: Indonesia, English, Japanese</small>
             </div>
+        </div>
 
+        <!-- Row 3: Telepon + Email -->
+        <div class="form-row">
             <div class="form-group">
-                <label>{{ form.phone_number.label }}</label>
+                <label for="{{ form.phone_number.id_for_label }}">{{ form.phone_number.label }} <span class="required">*</span></label>
                 {{ form.phone_number }}
             </div>
-
             <div class="form-group">
-                <label>{{ form.email.label }}</label>
+                <label for="{{ form.email.id_for_label }}">{{ form.email.label }} <span class="required">*</span></label>
                 {{ form.email }}
             </div>
         </div>
 
-        <div class="form-group" style="margin-top:16px;">
-            <label>{{ form.bio.label }}</label>
+        <!-- Bio -->
+        <div class="form-group full-width">
+            <label for="{{ form.bio.id_for_label }}">{{ form.bio.label }}</label>
             {{ form.bio }}
         </div>
 
-        <div class="form-group" style="margin-top:16px;">
-            <label>{{ form.profile_picture.label }}</label>
+        <!-- Foto Profil -->
+        <div class="form-group full-width">
+            <label for="{{ form.profile_picture.id_for_label }}">{{ form.profile_picture.label }}</label>
             {% if guide and guide.profile_picture %}
-            <div style="margin-bottom:8px;">
-                <img src="{{ guide.profile_picture.url }}" alt="" style="width:80px;height:80px;border-radius:12px;object-fit:cover;">
+            <div class="image-preview">
+                <img src="{{ guide.profile_picture.url }}" alt="{{ guide.name }}">
             </div>
             {% endif %}
             {{ form.profile_picture }}
+            <small class="form-help">Upload foto profil pemandu (JPG/PNG)</small>
         </div>
 
-        <div class="form-group" style="margin-top:16px;">
-            <label style="display:flex;align-items:center;gap:8px;">
+        <!-- Status Tersedia -->
+        <div class="form-group full-width form-check-group">
+            <label class="form-check-label">
                 {{ form.is_available }}
-                {{ form.is_available.label }}
+                <span><i class="fas fa-check-circle"></i> {{ form.is_available.label }}</span>
             </label>
         </div>
 
-        <div style="margin-top:24px;display:flex;gap:12px;">
-            <button type="submit" class="btn-primary">{{ submit_label }}</button>
-            <a href="{% url 'guide_admin:guide_list' %}" class="btn-secondary">Batal</a>
+        <!-- Actions -->
+        <div class="form-actions">
+            <a href="{% url 'guide_admin:guide_list' %}" class="btn-cancel">Batal</a>
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-save"></i> {{ submit_label }}
+            </button>
         </div>
     </form>
 </div>

@@ -108,7 +108,7 @@ def get_gemini_response(user_message):
     )
 
     response = client.models.generate_content(
-        model='gemini-2.0-flash',
+        model='gemini-2.5-flash',
         contents=user_message,
         config={
             'system_instruction': system_instruction,
