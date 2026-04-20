@@ -15,9 +15,11 @@ urlpatterns = [
     path('admin/products/', include('products.admin_urls')),
     path('admin/destinations/', include('destinations.admin_urls')),
     path('admin/homestays/', include('homestays.admin_urls')),
+    path('admin/guide/', include('guide.admin_urls')),
 
     path('', include('home.urls')),
     path('destinasi/', include('destinations.urls')),
+    path('paket-wisata/', include('guide.urls')),
     path('products/', include('products.urls')),
     path('homestays/', include('homestays.urls')),
     path('about/', include('about.urls')),

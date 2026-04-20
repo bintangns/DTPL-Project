@@ -49,7 +49,20 @@
         <div class="stat-info">
             <h3>{{ total_transactions }}</h3>
             <p>Total Transaksi</p>
-            <small>{{ total_homestay_bookings }} Homestay, {{ total_product_orders }} Produk</small>
+            <small>{{ total_homestay_bookings }} Homestay, {{ total_product_orders }} Produk, {{ total_package_bookings }} Paket</small>
+        </div>
+    </div>
+</div>
+
+<div class="stats-row" style="margin-top:0;">
+    <div class="stat-card">
+        <div class="stat-icon" style="background:#fdf4ff;color:#a855f7;">
+            <i class="fas fa-user-tie"></i>
+        </div>
+        <div class="stat-info">
+            <h3>{{ total_guides }}</h3>
+            <p>Pemandu Tersedia</p>
+            <small><a href="{% url 'guide_admin:guide_list' %}" style="color:#a855f7;">Kelola Pemandu →</a></small>
         </div>
     </div>
 </div>
@@ -98,6 +111,26 @@
 
 <div class="dashboard-grid-2">
     <div class="status-card">
+        <h3><i class="fas fa-ticket-alt"></i> Status Pemesanan Paket Wisata</h3>
+        <div class="status-row">
+            <span class="status-dot dot-yellow"></span>
+            <span>Pending</span>
+            <strong>{{ package_bookings_pending }}</strong>
+        </div>
+        <div class="status-row">
+            <span class="status-dot dot-green"></span>
+            <span>Dikonfirmasi</span>
+            <strong>{{ package_bookings_confirmed }}</strong>
+        </div>
+        <div class="status-row">
+            <span class="status-dot dot-blue"></span>
+            <span>Total Pemesanan Paket</span>
+            <strong>{{ total_package_bookings }}</strong>
+        </div>
+        <a href="{% url 'guide_admin:booking_list' %}" class="status-link">Lihat Semua Pesanan →</a>
+    </div>
+
+    <div class="status-card">
         <h3><i class="fas fa-bed"></i> Pemesanan Homestay Terbaru</h3>
         {% for booking in recent_homestay_bookings %}
         <div class="recent-order-item">
@@ -120,7 +153,9 @@
         <p style="color: #999; font-size: 0.88rem;">Belum ada pemesanan homestay di database.</p>
         {% endfor %}
     </div>
+</div>
 
+<div class="dashboard-grid-2">
     <div class="status-card">
         <h3><i class="fas fa-shopping-bag"></i> Pemesanan Produk Terbaru</h3>
         {% for order in recent_product_orders %}
@@ -142,6 +177,30 @@
         </div>
         {% empty %}
         <p style="color: #999; font-size: 0.88rem;">Belum ada pesanan produk di database.</p>
+        {% endfor %}
+    </div>
+
+    <div class="status-card">
+        <h3><i class="fas fa-ticket-alt"></i> Pemesanan Paket Terbaru</h3>
+        {% for booking in recent_package_bookings %}
+        <div class="recent-order-item">
+            <div class="recent-order-info">
+                <p class="name">{{ booking.customer_name }}</p>
+                <p class="detail">{{ booking.tour_package.name }}{% if booking.guide %} — {{ booking.guide.name }}{% endif %}</p>
+            </div>
+            <div class="recent-order-right">
+                <span class="badge {% if booking.status == 'confirmed' %}badge-confirmed{% elif booking.status == 'pending' %}badge-pending{% else %}badge-completed{% endif %}">
+                    {{ booking.get_status_display }}
+                </span>
+                <span class="price">
+                    {% with harga=booking.total_price|floatformat:0 %}
+                        Rp {% if harga|length == 7 %}{{ harga|slice:":1" }}.{{ harga|slice:"1:4" }}.{{ harga|slice:"4:" }}{% elif harga|length == 6 %}{{ harga|slice:":3" }}.{{ harga|slice:"3:" }}{% else %}{{ harga }}{% endif %}
+                    {% endwith %}
+                </span>
+            </div>
+        </div>
+        {% empty %}
+        <p style="color: #999; font-size: 0.88rem;">Belum ada pemesanan paket wisata.</p>
         {% endfor %}
     </div>
 </div>

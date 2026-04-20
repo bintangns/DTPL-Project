@@ -1,0 +1,190 @@
+{% load static %}
+<!-- ===== PAKET WISATA SECTION ===== -->
+{% if tour_packages %}
+<section class="tour-packages-section">
+    <div class="section-header">
+        <h2><i class="fas fa-ticket-alt"></i> Paket Wisata Tersedia</h2>
+        <p>Pilih paket wisata yang sesuai dengan kebutuhan Anda. Harga sudah termasuk pemandu wisata berpengalaman.</p>
+    </div>
+
+    <div class="packages-grid {% if tour_packages|length == 1 %}grid-1{% elif tour_packages|length == 2 %}grid-2{% else %}grid-3{% endif %}">
+        {% for package in tour_packages %}
+        <div class="package-card" id="package-{{ package.pk }}">
+            {% if package.image_url %}
+            <div class="package-image">
+                <img src="{{ package.image_url }}" alt="{{ package.name }}">
+                <span class="package-duration"><i class="fas fa-clock"></i> {{ package.duration }}</span>
+            </div>
+            {% endif %}
+            <div class="package-body">
+                <h3 class="package-name">{{ package.name }}</h3>
+                <p class="package-desc">{{ package.description|truncatewords:25 }}</p>
+
+                {% if package.itinerary %}
+                <div class="package-itinerary">
+                    <strong><i class="fas fa-route"></i> Itinerary:</strong>
+                    <p>{{ package.itinerary|truncatewords:20 }}</p>
+                </div>
+                {% endif %}
+
+                <div class="package-prices">
+                    <div class="price-item">
+                        <span class="price-label"><i class="fas fa-user"></i> Lokal</span>
+                        <span class="price-value">
+                            {% with harga=package.price_local|floatformat:0 %}
+                                {% if harga|length == 7 %}Rp {{ harga|slice:":1" }}.{{ harga|slice:"1:4" }}.{{ harga|slice:"4:" }}
+                                {% elif harga|length == 6 %}Rp {{ harga|slice:":3" }}.{{ harga|slice:"3:" }}
+                                {% else %}Rp {{ harga }}{% endif %}
+                            {% endwith %}
+                        </span>
+                    </div>
+                    <div class="price-item">
+                        <span class="price-label"><i class="fas fa-globe"></i> Mancanegara</span>
+                        <span class="price-value price-intl">
+                            {% with harga=package.price_international|floatformat:0 %}
+                                {% if harga|length == 7 %}Rp {{ harga|slice:":1" }}.{{ harga|slice:"1:4" }}.{{ harga|slice:"4:" }}
+                                {% elif harga|length == 6 %}Rp {{ harga|slice:":3" }}.{{ harga|slice:"3:" }}
+                                {% else %}Rp {{ harga }}{% endif %}
+                            {% endwith %}
+                        </span>
+                    </div>
+                </div>
+
+                <p class="package-participants"><i class="fas fa-users"></i> Maks. {{ package.max_participants }} peserta</p>
+
+                <button type="button" class="package-book-btn" onclick="openBookingModal('{{ package.slug }}', '{{ package.name }}', '{{ package.price_local }}', '{{ package.price_international }}')">
+                    <i class="fas fa-shopping-cart"></i> Pesan Paket
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- ===== BOOKING MODAL ===== -->
+<div class="modal-overlay" id="pkgModalOverlay">
+    <div class="booking-modal">
+        <span class="close-modal" id="pkgCloseModal">&times;</span>
+        <h3><i class="fas fa-ticket-alt"></i> Pemesanan Paket Wisata</h3>
+        <p style="font-size: 13px; color: #666; margin-bottom: 20px;" id="pkgModalSubtitle">Paket wisata</p>
+
+        <form id="pkgBookingForm" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="modal-form-group">
+                <label>Nama Lengkap</label>
+                <input type="text" name="customer_name" required placeholder="Contoh: Bulan Santoso">
+            </div>
+
+            <div class="modal-form-group">
+                <label>Email</label>
+                <input type="email" name="email" required placeholder="email@example.com">
+            </div>
+
+            <div class="modal-form-group">
+                <label>No. Telepon (WhatsApp)</label>
+                <input type="text" name="phone_number" required placeholder="0812...">
+            </div>
+
+            <div class="modal-form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label>Tanggal Wisata</label>
+                    <input type="text" name="tour_date" id="pkg_tour_date" required readonly placeholder="Pilih tanggal">
+                </div>
+                <div>
+                    <label>Jam Mulai</label>
+                    <input type="time" name="start_time" required value="08:00">
+                </div>
+            </div>
+
+            <div class="modal-form-group">
+                <label>Kategori Wisatawan</label>
+                <div class="tourist-category-options">
+                    <label class="category-option">
+                        <input type="radio" name="tourist_category" value="lokal" checked onchange="updatePrice()">
+                        <span class="category-label"><i class="fas fa-user"></i> Lokal</span>
+                    </label>
+                    <label class="category-option">
+                        <input type="radio" name="tourist_category" value="mancanegara" onchange="updatePrice()">
+                        <span class="category-label"><i class="fas fa-globe"></i> Mancanegara</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="modal-form-group">
+                <label>Jumlah Peserta</label>
+                <input type="number" name="num_participants" min="1" max="20" value="1" required onchange="updatePrice()" oninput="updatePrice()">
+            </div>
+
+            <div class="price-preview" id="pricePreview">
+                <span>Estimasi Total:</span>
+                <strong id="priceTotal">Rp 0</strong>
+            </div>
+
+            <div class="modal-form-group">
+                <label>Bukti Pembayaran (Image)</label>
+                <input type="file" name="payment_proof" accept="image/*">
+            </div>
+
+            <div class="modal-form-group">
+                <label>Catatan Tambahan</label>
+                <textarea name="notes" rows="2" placeholder="Ada permintaan khusus?"></textarea>
+            </div>
+
+            <button type="submit" class="booking-btn">
+                <i class="fas fa-paper-plane"></i> Kirim Pesanan
+            </button>
+        </form>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    let currentPriceLocal = 0;
+    let currentPriceIntl = 0;
+    let currentPkgSlug = '';
+
+    function openBookingModal(slug, name, priceLocal, priceIntl) {
+        currentPkgSlug = slug;
+        currentPriceLocal = parseFloat(priceLocal);
+        currentPriceIntl = parseFloat(priceIntl);
+
+        document.getElementById('pkgModalSubtitle').textContent = 'Pemesanan: ' + name;
+
+        // Update form action
+        const form = document.getElementById('pkgBookingForm');
+        form.action = '/paket-wisata/{{ dest.slug }}/' + slug + '/book/';
+
+        updatePrice();
+        document.getElementById('pkgModalOverlay').style.display = 'flex';
+    }
+
+    function updatePrice() {
+        const category = document.querySelector('input[name="tourist_category"]:checked').value;
+        const numParticipants = parseInt(document.querySelector('input[name="num_participants"]').value) || 1;
+        const pricePerPerson = category === 'mancanegara' ? currentPriceIntl : currentPriceLocal;
+        const total = pricePerPerson * numParticipants;
+        document.getElementById('priceTotal').textContent = 'Rp ' + total.toLocaleString('id-ID');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Close modal
+        document.getElementById('pkgCloseModal').onclick = function() {
+            document.getElementById('pkgModalOverlay').style.display = 'none';
+        };
+        window.addEventListener('click', function(e) {
+            if (e.target === document.getElementById('pkgModalOverlay')) {
+                document.getElementById('pkgModalOverlay').style.display = 'none';
+            }
+        });
+
+        // Flatpickr
+        flatpickr("#pkg_tour_date", {
+            minDate: "today",
+            dateFormat: "Y-m-d",
+            locale: { firstDayOfWeek: 1 }
+        });
+    });
+</script>
+{% endif %}

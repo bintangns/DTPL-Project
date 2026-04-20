@@ -1,0 +1,251 @@
+{% extends "adminpanel/base.html" %}
+{% load static %}
+
+{% block title %}Paket Wisata — Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .pkg-page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .pkg-page-header .page-header { margin-bottom: 0; }
+    .pkg-add-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 2px 8px rgba(22,163,74,0.2);
+    }
+    .pkg-add-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px rgba(22,163,74,0.3);
+    }
+    .pkg-nav-links {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .pkg-nav-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    .pkg-nav-link.link-guides {
+        background: #f0fdf4;
+        color: #16a34a;
+        border: 1px solid #bbf7d0;
+    }
+    .pkg-nav-link.link-guides:hover { background: #dcfce7; }
+    .pkg-nav-link.link-bookings {
+        background: #eff6ff;
+        color: #2563eb;
+        border: 1px solid #bfdbfe;
+    }
+    .pkg-nav-link.link-bookings:hover { background: #dbeafe; }
+
+    .pkg-image-thumb {
+        width: 48px;
+        height: 36px;
+        object-fit: cover;
+        border-radius: 6px;
+    }
+    .pkg-image-placeholder {
+        width: 48px;
+        height: 36px;
+        border-radius: 6px;
+        background: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #cbd5e1;
+        font-size: 14px;
+    }
+    .pkg-name-cell {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .pkg-name-info strong {
+        display: block;
+        font-size: 14px;
+        color: #1a1a1a;
+    }
+    .pkg-name-info small {
+        color: #999;
+        font-size: 12px;
+    }
+    .pkg-action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 14px;
+        transition: all 0.2s;
+    }
+    .pkg-action-btn.btn-edit {
+        background: #f0f9ff;
+        color: #0369a1;
+        border: 1px solid #bae6fd;
+    }
+    .pkg-action-btn.btn-edit:hover { background: #e0f2fe; }
+    .pkg-action-btn.btn-delete {
+        background: #fef2f2;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+    }
+    .pkg-action-btn.btn-delete:hover { background: #fee2e2; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pkg-page-header">
+    <div class="page-header">
+        <h1>Manajemen Paket Wisata</h1>
+        <p>Kelola paket wisata yang tersedia di setiap destinasi</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;align-items:flex-end;">
+        <a href="{% url 'guide_admin:package_create' %}" class="pkg-add-btn">
+            <i class="fas fa-plus"></i> Tambah Paket
+        </a>
+        <div class="pkg-nav-links">
+            <a href="{% url 'guide_admin:guide_list' %}" class="pkg-nav-link link-guides">
+                <i class="fas fa-users"></i> Kelola Pemandu
+            </a>
+            <a href="{% url 'guide_admin:booking_list' %}" class="pkg-nav-link link-bookings">
+                <i class="fas fa-clipboard-list"></i> Pemesanan
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="stats-row">
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #f0f9ff; color: #3b82f6;"><i class="fas fa-box"></i></div>
+        <div class="stat-info">
+            <h3>{{ total_packages }}</h3>
+            <p>Total Paket</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon icon-green"><i class="fas fa-check-circle"></i></div>
+        <div class="stat-info">
+            <h3>{{ total_active }}</h3>
+            <p>Aktif</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #fef2f2; color: #dc2626;"><i class="fas fa-times-circle"></i></div>
+        <div class="stat-info">
+            <h3>{{ total_inactive }}</h3>
+            <p>Nonaktif</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #fef3c7; color: #d97706;"><i class="fas fa-map-marker-alt"></i></div>
+        <div class="stat-info">
+            <h3>{{ destinations_count }}</h3>
+            <p>Destinasi</p>
+        </div>
+    </div>
+</div>
+
+<div class="data-table-wrapper">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Nama Paket</th>
+                <th>Destinasi</th>
+                <th>Harga Lokal</th>
+                <th>Harga Intl.</th>
+                <th>Durasi</th>
+                <th>Peserta Maks.</th>
+                <th>Status</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pkg in packages %}
+            <tr>
+                <td>
+                    <div class="pkg-name-cell">
+                        {% if pkg.image_url %}
+                        <img src="{{ pkg.image_url }}" alt="{{ pkg.name }}" class="pkg-image-thumb">
+                        {% else %}
+                        <div class="pkg-image-placeholder"><i class="fas fa-image"></i></div>
+                        {% endif %}
+                        <div class="pkg-name-info">
+                            <strong>{{ pkg.name }}</strong>
+                            <small>{{ pkg.slug }}</small>
+                        </div>
+                    </div>
+                </td>
+                <td>{{ pkg.destination.name }}</td>
+                <td>
+                    {% with harga=pkg.price_local|floatformat:0 %}
+                        {% if harga|length == 7 %}Rp {{ harga|slice:":1" }}.{{ harga|slice:"1:4" }}.{{ harga|slice:"4:" }}
+                        {% elif harga|length == 6 %}Rp {{ harga|slice:":3" }}.{{ harga|slice:"3:" }}
+                        {% else %}Rp {{ harga }}{% endif %}
+                    {% endwith %}
+                </td>
+                <td>
+                    {% with harga=pkg.price_international|floatformat:0 %}
+                        {% if harga|length == 7 %}Rp {{ harga|slice:":1" }}.{{ harga|slice:"1:4" }}.{{ harga|slice:"4:" }}
+                        {% elif harga|length == 6 %}Rp {{ harga|slice:":3" }}.{{ harga|slice:"3:" }}
+                        {% else %}Rp {{ harga }}{% endif %}
+                    {% endwith %}
+                </td>
+                <td>{{ pkg.duration }}</td>
+                <td style="text-align:center;">{{ pkg.max_participants }}</td>
+                <td>
+                    {% if pkg.is_active %}
+                    <span class="badge badge-confirmed">Aktif</span>
+                    {% else %}
+                    <span class="badge badge-cancelled">Nonaktif</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div style="display:flex;gap:6px;">
+                        <a href="{% url 'guide_admin:package_edit' pkg.pk %}" class="pkg-action-btn btn-edit" title="Edit">
+                            <i class="fas fa-pen"></i>
+                        </a>
+                        <a href="{% url 'guide_admin:package_delete' pkg.pk %}" class="pkg-action-btn btn-delete" title="Hapus">
+                            <i class="fas fa-trash-alt"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" style="text-align:center;color:#999;padding:40px;">
+                    <i class="fas fa-box-open" style="font-size:24px;margin-bottom:8px;display:block;color:#ddd;"></i>
+                    Belum ada paket wisata.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

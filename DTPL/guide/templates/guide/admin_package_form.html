@@ -1,0 +1,146 @@
+{% extends "adminpanel/base.html" %}
+{% load static %}
+
+{% block title %}{{ page_title }} — Admin{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'destinations/css/admin.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dest-form-page">
+    <div class="dest-form-header">
+        <div>
+            <h1>{{ page_title }}</h1>
+            <p>{% if package %}Edit data paket wisata yang sudah ada{% else %}Tambahkan paket wisata baru ke destinasi{% endif %}</p>
+        </div>
+        <a href="{% url 'guide_admin:package_list' %}" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Kembali ke Daftar
+        </a>
+    </div>
+
+    {% if form.errors %}
+    <div class="form-errors">
+        <i class="fas fa-exclamation-circle"></i>
+        <div>
+            <strong>Terdapat kesalahan pada form:</strong>
+            <ul>
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                    <li>{{ field }}: {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+
+    <form method="POST" class="dest-form">
+        {% csrf_token %}
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="{{ form.destination.id_for_label }}">
+                    {{ form.destination.label }} <span class="required">*</span>
+                </label>
+                {{ form.destination }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.name.id_for_label }}">
+                    {{ form.name.label }} <span class="required">*</span>
+                </label>
+                {{ form.name }}
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="{{ form.slug.id_for_label }}">
+                    {{ form.slug.label }} <span class="required">*</span>
+                </label>
+                {{ form.slug }}
+                <span class="form-help">URL-friendly identifier (otomatis dari nama)</span>
+            </div>
+            <div class="form-group">
+                <label for="{{ form.duration.id_for_label }}">
+                    {{ form.duration.label }} <span class="required">*</span>
+                </label>
+                {{ form.duration }}
+                <span class="form-help">Contoh: 3 jam, 1 hari</span>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="{{ form.price_local.id_for_label }}">
+                    {{ form.price_local.label }} <span class="required">*</span>
+                </label>
+                {{ form.price_local }}
+                <span class="form-help">Harga per orang (wisatawan lokal)</span>
+            </div>
+            <div class="form-group">
+                <label for="{{ form.price_international.id_for_label }}">
+                    {{ form.price_international.label }} <span class="required">*</span>
+                </label>
+                {{ form.price_international }}
+                <span class="form-help">Harga per orang (wisatawan mancanegara)</span>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="{{ form.max_participants.id_for_label }}">
+                    {{ form.max_participants.label }} <span class="required">*</span>
+                </label>
+                {{ form.max_participants }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.image_url.id_for_label }}">
+                    {{ form.image_url.label }}
+                </label>
+                {{ form.image_url }}
+                <span class="form-help">URL gambar paket wisata</span>
+            </div>
+        </div>
+
+        {% if package.image_url %}
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label>Preview Gambar</label>
+            <div class="image-preview">
+                <img src="{{ package.image_url }}" alt="{{ package.name }}">
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="form-group full-width">
+            <label for="{{ form.description.id_for_label }}">
+                {{ form.description.label }} <span class="required">*</span>
+            </label>
+            {{ form.description }}
+        </div>
+
+        <div class="form-group full-width">
+            <label for="{{ form.itinerary.id_for_label }}">
+                {{ form.itinerary.label }}
+            </label>
+            {{ form.itinerary }}
+            <span class="form-help">Rincian rencana perjalanan wisata</span>
+        </div>
+
+        <div class="form-check-group">
+            <label class="form-check-label">
+                {{ form.is_active }}
+                <span>{{ form.is_active.label }}</span>
+            </label>
+            <span class="form-help">Paket yang tidak aktif tidak akan ditampilkan di halaman publik</span>
+        </div>
+
+        <div class="form-actions">
+            <a href="{% url 'guide_admin:package_list' %}" class="btn-cancel">Batal</a>
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-save"></i> {{ submit_label }}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

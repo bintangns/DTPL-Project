@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Pemesanan Berhasil — Desa Manud Jaya{% endblock %}
+{% block nav_home %}{% endblock %}
+{% block nav_destinasi %}active{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'guide/css/style.css' %}">
+<style>
+    .navbar {
+        background: var(--white) !important;
+        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        padding: 0.6rem 0;
+    }
+    .nav-logo { color: var(--primary) !important; }
+    .nav-link { color: var(--text) !important; }
+    .nav-link:hover { color: var(--primary) !important; }
+    .hamburger, .hamburger::before, .hamburger::after {
+        background: var(--text) !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="success-page">
+    <div class="success-container">
+        <div class="success-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <h1>Pemesanan Berhasil!</h1>
+        <p class="success-subtitle">Terima kasih telah memesan paket wisata di Desa Manud Jaya</p>
+
+        <div class="booking-detail-card">
+            <h3><i class="fas fa-ticket-alt"></i> Detail Pesanan</h3>
+            <div class="detail-grid-info">
+                <div class="detail-row">
+                    <span class="detail-label">Paket</span>
+                    <span class="detail-value">{{ booking.tour_package.name }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Destinasi</span>
+                    <span class="detail-value">{{ booking.tour_package.destination.name }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Tanggal</span>
+                    <span class="detail-value">{{ booking.tour_date }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Jam Mulai</span>
+                    <span class="detail-value">{{ booking.start_time }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Kategori</span>
+                    <span class="detail-value">{{ booking.get_tourist_category_display }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Peserta</span>
+                    <span class="detail-value">{{ booking.num_participants }} orang</span>
+                </div>
+                <div class="detail-row total-row">
+                    <span class="detail-label">Total Harga</span>
+                    <span class="detail-value">
+                        {% with harga=booking.total_price|floatformat:0 %}
+                            {% if harga|length == 7 %}Rp {{ harga|slice:":1" }}.{{ harga|slice:"1:4" }}.{{ harga|slice:"4:" }}
+                            {% elif harga|length == 6 %}Rp {{ harga|slice:":3" }}.{{ harga|slice:"3:" }}
+                            {% else %}Rp {{ harga }}{% endif %}
+                        {% endwith %}
+                    </span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Status</span>
+                    <span class="detail-value status-badge pending">{{ booking.get_status_display }}</span>
+                </div>
+            </div>
+        </div>
+
+        {% if booking.guide %}
+        <div class="guide-profile-card">
+            <h3><i class="fas fa-user-tie"></i> Pemandu Wisata Anda</h3>
+            <div class="guide-profile-info">
+                {% if booking.guide.profile_picture %}
+                <img src="{{ booking.guide.profile_picture.url }}" alt="{{ booking.guide.name }}" class="guide-avatar">
+                {% else %}
+                <div class="guide-avatar-placeholder">
+                    <i class="fas fa-user"></i>
+                </div>
+                {% endif %}
+                <div class="guide-details">
+                    <h4>{{ booking.guide.name }}</h4>
+                    <span class="guide-category-badge {{ booking.guide.category }}">
+                        {{ booking.guide.get_category_display }}
+                    </span>
+                    <p class="guide-languages">
+                        <i class="fas fa-language"></i>
+                        {% for lang in booking.guide.languages_list %}
+                            <span class="lang-tag">{{ lang }}</span>
+                        {% endfor %}
+                    </p>
+                    {% if booking.guide.bio %}
+                    <p class="guide-bio">{{ booking.guide.bio }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="guide-profile-card">
+            <h3><i class="fas fa-user-clock"></i> Pemandu Wisata</h3>
+            <p style="color: #666;">Pemandu wisata akan segera dialokasikan oleh admin. Kami akan menghubungi Anda melalui email.</p>
+        </div>
+        {% endif %}
+
+        <div class="success-actions">
+            <a href="{% url 'destinations:detail' booking.tour_package.destination.slug %}" class="btn-secondary">
+                <i class="fas fa-arrow-left"></i> Kembali ke Destinasi
+            </a>
+            <a href="{% url 'home:home' %}" class="btn-primary">
+                <i class="fas fa-home"></i> Halaman Utama
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

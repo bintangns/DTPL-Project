@@ -1,0 +1,402 @@
+{% extends "adminpanel/base.html" %}
+
+{% block title %}Pemesanan Paket Wisata — Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .booking-stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .booking-stat-card {
+        background: #fff;
+        border-radius: 14px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        border: 1px solid #f0f0f0;
+    }
+    .booking-stat-card .stat-icon-circle {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+    .booking-stat-card .stat-text h3 {
+        font-size: 1.6rem;
+        font-weight: 700;
+        margin: 0;
+        line-height: 1.2;
+    }
+    .booking-stat-card .stat-text p {
+        font-size: 0.78rem;
+        color: #777;
+        margin: 2px 0 0;
+        font-weight: 500;
+    }
+    .stat-blue .stat-icon-circle { background: #eff6ff; color: #3b82f6; }
+    .stat-blue .stat-text h3 { color: #1a1a1a; }
+    .stat-orange .stat-icon-circle { background: #fff7ed; color: #f97316; }
+    .stat-orange .stat-text h3 { color: #f97316; }
+    .stat-green .stat-icon-circle { background: #f0fdf4; color: #22c55e; }
+    .stat-green .stat-text h3 { color: #22c55e; }
+    .stat-red .stat-icon-circle { background: #fef2f2; color: #ef4444; }
+    .stat-red .stat-text h3 { color: #ef4444; }
+    .stat-revenue {
+        background: linear-gradient(135deg, #f0fdf4, #dcfce7) !important;
+        border: 1px solid #bbf7d0 !important;
+    }
+    .stat-revenue .stat-icon-circle { background: rgba(22,163,74,0.15); color: #16a34a; }
+    .stat-revenue .stat-text h3 { color: #16a34a; font-size: 1.3rem; }
+
+    /* Filter Tabs */
+    .filter-tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 24px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .filter-tabs span {
+        font-size: 14px;
+        color: #666;
+        font-weight: 500;
+        margin-right: 8px;
+    }
+    .filter-tab {
+        display: inline-block;
+        padding: 8px 18px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        border: 1px solid #e5e7eb;
+        color: #555;
+        background: #fff;
+        transition: all 0.2s;
+    }
+    .filter-tab:hover { border-color: #16a34a; color: #16a34a; }
+    .filter-tab.active {
+        background: #16a34a;
+        color: white;
+        border-color: #16a34a;
+    }
+
+    /* Booking table details */
+    .booking-id-cell {
+        font-weight: 700;
+        color: #1a1a1a;
+        font-size: 14px;
+    }
+    .booking-date-cell {
+        font-size: 12px;
+        color: #666;
+        margin-top: 2px;
+    }
+    .booking-date-cell i { color: #999; margin-right: 4px; width: 12px; }
+    .booking-dest-cell {
+        display: flex;
+        align-items: flex-start;
+        gap: 6px;
+    }
+    .booking-dest-cell i {
+        color: #16a34a;
+        margin-top: 3px;
+        flex-shrink: 0;
+    }
+    .booking-dest-name {
+        font-weight: 600;
+        font-size: 13px;
+        color: #1a1a1a;
+    }
+    .booking-pkg-name {
+        font-size: 12px;
+        color: #666;
+    }
+    .booking-customer-cell strong {
+        display: block;
+        font-size: 13px;
+        color: #1a1a1a;
+    }
+    .booking-customer-cell .customer-phone,
+    .booking-customer-cell .customer-email {
+        font-size: 12px;
+        color: #888;
+        display: block;
+    }
+    .booking-customer-cell .customer-phone i,
+    .booking-customer-cell .customer-email i {
+        width: 12px;
+        margin-right: 4px;
+        color: #aaa;
+    }
+    .booking-guide-cell strong {
+        display: block;
+        font-size: 13px;
+        color: #1a1a1a;
+    }
+    .booking-guide-cell .guide-phone {
+        font-size: 12px;
+        color: #888;
+    }
+    .booking-guide-cell .guide-phone i {
+        width: 12px;
+        margin-right: 4px;
+        color: #aaa;
+    }
+    .participant-info {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .participant-count {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 14px;
+        color: #555;
+    }
+    .participant-count i { color: #999; }
+    .tourist-badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    .tourist-badge.lokal { background: #dcfce7; color: #16a34a; }
+    .tourist-badge.asing { background: #dbeafe; color: #2563eb; }
+
+    .price-cell {
+        font-weight: 700;
+        font-size: 14px;
+        color: #1a1a1a;
+    }
+
+    /* Action buttons */
+    .booking-actions {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+    }
+    .action-icon-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-size: 13px;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+    .action-icon-btn.btn-view { background: #f0f9ff; color: #0369a1; }
+    .action-icon-btn.btn-view:hover { background: #e0f2fe; }
+    .action-icon-btn.btn-confirm { background: #f0fdf4; color: #16a34a; }
+    .action-icon-btn.btn-confirm:hover { background: #dcfce7; }
+    .action-icon-btn.btn-cancel { background: #fef2f2; color: #dc2626; }
+    .action-icon-btn.btn-cancel:hover { background: #fee2e2; }
+    .action-icon-btn.btn-email { background: #f5f3ff; color: #7c3aed; }
+    .action-icon-btn.btn-email:hover { background: #ede9fe; }
+
+    .status-select-mini {
+        font-size: 11px;
+        padding: 4px 8px;
+        border-radius: 6px;
+        border: 1px solid #d1d5db;
+        background: #fff;
+        cursor: pointer;
+        outline: none;
+    }
+    .status-select-mini:focus {
+        border-color: #16a34a;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Pemesanan Paket Wisata</h1>
+    <p>Kelola dan monitor pemesanan paket wisata dari wisatawan</p>
+</div>
+
+<div class="booking-stats-row">
+    <div class="booking-stat-card stat-blue">
+        <div class="stat-icon-circle"><i class="fas fa-clipboard-list"></i></div>
+        <div class="stat-text">
+            <h3>{{ total_bookings }}</h3>
+            <p>Total Booking</p>
+        </div>
+    </div>
+    <div class="booking-stat-card stat-orange">
+        <div class="stat-icon-circle"><i class="fas fa-clock"></i></div>
+        <div class="stat-text">
+            <h3>{{ bookings_pending }}</h3>
+            <p>Menunggu</p>
+        </div>
+    </div>
+    <div class="booking-stat-card stat-green">
+        <div class="stat-icon-circle"><i class="fas fa-check-circle"></i></div>
+        <div class="stat-text">
+            <h3>{{ bookings_confirmed }}</h3>
+            <p>Terkonfirmasi</p>
+        </div>
+    </div>
+    <div class="booking-stat-card stat-red">
+        <div class="stat-icon-circle"><i class="fas fa-times-circle"></i></div>
+        <div class="stat-text">
+            <h3>{{ bookings_cancelled }}</h3>
+            <p>Dibatalkan</p>
+        </div>
+    </div>
+    <div class="booking-stat-card stat-revenue">
+        <div class="stat-icon-circle"><i class="fas fa-wallet"></i></div>
+        <div class="stat-text">
+            <p>Total Pendapatan</p>
+            <h3>
+                {% with harga=total_revenue|floatformat:0 %}
+                    {% if harga|length >= 7 %}Rp {{ harga|slice:":1" }}.{{ harga|slice:"1:4" }}.{{ harga|slice:"4:" }}
+                    {% elif harga|length == 6 %}Rp {{ harga|slice:":3" }}.{{ harga|slice:"3:" }}
+                    {% else %}Rp {{ harga }}{% endif %}
+                {% endwith %}
+            </h3>
+        </div>
+    </div>
+</div>
+
+<div class="filter-tabs">
+    <span>Filter Status:</span>
+    <a href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}" class="filter-tab {% if not request.GET.status %}active{% endif %}">Semua ({{ total_bookings }})</a>
+    <a href="?status=pending{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="filter-tab {% if request.GET.status == 'pending' %}active{% endif %}">Menunggu ({{ bookings_pending }})</a>
+    <a href="?status=confirmed{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="filter-tab {% if request.GET.status == 'confirmed' %}active{% endif %}">Terkonfirmasi ({{ bookings_confirmed }})</a>
+    <a href="?status=cancelled{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="filter-tab {% if request.GET.status == 'cancelled' %}active{% endif %}">Dibatalkan ({{ bookings_cancelled }})</a>
+</div>
+
+<div class="data-table-wrapper">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>ID & Tanggal</th>
+                <th>Destinasi & Paket</th>
+                <th>Pemesan</th>
+                <th>Pemandu</th>
+                <th>Peserta</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in bookings %}
+            <tr>
+                <td>
+                    <div class="booking-id-cell">TB{{ booking.pk|stringformat:"03d" }}</div>
+                    <div class="booking-date-cell">
+                        <div>{{ booking.tour_date|date:"l, d F Y" }}</div>
+                        <div><i class="fas fa-clock"></i> {{ booking.start_time|time:"H:i" }}</div>
+                    </div>
+                </td>
+                <td>
+                    <div class="booking-dest-cell">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>
+                            <div class="booking-dest-name">{{ booking.tour_package.destination.name }}</div>
+                            <div class="booking-pkg-name"><i class="fas fa-ticket-alt" style="margin-right:4px;"></i> {{ booking.tour_package.name }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="booking-customer-cell">
+                        <strong>{{ booking.customer_name }}</strong>
+                        <span class="customer-phone"><i class="fas fa-phone"></i> {{ booking.phone_number }}</span>
+                        <span class="customer-email"><i class="fas fa-envelope"></i> {{ booking.email }}</span>
+                    </div>
+                </td>
+                <td>
+                    {% if booking.guide %}
+                    <div class="booking-guide-cell">
+                        <strong>{{ booking.guide.name }}</strong>
+                        <span class="guide-phone"><i class="fas fa-phone"></i> {{ booking.guide.phone_number }}</span>
+                    </div>
+                    {% else %}
+                    <span style="color:#999;font-size:13px;">Belum ditentukan</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="participant-info">
+                        <span class="participant-count"><i class="fas fa-users"></i> {{ booking.num_participants }}</span>
+                        <span class="tourist-badge {% if booking.tourist_category == 'mancanegara' %}asing{% else %}lokal{% endif %}">
+                            {% if booking.tourist_category == 'mancanegara' %}Asing{% else %}Lokal{% endif %}
+                        </span>
+                    </div>
+                </td>
+                <td>
+                    <span class="price-cell">
+                        {% with harga=booking.total_price|floatformat:0 %}
+                            {% if harga|length >= 7 %}Rp {{ harga|slice:":1" }}.{{ harga|slice:"1:4" }}.{{ harga|slice:"4:" }}
+                            {% elif harga|length == 6 %}Rp {{ harga|slice:":3" }}.{{ harga|slice:"3:" }}
+                            {% else %}Rp {{ harga }}{% endif %}
+                        {% endwith %}
+                    </span>
+                </td>
+                <td>
+                    <span class="badge {% if booking.status == 'confirmed' %}badge-confirmed{% elif booking.status == 'pending' %}badge-pending{% elif booking.status == 'completed' %}badge-completed{% else %}badge-cancelled{% endif %}">
+                        {% if booking.status == 'pending' %}Menunggu{% elif booking.status == 'confirmed' %}Terkonfirmasi{% elif booking.status == 'completed' %}Selesai{% else %}Dibatalkan{% endif %}
+                    </span>
+                </td>
+                <td>
+                    <div class="booking-actions">
+                        {% if booking.payment_proof %}
+                        <a href="{{ booking.payment_proof.url }}" target="_blank" class="action-icon-btn btn-view" title="Lihat Bukti Bayar">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        {% endif %}
+                        {% if booking.status == 'pending' %}
+                        <form method="POST" action="{% url 'guide_admin:booking_update' booking.pk %}" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="status" value="confirmed">
+                            <button type="submit" class="action-icon-btn btn-confirm" title="Konfirmasi">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        </form>
+                        <form method="POST" action="{% url 'guide_admin:booking_update' booking.pk %}" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="status" value="cancelled">
+                            <button type="submit" class="action-icon-btn btn-cancel" title="Batalkan">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </form>
+                        {% elif booking.status == 'confirmed' %}
+                        <form method="POST" action="{% url 'guide_admin:booking_update' booking.pk %}" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="status" value="completed">
+                            <button type="submit" class="action-icon-btn btn-confirm" title="Selesaikan">
+                                <i class="fas fa-flag-checkered"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" style="text-align:center;color:#999;padding:40px;">
+                    <i class="fas fa-inbox" style="font-size:24px;margin-bottom:8px;display:block;color:#ddd;"></i>
+                    Belum ada pemesanan paket wisata.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

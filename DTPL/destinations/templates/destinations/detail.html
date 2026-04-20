@@ -7,6 +7,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'destinations/css/style.css' %}">
+<link rel="stylesheet" href="{% static 'guide/css/style.css' %}">
 <style>
     /* Force navbar to scrolled state on detail pages (white bar behind nav) */
     .navbar {
@@ -126,6 +127,13 @@
             </div>
             {% endif %}
         </aside>
+    </div>
+</section>
+
+<!-- ===== TOUR PACKAGES ===== -->
+<section class="detail-content-section">
+    <div class="detail-content" style="display:block;">
+        {% include 'guide/tour_packages_section.html' %}
     </div>
 </section>
 

@@ -61,6 +61,14 @@
                 <i class="fas fa-star"></i>
                 <span>Rating Management</span>
             </a>
+            <a href="{% url 'guide_admin:guide_list' %}" class="sidebar-link {% if active_nav == 'pemandu' %}active{% endif %}">
+                <i class="fas fa-user-tie"></i>
+                <span>Pemandu Wisata</span>
+            </a>
+            <a href="{% url 'guide_admin:booking_list' %}" class="sidebar-link {% if active_nav == 'pemesanan_paket' %}active{% endif %}">
+                <i class="fas fa-ticket-alt"></i>
+                <span>Pemesanan Paket</span>
+            </a>
         </nav>
     </aside>
 
