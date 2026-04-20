@@ -1,6 +1,10 @@
+import json
+
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import Http404
+from django.http import Http404, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
 from .models import Destination, DestinationCategory
 from .forms import DestinationForm
@@ -26,8 +30,20 @@ def destination_detail(request, slug):
         slug=slug,
         is_active=True,
     )
+
+    # Query related tour packages
+    tour_packages = []
+    try:
+        from guide.models import TourPackage
+        tour_packages = TourPackage.objects.filter(
+            destination=destination, is_active=True
+        )
+    except Exception:
+        pass
+
     context = {
         'dest': destination,
+        'tour_packages': tour_packages,
         'review_form': ReviewForm(),
         'review_summary': get_review_summary_for_instance(destination),
         'review_type': 'destination',
@@ -138,3 +154,30 @@ def admin_destination_delete(request, pk):
         'active_nav': 'destinasi',
         'destination': destination,
     })
+
+
+# =========================
+# GEMINI LLM CHATBOT API
+# =========================
+@csrf_exempt
+@require_POST
+def ask_gemini(request):
+    """API endpoint untuk chatbot Gemini — rekomendasi wisata interaktif."""
+    try:
+        body = json.loads(request.body)
+        user_message = body.get('message', '').strip()
+
+        if not user_message:
+            return JsonResponse({'error': 'Pesan tidak boleh kosong'}, status=400)
+
+        from .services import get_gemini_response
+        response_text = get_gemini_response(user_message)
+        return JsonResponse({'response': response_text})
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse(
+            {'error': f'Maaf, terjadi kesalahan pada asisten kami. Silakan coba lagi nanti.'},
+            status=500
+        )

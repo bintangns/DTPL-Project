@@ -1,0 +1,117 @@
+{% extends "adminpanel/base.html" %}
+
+{% block title %}Pemesanan Paket Wisata — Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Pemesanan Paket Wisata</h1>
+    <p>Kelola pemesanan paket wisata yang masuk</p>
+</div>
+
+<div class="stats-row">
+    <div class="stat-card stat-green">
+        <div class="stat-icon"><i class="fas fa-ticket-alt"></i></div>
+        <div class="stat-info">
+            <h3>{{ total_bookings }}</h3>
+            <p>Total Pemesanan</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon icon-orange"><i class="fas fa-clock"></i></div>
+        <div class="stat-info">
+            <h3>{{ bookings_pending }}</h3>
+            <p>Pending</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon icon-blue"><i class="fas fa-check"></i></div>
+        <div class="stat-info">
+            <h3>{{ bookings_confirmed }}</h3>
+            <p>Confirmed</p>
+        </div>
+    </div>
+</div>
+
+<div class="content-card">
+    <div class="content-card-header">
+        <h3>Daftar Pemesanan</h3>
+        <form method="get" style="display:flex;gap:8px;">
+            <input type="text" name="search" value="{{ request.GET.search }}" placeholder="Cari nama/email..." class="form-control" style="max-width:220px;">
+            <select name="status" class="form-control" style="max-width:150px;" onchange="this.form.submit()">
+                <option value="">Semua Status</option>
+                <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
+                <option value="confirmed" {% if request.GET.status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                <option value="completed" {% if request.GET.status == 'completed' %}selected{% endif %}>Completed</option>
+                <option value="cancelled" {% if request.GET.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+            </select>
+            <button type="submit" class="btn-sm btn-primary"><i class="fas fa-search"></i></button>
+        </form>
+    </div>
+
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Pemesan</th>
+                    <th>Paket</th>
+                    <th>Pemandu</th>
+                    <th>Tanggal</th>
+                    <th>Kategori</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                <tr>
+                    <td>{{ booking.pk }}</td>
+                    <td>
+                        <strong>{{ booking.customer_name }}</strong>
+                        <br><small style="color:#666;">{{ booking.email }}</small>
+                    </td>
+                    <td>{{ booking.tour_package.name }}</td>
+                    <td>
+                        {% if booking.guide %}
+                        {{ booking.guide.name }}
+                        {% else %}
+                        <span style="color:#999;">—</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ booking.tour_date }}<br><small>{{ booking.start_time }}</small></td>
+                    <td>
+                        <span class="badge {% if booking.tourist_category == 'mancanegara' %}badge-confirmed{% else %}badge-pending{% endif %}">
+                            {{ booking.get_tourist_category_display }}
+                        </span>
+                    </td>
+                    <td>
+                        {% with harga=booking.total_price|floatformat:0 %}
+                            {% if harga|length == 6 %}Rp {{ harga|slice:":3" }}.{{ harga|slice:"3:" }}{% else %}Rp {{ harga }}{% endif %}
+                        {% endwith %}
+                    </td>
+                    <td>
+                        <span class="badge {% if booking.status == 'confirmed' %}badge-confirmed{% elif booking.status == 'pending' %}badge-pending{% elif booking.status == 'completed' %}badge-completed{% else %}badge-cancelled{% endif %}">
+                            {{ booking.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <form method="POST" action="{% url 'guide_admin:booking_update' booking.pk %}" style="display:inline;">
+                            {% csrf_token %}
+                            <select name="status" class="form-control" style="font-size:12px;padding:4px 8px;width:auto;display:inline-block;" onchange="this.form.submit()">
+                                <option value="pending" {% if booking.status == 'pending' %}selected{% endif %}>Pending</option>
+                                <option value="confirmed" {% if booking.status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                                <option value="completed" {% if booking.status == 'completed' %}selected{% endif %}>Completed</option>
+                                <option value="cancelled" {% if booking.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                            </select>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="9" style="text-align:center;color:#999;padding:30px;">Belum ada pemesanan paket wisata.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

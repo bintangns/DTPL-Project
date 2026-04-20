@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'dashboard',
     'bookings',
     'reviews',
+    'guide',
 ]
 
 MIDDLEWARE = [
@@ -163,6 +164,7 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 
 
 BREVO_API_KEY = os.getenv("BREVO_API_KEY", "")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 
 DEFAULT_FROM_EMAIL = os.getenv(
     'DEFAULT_FROM_EMAIL',

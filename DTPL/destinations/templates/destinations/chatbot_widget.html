@@ -1,0 +1,46 @@
+{% load static %}
+<!-- Chatbot Widget -->
+<link rel="stylesheet" href="{% static 'destinations/css/chatbot.css' %}">
+
+<div class="chatbot-toggle" id="chatbotToggle" title="Asisten Wisata AI">
+    <i class="fas fa-robot"></i>
+    <span class="chatbot-pulse"></span>
+</div>
+
+<div class="chatbot-panel" id="chatbotPanel">
+    <div class="chatbot-header">
+        <div class="chatbot-header-info">
+            <div class="chatbot-avatar-sm">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div>
+                <h4>Asisten Wisata Manud Jaya</h4>
+                <span class="chatbot-status">● Online</span>
+            </div>
+        </div>
+        <button class="chatbot-close" id="chatbotClose" aria-label="Close chat">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <div class="chatbot-messages" id="chatbotMessages">
+        <div class="chat-message bot">
+            <div class="chat-bubble">
+                Halo! 👋 Saya <strong>Asisten Wisata Manud Jaya</strong>. Saya bisa bantu rekomendasikan destinasi, homestay, paket wisata, atau produk lokal yang sesuai preferensi Anda.<br><br>
+                Silakan tanya apa saja! Misalnya:<br>
+                • <em>"Rekomendasi wisata alam untuk keluarga"</em><br>
+                • <em>"Homestay murah di Manud Jaya"</em><br>
+                • <em>"Paket wisata budget 200rb"</em>
+            </div>
+        </div>
+    </div>
+
+    <div class="chatbot-input-area">
+        <textarea id="chatbotInput" placeholder="Ketik pertanyaan Anda..." rows="1"></textarea>
+        <button id="chatbotSend" title="Kirim">
+            <i class="fas fa-paper-plane"></i>
+        </button>
+    </div>
+</div>
+
+<script src="{% static 'destinations/js/chatbot.js' %}"></script>
