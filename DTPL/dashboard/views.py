@@ -1,8 +1,12 @@
+import json
 from django.shortcuts import render, redirect
 from django.db.models import Sum, Count
 from products.models import Product, ProductOrder
 from homestays.models import Homestay, HomestayBooking # Pastikan import ini benar
 from guide.models import Guide, PackageBooking
+from datetime import date, timedelta
+from django.http import HttpResponse
+from django.db.models.functions import TruncMonth
 
 def dashboard_home(request):
     if not request.session.get('is_admin_logged_in'):
@@ -91,3 +95,464 @@ def dashboard_home(request):
         'recent_package_bookings': recent_package_bookings,
     }
     return render(request, 'dashboard/home.html', context)
+
+def _parse_period(request):
+    """Return (date_from, date_to, period_key, period_label) from GET params."""
+    period = request.GET.get('period', 'this_month')
+    today  = date.today()
+ 
+    if period == 'this_month':
+        date_from = today.replace(day=1)
+        date_to   = today
+        label     = today.strftime('%B %Y')
+    elif period == 'last_month':
+        first_this     = today.replace(day=1)
+        last_month_end = first_this - timedelta(days=1)
+        date_from      = last_month_end.replace(day=1)
+        date_to        = last_month_end
+        label          = last_month_end.strftime('%B %Y')
+    elif period == 'this_year':
+        date_from = today.replace(month=1, day=1)
+        date_to   = today
+        label     = str(today.year)
+    elif period == 'last_year':
+        date_from = today.replace(year=today.year - 1, month=1, day=1)
+        date_to   = today.replace(year=today.year - 1, month=12, day=31)
+        label     = str(today.year - 1)
+    elif period == 'custom':
+        try:
+            date_from = date.fromisoformat(request.GET.get('date_from', ''))
+            date_to   = date.fromisoformat(request.GET.get('date_to', ''))
+            label     = f"{date_from.strftime('%d %b %Y')} – {date_to.strftime('%d %b %Y')}"
+        except ValueError:
+            date_from = today.replace(day=1)
+            date_to   = today
+            label     = today.strftime('%B %Y')
+    else:
+        date_from = today.replace(day=1)
+        date_to   = today
+        label     = today.strftime('%B %Y')
+ 
+    return date_from, date_to, period, label
+ 
+ 
+def _fmt_rupiah(value):
+    return f"Rp {int(value):,}".replace(',', '.')
+ 
+ 
+ 
+# ════════════════════════════════════════════════════════════════════════════
+#  PBI-12 ─ ANALYTICS DASHBOARD
+# ════════════════════════════════════════════════════════════════════════════
+ 
+def analytics_dashboard(request):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+ 
+    date_from, date_to, period, period_label = _parse_period(request)
+ 
+    # ── filtered querysets ───────────────────────────────────────────────
+    homestay_qs = HomestayBooking.objects.filter(
+        created_at__date__gte=date_from, created_at__date__lte=date_to)
+    product_qs  = ProductOrder.objects.filter(
+        created_at__date__gte=date_from, created_at__date__lte=date_to)
+    package_qs  = PackageBooking.objects.filter(
+        created_at__date__gte=date_from, created_at__date__lte=date_to)
+ 
+    confirmed_product = ['confirmed', 'ready_pickup', 'shipping', 'completed']
+    confirmed_other   = ['confirmed', 'completed']
+ 
+    # ── KPI ──────────────────────────────────────────────────────────────
+    total_visitors    = homestay_qs.count() + package_qs.count()
+    rev_homestay      = homestay_qs.filter(status__in=confirmed_other).aggregate(
+        t=Sum('total_price'))['t'] or 0
+    rev_product       = product_qs.filter(status__in=confirmed_product).aggregate(
+        t=Sum('product__price'))['t'] or 0
+    rev_package       = package_qs.filter(status__in=confirmed_other).aggregate(
+        t=Sum('total_price'))['t'] or 0
+    total_revenue     = rev_homestay + rev_product + rev_package
+    total_transactions = homestay_qs.count() + product_qs.count() + package_qs.count()
+    avg_revenue       = total_revenue / total_transactions if total_transactions else 0
+ 
+    # ── monthly trend (last 6 months) ───────────────────────────────────
+    today         = date.today()
+    six_months_ago = (today.replace(day=1) - timedelta(days=150)).replace(day=1)
+ 
+    months = [
+        (today.replace(day=1) - timedelta(days=i * 30)).replace(day=1)
+        for i in range(5, -1, -1)
+    ]
+ 
+    def monthly_revenue(model, price_field, statuses):
+        return {
+            r['month'].date().replace(day=1): float(r['total'])
+            for r in model.objects
+            .filter(created_at__date__gte=six_months_ago, status__in=statuses)
+            .annotate(month=TruncMonth('created_at'))
+            .values('month')
+            .annotate(total=Sum(price_field))
+        }
+ 
+    hs_d   = monthly_revenue(HomestayBooking, 'total_price', confirmed_other)
+    pkg_d  = monthly_revenue(PackageBooking,  'total_price', confirmed_other)
+    prod_d = {
+        r['month'].date().replace(day=1): float(r['total'])
+        for r in ProductOrder.objects
+        .filter(created_at__date__gte=six_months_ago, status__in=confirmed_product)
+        .annotate(month=TruncMonth('created_at'))
+        .values('month')
+        .annotate(total=Sum('product__price'))
+    }
+ 
+    chart_labels   = [m.strftime('%b %Y') for m in months]
+    chart_homestay = [hs_d.get(m, 0)   for m in months]
+    chart_package  = [pkg_d.get(m, 0)  for m in months]
+    chart_product  = [prod_d.get(m, 0) for m in months]
+    chart_total    = [a + b + c for a, b, c in zip(chart_homestay, chart_package, chart_product)]
+ 
+    # ── visitor count trend ──────────────────────────────────────────────
+    def monthly_count(model):
+        return {
+            r['month'].date().replace(day=1): r['cnt']
+            for r in model.objects
+            .filter(created_at__date__gte=six_months_ago)
+            .annotate(month=TruncMonth('created_at'))
+            .values('month')
+            .annotate(cnt=Count('id'))
+        }
+ 
+    hs_cnt  = monthly_count(HomestayBooking)
+    pkg_cnt = monthly_count(PackageBooking)
+    chart_visitors = [hs_cnt.get(m, 0) + pkg_cnt.get(m, 0) for m in months]
+ 
+    # ── breakdown cards ──────────────────────────────────────────────────
+    breakdown = [
+        {'label': 'Homestay',     'count': homestay_qs.count(), 'revenue': float(rev_homestay),
+         'revenue_fmt': _fmt_rupiah(rev_homestay), 'icon': 'fa-bed',          'color': '#3b82f6'},
+        {'label': 'Produk Lokal', 'count': product_qs.count(),  'revenue': float(rev_product),
+         'revenue_fmt': _fmt_rupiah(rev_product),  'icon': 'fa-box-open',     'color': '#f59e0b'},
+        {'label': 'Paket Wisata', 'count': package_qs.count(),  'revenue': float(rev_package),
+         'revenue_fmt': _fmt_rupiah(rev_package),  'icon': 'fa-map-marked-alt','color': '#10b981'},
+    ]
+ 
+    # ── top performers ───────────────────────────────────────────────────
+    top_homestays = (
+        HomestayBooking.objects
+        .filter(created_at__date__gte=date_from, created_at__date__lte=date_to,
+                status__in=confirmed_other)
+        .values('homestay__name')
+        .annotate(total=Sum('total_price'), cnt=Count('id'))
+        .order_by('-total')[:5]
+    )
+    top_packages = (
+        PackageBooking.objects
+        .filter(created_at__date__gte=date_from, created_at__date__lte=date_to,
+                status__in=confirmed_other)
+        .values('tour_package__name')
+        .annotate(total=Sum('total_price'), cnt=Count('id'))
+        .order_by('-total')[:5]
+    )
+ 
+    context = {
+        'active_nav': 'analytics',
+        'period': period,
+        'period_label': period_label,
+        'date_from': date_from.isoformat(),
+        'date_to':   date_to.isoformat(),
+        # KPI
+        'total_visitors':      total_visitors,
+        'total_revenue_fmt':   _fmt_rupiah(total_revenue),
+        'total_transactions':  total_transactions,
+        'avg_revenue_fmt':     _fmt_rupiah(avg_revenue),
+        'rev_homestay_fmt':    _fmt_rupiah(rev_homestay),
+        'rev_product_fmt':     _fmt_rupiah(rev_product),
+        'rev_package_fmt':     _fmt_rupiah(rev_package),
+        # Charts (JSON for Chart.js)
+        'chart_labels_json':   json.dumps(chart_labels),
+        'chart_total_json':    json.dumps(chart_total),
+        'chart_homestay_json': json.dumps(chart_homestay),
+        'chart_package_json':  json.dumps(chart_package),
+        'chart_product_json':  json.dumps(chart_product),
+        'chart_visitors_json': json.dumps(chart_visitors),
+        'donut_labels_json':   json.dumps([b['label']   for b in breakdown]),
+        'donut_data_json':     json.dumps([b['revenue'] for b in breakdown]),
+        'donut_colors_json':   json.dumps([b['color']   for b in breakdown]),
+        # Tables
+        'breakdown':     breakdown,
+        'top_homestays': top_homestays,
+        'top_packages':  top_packages,
+    }
+    return render(request, 'dashboard/analytics.html', context)
+ 
+ 
+# ════════════════════════════════════════════════════════════════════════════
+#  EXPORT: EXCEL
+# ════════════════════════════════════════════════════════════════════════════
+ 
+def export_excel(request):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+ 
+    try:
+        import openpyxl
+        from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+        from openpyxl.utils import get_column_letter
+    except ImportError:
+        return HttpResponse(
+            "openpyxl tidak terinstall. Jalankan: pip install openpyxl", status=500)
+ 
+    date_from, date_to, _, period_label = _parse_period(request)
+    confirmed_product = ['confirmed', 'ready_pickup', 'shipping', 'completed']
+    confirmed_other   = ['confirmed', 'completed']
+ 
+    wb = openpyxl.Workbook()
+ 
+    # ── shared styles ────────────────────────────────────────────────────
+    H_FILL  = PatternFill("solid", fgColor="1a5276")
+    H_FONT  = Font(color="FFFFFF", bold=True, size=11)
+    ALT_FILL= PatternFill("solid", fgColor="d6eaf8")
+    CENTER  = Alignment(horizontal='center', vertical='center')
+    THIN    = Border(
+        left=Side(style='thin'), right=Side(style='thin'),
+        top=Side(style='thin'),  bottom=Side(style='thin'),
+    )
+ 
+    def header_row(ws, row, n):
+        for c in range(1, n + 1):
+            cell = ws.cell(row=row, column=c)
+            cell.fill, cell.font, cell.alignment, cell.border = H_FILL, H_FONT, CENTER, THIN
+ 
+    def data_row(ws, row, n, alt=False):
+        fill = ALT_FILL if alt else PatternFill("solid", fgColor="FFFFFF")
+        for c in range(1, n + 1):
+            cell = ws.cell(row=row, column=c)
+            cell.fill   = fill
+            cell.border = THIN
+            cell.alignment = Alignment(vertical='center')
+ 
+    def set_widths(ws, widths):
+        for i, w in enumerate(widths, 1):
+            ws.column_dimensions[get_column_letter(i)].width = w
+ 
+    # ── Sheet 1 – Ringkasan ──────────────────────────────────────────────
+    ws1 = wb.active
+    ws1.title = "Ringkasan"
+    set_widths(ws1, [32, 26])
+ 
+    ws1['A1'] = "LAPORAN KINERJA WISATA DESA MANUD JAYA"
+    ws1['A1'].font = Font(bold=True, size=14)
+    ws1['A1'].alignment = CENTER
+    ws1.merge_cells('A1:B1')
+    ws1['A2'] = f"Periode: {period_label}"
+    ws1['A2'].font = Font(italic=True)
+    ws1.merge_cells('A2:B2')
+    ws1.append([])
+ 
+    hs_qs  = HomestayBooking.objects.filter(
+        created_at__date__gte=date_from, created_at__date__lte=date_to)
+    pr_qs  = ProductOrder.objects.filter(
+        created_at__date__gte=date_from, created_at__date__lte=date_to)
+    pk_qs  = PackageBooking.objects.filter(
+        created_at__date__gte=date_from, created_at__date__lte=date_to)
+ 
+    rev_hs = hs_qs.filter(status__in=confirmed_other).aggregate(t=Sum('total_price'))['t'] or 0
+    rev_pr = pr_qs.filter(status__in=confirmed_product).aggregate(t=Sum('product__price'))['t'] or 0
+    rev_pk = pk_qs.filter(status__in=confirmed_other).aggregate(t=Sum('total_price'))['t'] or 0
+    total_rev = rev_hs + rev_pr + rev_pk
+ 
+    ws1.append(["Indikator", "Nilai"])
+    header_row(ws1, 4, 2)
+ 
+    rows = [
+        ("Total Kunjungan Wisatawan", hs_qs.count() + pk_qs.count()),
+        ("Total Transaksi",           hs_qs.count() + pr_qs.count() + pk_qs.count()),
+        ("Total Pendapatan",          _fmt_rupiah(total_rev)),
+        ("Pendapatan Homestay",       _fmt_rupiah(rev_hs)),
+        ("Pendapatan Produk Lokal",   _fmt_rupiah(rev_pr)),
+        ("Pendapatan Paket Wisata",   _fmt_rupiah(rev_pk)),
+        ("Pemesanan Homestay",        hs_qs.count()),
+        ("Pemesanan Produk",          pr_qs.count()),
+        ("Pemesanan Paket Wisata",    pk_qs.count()),
+    ]
+    for i, (k, v) in enumerate(rows, 5):
+        ws1.cell(row=i, column=1, value=k)
+        ws1.cell(row=i, column=2, value=v)
+        data_row(ws1, i, 2, alt=(i % 2 == 0))
+ 
+    # ── Sheet 2 – Homestay Bookings ──────────────────────────────────────
+    ws2 = wb.create_sheet("Pemesanan Homestay")
+    cols = ["ID", "Nama Tamu", "Homestay", "Check-in", "Check-out", "Total Harga", "Status", "Tgl Pesan"]
+    set_widths(ws2, [6, 25, 30, 14, 14, 20, 15, 22])
+    ws2.append(cols)
+    header_row(ws2, 1, len(cols))
+    for i, b in enumerate(hs_qs.select_related('homestay').order_by('-created_at'), 2):
+        ws2.append([b.pk, b.customer_name, b.homestay.name,
+                    b.check_in.strftime('%d/%m/%Y'), b.check_out.strftime('%d/%m/%Y'),
+                    float(b.total_price), b.get_status_display(),
+                    b.created_at.strftime('%d/%m/%Y %H:%M')])
+        data_row(ws2, i, len(cols), alt=(i % 2 == 0))
+ 
+    # ── Sheet 3 – Product Orders ─────────────────────────────────────────
+    ws3 = wb.create_sheet("Pesanan Produk")
+    cols = ["ID", "Nama Pelanggan", "Produk", "Qty", "Harga Satuan", "Total", "Status", "Tgl Pesan"]
+    set_widths(ws3, [6, 25, 30, 6, 18, 20, 15, 22])
+    ws3.append(cols)
+    header_row(ws3, 1, len(cols))
+    for i, o in enumerate(pr_qs.select_related('product').order_by('-created_at'), 2):
+        ws3.append([o.pk, o.customer_name, o.product.name, o.quantity,
+                    float(o.product.price), float(o.product.price) * o.quantity,
+                    o.get_status_display(), o.created_at.strftime('%d/%m/%Y %H:%M')])
+        data_row(ws3, i, len(cols), alt=(i % 2 == 0))
+ 
+    # ── Sheet 4 – Package Bookings ───────────────────────────────────────
+    ws4 = wb.create_sheet("Pemesanan Paket Wisata")
+    cols = ["ID", "Nama Tamu", "Paket", "Pemandu", "Tgl Tour", "Peserta", "Total Harga", "Status", "Tgl Pesan"]
+    set_widths(ws4, [6, 25, 30, 25, 14, 8, 20, 15, 22])
+    ws4.append(cols)
+    header_row(ws4, 1, len(cols))
+    for i, b in enumerate(pk_qs.select_related('tour_package', 'guide').order_by('-created_at'), 2):
+        ws4.append([b.pk, b.customer_name, b.tour_package.name,
+                    b.guide.name if b.guide else '-',
+                    b.tour_date.strftime('%d/%m/%Y'), b.num_participants,
+                    float(b.total_price), b.get_status_display(),
+                    b.created_at.strftime('%d/%m/%Y %H:%M')])
+        data_row(ws4, i, len(cols), alt=(i % 2 == 0))
+ 
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = (
+        f'attachment; filename="laporan_wisata_{date_from}_{date_to}.xlsx"')
+    wb.save(response)
+    return response
+ 
+ 
+# ════════════════════════════════════════════════════════════════════════════
+#  EXPORT: PDF
+# ════════════════════════════════════════════════════════════════════════════
+ 
+def export_pdf(request):
+    if not request.session.get('is_admin_logged_in'):
+        return redirect('adminpanel:login')
+ 
+    try:
+        import io
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib import colors
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib.units import cm
+        from reportlab.lib.enums import TA_CENTER
+        from reportlab.platypus import (
+            SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, HRFlowable)
+    except ImportError:
+        return HttpResponse(
+            "reportlab tidak terinstall. Jalankan: pip install reportlab", status=500)
+ 
+    date_from, date_to, _, period_label = _parse_period(request)
+    confirmed_product = ['confirmed', 'ready_pickup', 'shipping', 'completed']
+    confirmed_other   = ['confirmed', 'completed']
+ 
+    hs_qs = HomestayBooking.objects.filter(
+        created_at__date__gte=date_from, created_at__date__lte=date_to)
+    pr_qs = ProductOrder.objects.filter(
+        created_at__date__gte=date_from, created_at__date__lte=date_to)
+    pk_qs = PackageBooking.objects.filter(
+        created_at__date__gte=date_from, created_at__date__lte=date_to)
+ 
+    rev_hs = hs_qs.filter(status__in=confirmed_other).aggregate(t=Sum('total_price'))['t'] or 0
+    rev_pr = pr_qs.filter(status__in=confirmed_product).aggregate(t=Sum('product__price'))['t'] or 0
+    rev_pk = pk_qs.filter(status__in=confirmed_other).aggregate(t=Sum('total_price'))['t'] or 0
+    total_rev = rev_hs + rev_pr + rev_pk
+ 
+    BRAND  = colors.HexColor('#1a5276')
+    ACCENT = colors.HexColor('#2e86c1')
+    LIGHT  = colors.HexColor('#d6eaf8')
+ 
+    buffer = io.BytesIO()
+    doc    = SimpleDocTemplate(buffer, pagesize=A4,
+                                topMargin=2*cm, bottomMargin=2*cm,
+                                leftMargin=2*cm, rightMargin=2*cm)
+    styles = getSampleStyleSheet()
+ 
+    title_s   = ParagraphStyle('T', parent=styles['Title'],
+                                fontSize=18, textColor=BRAND, spaceAfter=4, alignment=TA_CENTER)
+    sub_s     = ParagraphStyle('S', parent=styles['Normal'],
+                                fontSize=10, textColor=colors.grey,
+                                alignment=TA_CENTER, spaceAfter=16)
+    section_s = ParagraphStyle('H', parent=styles['Heading2'],
+                                fontSize=12, textColor=BRAND, spaceBefore=16, spaceAfter=8)
+    footer_s  = ParagraphStyle('F', parent=styles['Normal'],
+                                fontSize=8, textColor=colors.grey, alignment=TA_CENTER)
+ 
+    TS_BASE = [
+        ('FONTSIZE', (0, 0), (-1, -1), 9),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, LIGHT]),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#aed6f1')),
+        ('TOPPADDING',    (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('LEFTPADDING',   (0, 0), (-1, -1), 7),
+    ]
+ 
+    def make_table(data, col_widths, header_color=ACCENT):
+        t = Table(data, colWidths=col_widths)
+        t.setStyle(TableStyle(TS_BASE + [
+            ('BACKGROUND', (0, 0), (-1, 0), header_color),
+            ('TEXTCOLOR',  (0, 0), (-1, 0), colors.white),
+            ('FONTNAME',   (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ]))
+        return t
+ 
+    story = [
+        Paragraph("LAPORAN KINERJA WISATA", title_s),
+        Paragraph("Desa Manud Jaya", title_s),
+        Paragraph(f"Periode: {period_label}", sub_s),
+        HRFlowable(width="100%", thickness=2, color=BRAND),
+        Spacer(1, 0.4*cm),
+    ]
+ 
+    # KPI summary
+    story.append(Paragraph("Ringkasan Kinerja", section_s))
+    story.append(make_table([
+        ["Indikator", "Nilai"],
+        ["Total Kunjungan Wisatawan", str(hs_qs.count() + pk_qs.count())],
+        ["Total Transaksi",           str(hs_qs.count() + pr_qs.count() + pk_qs.count())],
+        ["Total Pendapatan",          _fmt_rupiah(total_rev)],
+        ["Pendapatan Homestay",       _fmt_rupiah(rev_hs)],
+        ["Pendapatan Produk Lokal",   _fmt_rupiah(rev_pr)],
+        ["Pendapatan Paket Wisata",   _fmt_rupiah(rev_pk)],
+    ], [10*cm, 7*cm], header_color=BRAND))
+ 
+    # Homestay detail
+    story.append(Paragraph("Detail Pemesanan Homestay (10 Terbaru)", section_s))
+    hs_rows = [["Nama Tamu", "Homestay", "Check-in", "Check-out", "Total", "Status"]]
+    for b in hs_qs.select_related('homestay').order_by('-created_at')[:10]:
+        hs_rows.append([b.customer_name, b.homestay.name,
+                         b.check_in.strftime('%d/%m/%Y'), b.check_out.strftime('%d/%m/%Y'),
+                         _fmt_rupiah(b.total_price), b.get_status_display()])
+    if len(hs_rows) == 1:
+        hs_rows.append(["Tidak ada data", "-", "-", "-", "-", "-"])
+    story.append(make_table(hs_rows, [3.5*cm, 4*cm, 2.5*cm, 2.5*cm, 3*cm, 2.5*cm]))
+ 
+    # Package detail
+    story.append(Paragraph("Detail Pemesanan Paket Wisata (10 Terbaru)", section_s))
+    pk_rows = [["Nama Tamu", "Paket", "Tgl Tour", "Peserta", "Total", "Status"]]
+    for b in pk_qs.select_related('tour_package').order_by('-created_at')[:10]:
+        pk_rows.append([b.customer_name, b.tour_package.name,
+                         b.tour_date.strftime('%d/%m/%Y'), str(b.num_participants),
+                         _fmt_rupiah(b.total_price), b.get_status_display()])
+    if len(pk_rows) == 1:
+        pk_rows.append(["Tidak ada data", "-", "-", "-", "-", "-"])
+    story.append(make_table(pk_rows, [3.5*cm, 4.5*cm, 2.5*cm, 2*cm, 3*cm, 2.5*cm]))
+ 
+    story += [
+        Spacer(1, 0.5*cm),
+        HRFlowable(width="100%", thickness=1, color=colors.HexColor('#aed6f1')),
+        Spacer(1, 0.2*cm),
+        Paragraph(f"Laporan digenerate otomatis — {date.today().strftime('%d %B %Y')}", footer_s),
+    ]
+ 
+    doc.build(story)
+    buffer.seek(0)
+    response = HttpResponse(buffer, content_type='application/pdf')
+    response['Content-Disposition'] = (
+        f'attachment; filename="laporan_wisata_{date_from}_{date_to}.pdf"')
+    return response
