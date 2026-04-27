@@ -33,6 +33,7 @@ ALLOWED_HOSTS = [
 
 CSRF_TRUSTED_ORIGINS = [
     "https://dtpl-project-production.up.railway.app",
+    "https://desamanudjaya.up.railway.app",
 ]
 
 # Application definition
