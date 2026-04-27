@@ -177,4 +177,5 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 CSRF_TRUSTED_ORIGINS = [
     "https://focused-expression-staging.up.railway.app",
+    "https://desamanudjaya.up.railway.app",
 ]
