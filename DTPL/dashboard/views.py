@@ -1,8 +1,10 @@
+from collections import Counter
 import json
 from django.shortcuts import render, redirect
-from django.db.models import Sum, Count
+from django.db.models import Sum, Count, F, FloatField, ExpressionWrapper, DurationField, Avg
 from products.models import Product, ProductOrder
-from homestays.models import Homestay, HomestayBooking # Pastikan import ini benar
+from homestays.models import Homestay, HomestayBooking
+from reviews.models import Review
 from guide.models import Guide, PackageBooking
 from datetime import date, timedelta
 from django.http import HttpResponse
@@ -151,38 +153,59 @@ def analytics_dashboard(request):
  
     date_from, date_to, period, period_label = _parse_period(request)
  
-    # ── filtered querysets ───────────────────────────────────────────────
+    # ── Filtered querysets (berdasarkan periode yang dipilih) ─────────────────
     homestay_qs = HomestayBooking.objects.filter(
         created_at__date__gte=date_from, created_at__date__lte=date_to)
-    product_qs  = ProductOrder.objects.filter(
+    product_qs = ProductOrder.objects.filter(
         created_at__date__gte=date_from, created_at__date__lte=date_to)
-    package_qs  = PackageBooking.objects.filter(
+    package_qs = PackageBooking.objects.filter(
         created_at__date__gte=date_from, created_at__date__lte=date_to)
  
     confirmed_product = ['confirmed', 'ready_pickup', 'shipping', 'completed']
     confirmed_other   = ['confirmed', 'completed']
  
-    # ── KPI ──────────────────────────────────────────────────────────────
-    total_visitors    = homestay_qs.count() + package_qs.count()
-    rev_homestay      = homestay_qs.filter(status__in=confirmed_other).aggregate(
-        t=Sum('total_price'))['t'] or 0
-    rev_product       = product_qs.filter(status__in=confirmed_product).aggregate(
-        t=Sum('product__price'))['t'] or 0
-    rev_package       = package_qs.filter(status__in=confirmed_other).aggregate(
-        t=Sum('total_price'))['t'] or 0
-    total_revenue     = rev_homestay + rev_product + rev_package
+    # ── KPI Utama ─────────────────────────────────────────────────────────────
+    total_visitors     = homestay_qs.count() + package_qs.count()
+    rev_homestay       = homestay_qs.filter(status__in=confirmed_other).aggregate(
+                            t=Sum('total_price'))['t'] or 0
+    rev_product        = product_qs.filter(status__in=confirmed_product).aggregate(
+                            t=Sum('product__price'))['t'] or 0
+    rev_package        = package_qs.filter(status__in=confirmed_other).aggregate(
+                            t=Sum('total_price'))['t'] or 0
+    total_revenue      = rev_homestay + rev_product + rev_package
     total_transactions = homestay_qs.count() + product_qs.count() + package_qs.count()
-    avg_revenue       = total_revenue / total_transactions if total_transactions else 0
+    avg_revenue        = total_revenue / total_transactions if total_transactions else 0
  
-    # ── monthly trend (last 6 months) ───────────────────────────────────
-    today         = date.today()
+    # ── Breakdown cards ───────────────────────────────────────────────────────
+    breakdown = [
+        {
+            'label': 'Homestay', 'count': homestay_qs.count(),
+            'revenue': float(rev_homestay), 'revenue_fmt': _fmt_rupiah(rev_homestay),
+            'icon': 'fa-bed', 'color': '#3b82f6',
+        },
+        {
+            'label': 'Produk Lokal', 'count': product_qs.count(),
+            'revenue': float(rev_product), 'revenue_fmt': _fmt_rupiah(rev_product),
+            'icon': 'fa-box-open', 'color': '#f59e0b',
+        },
+        {
+            'label': 'Paket Wisata', 'count': package_qs.count(),
+            'revenue': float(rev_package), 'revenue_fmt': _fmt_rupiah(rev_package),
+            'icon': 'fa-map-marked-alt', 'color': '#10b981',
+        },
+    ]
+ 
+    # ── Rentang 6 bulan terakhir ──────────────────────────────────────────────
+    today          = date.today()
     six_months_ago = (today.replace(day=1) - timedelta(days=150)).replace(day=1)
  
+    # Daftar awal-bulan untuk 6 bulan terakhir (urut lama → baru)
     months = [
         (today.replace(day=1) - timedelta(days=i * 30)).replace(day=1)
         for i in range(5, -1, -1)
     ]
  
+    # ── Helper: revenue per bulan ─────────────────────────────────────────────
     def monthly_revenue(model, price_field, statuses):
         return {
             r['month'].date().replace(day=1): float(r['total'])
@@ -193,6 +216,18 @@ def analytics_dashboard(request):
             .annotate(total=Sum(price_field))
         }
  
+    # ── Helper: count booking per bulan ──────────────────────────────────────
+    def monthly_count(model):
+        return {
+            r['month'].date().replace(day=1): r['cnt']
+            for r in model.objects
+            .filter(created_at__date__gte=six_months_ago)
+            .annotate(month=TruncMonth('created_at'))
+            .values('month')
+            .annotate(cnt=Count('id'))
+        }
+ 
+    # ── Data chart revenue ────────────────────────────────────────────────────
     hs_d   = monthly_revenue(HomestayBooking, 'total_price', confirmed_other)
     pkg_d  = monthly_revenue(PackageBooking,  'total_price', confirmed_other)
     prod_d = {
@@ -210,32 +245,31 @@ def analytics_dashboard(request):
     chart_product  = [prod_d.get(m, 0) for m in months]
     chart_total    = [a + b + c for a, b, c in zip(chart_homestay, chart_package, chart_product)]
  
-    # ── visitor count trend ──────────────────────────────────────────────
-    def monthly_count(model):
-        return {
-            r['month'].date().replace(day=1): r['cnt']
-            for r in model.objects
-            .filter(created_at__date__gte=six_months_ago)
-            .annotate(month=TruncMonth('created_at'))
-            .values('month')
-            .annotate(cnt=Count('id'))
-        }
- 
+    # ── Data chart kunjungan (count booking, HARUS sebelum mom_visitors_pct) ──
     hs_cnt  = monthly_count(HomestayBooking)
     pkg_cnt = monthly_count(PackageBooking)
     chart_visitors = [hs_cnt.get(m, 0) + pkg_cnt.get(m, 0) for m in months]
  
-    # ── breakdown cards ──────────────────────────────────────────────────
-    breakdown = [
-        {'label': 'Homestay',     'count': homestay_qs.count(), 'revenue': float(rev_homestay),
-         'revenue_fmt': _fmt_rupiah(rev_homestay), 'icon': 'fa-bed',          'color': '#3b82f6'},
-        {'label': 'Produk Lokal', 'count': product_qs.count(),  'revenue': float(rev_product),
-         'revenue_fmt': _fmt_rupiah(rev_product),  'icon': 'fa-box-open',     'color': '#f59e0b'},
-        {'label': 'Paket Wisata', 'count': package_qs.count(),  'revenue': float(rev_package),
-         'revenue_fmt': _fmt_rupiah(rev_package),  'icon': 'fa-map-marked-alt','color': '#10b981'},
-    ]
+    # ── Data chart booking count homestay (untuk bar chart, bukan revenue) ────
+    chart_homestay_count = [hs_cnt.get(m, 0) for m in months]  # reuse hs_cnt
  
-    # ── top performers ───────────────────────────────────────────────────
+    # ── MoM growth % (harus setelah semua chart_* terdefinisi) ───────────────
+    def pct_change(current, previous):
+        if (previous is None or previous == 0) and current > 0:
+            return 100.0
+        
+        # Jika keduanya 0, maka memang 0%
+        if (previous is None or previous == 0) and (current == 0):
+            return 0.0
+        
+        return round(((current - previous) / previous) * 100, 1)
+        
+    mom_visitors_pct = pct_change(chart_visitors[-1],  chart_visitors[-2])  if len(chart_visitors)  >= 2 else 0
+    mom_homestay_pct = pct_change(chart_homestay[-1],  chart_homestay[-2])  if len(chart_homestay)  >= 2 else 0
+    mom_revenue_pct  = pct_change(chart_total[-1],     chart_total[-2])     if len(chart_total)     >= 2 else 0
+    mom_product_pct  = pct_change(chart_product[-1],   chart_product[-2])   if len(chart_product)   >= 2 else 0
+ 
+    # ── Top performers ────────────────────────────────────────────────────────
     top_homestays = (
         HomestayBooking.objects
         .filter(created_at__date__gte=date_from, created_at__date__lte=date_to,
@@ -253,34 +287,151 @@ def analytics_dashboard(request):
         .order_by('-total')[:5]
     )
  
+    # ── Top products ──────────────────────────────────────────────────────────
+    top_products = (
+        ProductOrder.objects
+        .filter(
+            created_at__date__gte=date_from,
+            created_at__date__lte=date_to,
+            status__in=confirmed_product,
+        )
+        .values('product__name', 'product__category__name')
+        .annotate(
+            qty=Sum('quantity'),
+            revenue=Sum(
+                ExpressionWrapper(
+                    F('quantity') * F('product__price'),
+                    output_field=FloatField()
+                )
+            ),
+        )
+        .order_by('-qty')[:6]
+    )
+ 
+    # ── Rata-rata durasi menginap (malam) ─────────────────────────────────────
+    hs_durations = list(
+        HomestayBooking.objects
+        .filter(created_at__date__gte=date_from, created_at__date__lte=date_to)
+        .annotate(
+            duration=ExpressionWrapper(
+                F('check_out') - F('check_in'),
+                output_field=DurationField()
+            )
+        )
+        .values_list('duration', flat=True)
+    )
+    if hs_durations:
+        total_days = sum(
+            (d.days if d is not None and hasattr(d, 'days') else 0)
+            for d in hs_durations
+        )
+        avg_stay_nights = round(total_days / len(hs_durations), 1)
+    else:
+        avg_stay_nights = 0
+ 
+    # ── Customer satisfaction (avg rating semua review approved) ──────────────
+    avg_rating_raw = Review.objects.filter(is_approved=True).aggregate(avg=Avg('rating'))['avg']
+    avg_rating     = round(float(avg_rating_raw), 1) if avg_rating_raw else 0
+ 
+    # ── Total kunjungan 6 bulan ───────────────────────────────────────────────
+    total_six_months = sum(chart_visitors)
+ 
+    # ── Repeat visitor rate ───────────────────────────────────────────────────
+    hs_emails     = list(HomestayBooking.objects.values_list('email', flat=True))
+    pkg_emails    = list(PackageBooking.objects.values_list('email', flat=True))
+    email_counter = Counter(hs_emails + pkg_emails)
+    repeat_count  = sum(1 for v in email_counter.values() if v > 1)
+    total_unique  = len(email_counter)
+    repeat_rate   = round((repeat_count / total_unique * 100), 1) if total_unique else 0
+ 
+    # ── Target KPI progress ───────────────────────────────────────────────────
+    TARGET_VISITORS = 200
+    TARGET_HOMESTAY = 20
+    visitor_pct  = min(round((total_visitors        / TARGET_VISITORS * 100), 1), 100)
+    homestay_pct = min(round((breakdown[0]['count'] / TARGET_HOMESTAY * 100), 1), 100)
+ 
+    # ── Ranking destinasi (dari PackageBooking) ───────────────────────────────
+    dest_colors  = ['#22c55e', '#3b82f6', '#f59e0b', '#e11d48', '#8b5cf6']
+    dest_qs_raw  = list(
+        PackageBooking.objects
+        .filter(created_at__date__gte=date_from, created_at__date__lte=date_to)
+        .values('tour_package__name')
+        .annotate(visits=Count('id'))
+        .order_by('-visits')[:5]
+    )
+    max_visits   = dest_qs_raw[0]['visits'] if dest_qs_raw else 1
+    dest_ranking = [
+        {
+            'name':   d['tour_package__name'] or 'Paket Tidak Diketahui',
+            'visits': d['visits'],
+            'pct':    round(d['visits'] / max_visits * 100, 1),
+            'color':  dest_colors[i % len(dest_colors)],
+        }
+        for i, d in enumerate(dest_qs_raw)
+    ]
+ 
+    # ── Context ───────────────────────────────────────────────────────────────
     context = {
-        'active_nav': 'analytics',
-        'period': period,
+        'active_nav':   'analytics',
+        'period':       period,
         'period_label': period_label,
-        'date_from': date_from.isoformat(),
-        'date_to':   date_to.isoformat(),
-        # KPI
-        'total_visitors':      total_visitors,
-        'total_revenue_fmt':   _fmt_rupiah(total_revenue),
-        'total_transactions':  total_transactions,
-        'avg_revenue_fmt':     _fmt_rupiah(avg_revenue),
-        'rev_homestay_fmt':    _fmt_rupiah(rev_homestay),
-        'rev_product_fmt':     _fmt_rupiah(rev_product),
-        'rev_package_fmt':     _fmt_rupiah(rev_package),
-        # Charts (JSON for Chart.js)
+        'date_from':    date_from.isoformat(),
+        'date_to':      date_to.isoformat(),
+ 
+        # KPI utama
+        'total_visitors':     total_visitors,
+        'total_revenue_fmt':  _fmt_rupiah(total_revenue),
+        'total_transactions': total_transactions,
+        'avg_revenue_fmt':    _fmt_rupiah(avg_revenue),
+        'rev_homestay_fmt':   _fmt_rupiah(rev_homestay),
+        'rev_product_fmt':    _fmt_rupiah(rev_product),
+        'rev_package_fmt':    _fmt_rupiah(rev_package),
+ 
+        # Breakdown cards
+        'breakdown':     breakdown,
+        'top_homestays': top_homestays,
+        'top_packages':  top_packages,
+        'top_products':  top_products,
+ 
+        # Charts — revenue
         'chart_labels_json':   json.dumps(chart_labels),
         'chart_total_json':    json.dumps(chart_total),
         'chart_homestay_json': json.dumps(chart_homestay),
         'chart_package_json':  json.dumps(chart_package),
         'chart_product_json':  json.dumps(chart_product),
         'chart_visitors_json': json.dumps(chart_visitors),
-        'donut_labels_json':   json.dumps([b['label']   for b in breakdown]),
-        'donut_data_json':     json.dumps([b['revenue'] for b in breakdown]),
-        'donut_colors_json':   json.dumps([b['color']   for b in breakdown]),
-        # Tables
-        'breakdown':     breakdown,
-        'top_homestays': top_homestays,
-        'top_packages':  top_packages,
+ 
+        # Chart — booking count homestay (bar chart)
+        'chart_homestay_count_json': json.dumps(chart_homestay_count),
+ 
+        # Donut breakdown
+        'donut_labels_json': json.dumps([b['label']   for b in breakdown]),
+        'donut_data_json':   json.dumps([b['revenue'] for b in breakdown]),
+        'donut_colors_json': json.dumps([b['color']   for b in breakdown]),
+ 
+        # MoM growth %
+        'mom_visitors_pct': mom_visitors_pct,
+        'mom_homestay_pct': mom_homestay_pct,
+        'mom_revenue_pct':  mom_revenue_pct,
+        'mom_product_pct':  mom_product_pct,
+ 
+        # Target KPI
+        'visitor_pct':     visitor_pct,
+        'homestay_pct':    homestay_pct,
+        'target_visitors': TARGET_VISITORS,
+        'target_homestay': TARGET_HOMESTAY,
+ 
+        # Bottom stats
+        'avg_stay_nights':  avg_stay_nights,
+        'avg_rating':       avg_rating,
+        'total_six_months': total_six_months,
+        'repeat_rate':      repeat_rate,
+ 
+        # Destinasi ranking
+        'dest_ranking':     dest_ranking,
+        'dest_labels_json': json.dumps([d['name']   for d in dest_ranking]),
+        'dest_data_json':   json.dumps([d['visits'] for d in dest_ranking]),
+        'dest_colors_json': json.dumps([d['color']  for d in dest_ranking]),
     }
     return render(request, 'dashboard/analytics.html', context)
  

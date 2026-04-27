@@ -1,0 +1,99 @@
+{# dashboard/templates/dashboard/analytics/_tab_tren.html #}
+{# Context: top_homestays, top_products #}
+{# Charts: visitorChart, homestayChart, revenueChart (rendered by _scripts.html) #}
+
+<div class="tab-pane active" id="tab-tren">
+
+  <!-- Tren Kunjungan (line chart) -->
+  <div class="card" style="margin-bottom:20px;">
+    <p class="card-title">Tren Kunjungan Wisatawan (6 Bulan Terakhir)</p>
+    <p class="card-sub">Grafik perkembangan jumlah kunjungan wisatawan</p>
+    <canvas id="visitorChart" height="75"></canvas>
+  </div>
+
+  <!-- Tren Pemesanan Homestay + Tren Pendapatan -->
+  <div class="grid-2" style="margin-bottom:20px;">
+    <div class="card">
+      <p class="card-title">Tren Pemesanan Homestay</p>
+      <p class="card-sub">Jumlah pemesanan homestay per bulan</p>
+      <canvas id="homestayChart" height="150"></canvas>
+    </div>
+    <div class="card">
+      <p class="card-title">Tren Pendapatan</p>
+      <p class="card-sub">Pendapatan homestay dan penjualan produk</p>
+      <canvas id="revenueChart" height="150"></canvas>
+    </div>
+  </div>
+
+  <!-- Tabel Kinerja Homestay + Tabel Produk -->
+  <div class="grid-2">
+
+    <!-- Kinerja Homestay -->
+    <div class="card">
+      <p class="card-title">Kinerja Homestay</p>
+      <p class="card-sub">Top 5 homestay berdasarkan jumlah pemesanan</p>
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Homestay</th>
+            <th>Pemesanan</th>
+            <th>Pendapatan</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for hs in top_homestays %}
+          <tr>
+            <td>{{ hs.homestay__name }}</td>
+            <td><span class="occ-badge">{{ hs.cnt }}x</span></td>
+            <td>Rp {{ hs.total|floatformat:0 }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="3" style="text-align:center;color:var(--text-light);padding:24px;">
+              Belum ada data homestay pada periode ini
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Penjualan Produk Lokal -->
+    <div class="card">
+      <p class="card-title">Penjualan Produk Lokal</p>
+      <p class="card-sub">Top selling produk berdasarkan kuantitas terjual</p>
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Produk</th>
+            <th>Terjual</th>
+            <th>Pendapatan</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for prod in top_products %}
+          <tr>
+            <td>
+              {{ prod.product__name }}
+              {% if prod.product__category__name %}
+                <span class="prod-tag" style="background:#f1f5f9;color:#475569;">
+                  {{ prod.product__category__name }}
+                </span>
+              {% endif %}
+            </td>
+            <td>{{ prod.qty }}</td>
+            <td>Rp {{ prod.revenue|floatformat:0 }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="3" style="text-align:center;color:var(--text-light);padding:24px;">
+              Belum ada data penjualan produk pada periode ini
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>

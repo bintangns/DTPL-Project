@@ -1,0 +1,208 @@
+{# dashboard/templates/dashboard/analytics/_header.html #}
+{# Context: period, period_label, total_visitors, breakdown, rev_homestay_fmt,  #}
+{#          rev_product_fmt, mom_visitors_pct, mom_homestay_pct, mom_revenue_pct, #}
+{#          mom_product_pct, visitor_pct, homestay_pct, avg_rating,              #}
+{#          target_visitors, target_homestay                                      #}
+{% load i18n %}
+
+<!-- ── Header ── -->
+<div class="dash-header">
+  <div>
+    <h1>Dashboard Analytics</h1>
+    <p>Laporan kinerja wisata Desa Manud Jaya &mdash; Periode {{ period_label }}</p>
+  </div>
+  <div class="export-group">
+    <a href="{% url 'dashboard:export_pdf' %}?period={{ period }}" class="btn-export">
+      <i class="fas fa-file-pdf"></i> Export PDF
+    </a>
+    <a href="{% url 'dashboard:export_excel' %}?period={{ period }}" class="btn-export">
+      <i class="fas fa-file-excel"></i> Export Excel
+    </a>
+  </div>
+</div>
+
+<!-- ── Period Selector ── -->
+<div class="period-bar">
+  <div class="period-label">
+    <i class="far fa-calendar-alt"></i>
+    <span>Periode Tampilan:</span>
+  </div>
+  <div class="period-btns">
+    <a href="?period=this_month" class="btn-period {% if period == 'this_month' %}active{% endif %}">1 Bulan</a>
+    <a href="?period=last_month" class="btn-period {% if period == 'last_month' %}active{% endif %}">3 Bulan</a>
+    <a href="?period=this_year"  class="btn-period {% if period == 'this_year'  %}active{% endif %}">6 Bulan</a>
+  </div>
+</div>
+
+<!-- ── KPI Cards ── -->
+<div class="kpi-grid">
+
+  {% comment %} Macro-like snippet untuk growth badge {% endcomment %}
+  <div class="kpi-card">
+    <div class="kpi-top">
+      <span class="kpi-name">Total Kunjungan</span>
+      <div class="kpi-icon blue"><i class="fas fa-users"></i></div>
+    </div>
+    <div class="kpi-value">{{ total_visitors }}</div>
+    <div class="kpi-sub">wisatawan periode ini</div>
+    {% if mom_visitors_pct >= 0 %}
+      <div class="kpi-growth">
+        <i class="fas fa-arrow-up"></i> +{{ mom_visitors_pct }}%
+        <span class="from">dari bulan lalu</span>
+      </div>
+    {% else %}
+      <div class="kpi-growth" style="color:#dc2626;background:#fff1f2;border-color:#fecdd3;">
+        <i class="fas fa-arrow-down"></i> {{ mom_visitors_pct }}%
+        <span class="from">dari bulan lalu</span>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-top">
+      <span class="kpi-name">Pemesanan Homestay</span>
+      <div class="kpi-icon green"><i class="fas fa-home"></i></div>
+    </div>
+    <div class="kpi-value">{{ breakdown.0.count }}</div>
+    <div class="kpi-sub">pemesanan periode ini</div>
+    {% if mom_homestay_pct >= 0 %}
+      <div class="kpi-growth">
+        <i class="fas fa-arrow-up"></i> +{{ mom_homestay_pct }}%
+        <span class="from">dari bulan lalu</span>
+      </div>
+    {% else %}
+      <div class="kpi-growth" style="color:#dc2626;background:#fff1f2;border-color:#fecdd3;">
+        <i class="fas fa-arrow-down"></i> {{ mom_homestay_pct }}%
+        <span class="from">dari bulan lalu</span>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-top">
+      <span class="kpi-name">Pendapatan Homestay</span>
+      <div class="kpi-icon amber"><i class="fas fa-chart-line"></i></div>
+    </div>
+    <div class="kpi-value" style="font-size:1.4rem;">{{ rev_homestay_fmt }}</div>
+    <div class="kpi-sub">pendapatan periode ini</div>
+    {% if mom_revenue_pct >= 0 %}
+      <div class="kpi-growth">
+        <i class="fas fa-arrow-up"></i> +{{ mom_revenue_pct }}%
+        <span class="from">dari bulan lalu</span>
+      </div>
+    {% else %}
+      <div class="kpi-growth" style="color:#dc2626;background:#fff1f2;border-color:#fecdd3;">
+        <i class="fas fa-arrow-down"></i> {{ mom_revenue_pct }}%
+        <span class="from">dari bulan lalu</span>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-top">
+      <span class="kpi-name">Penjualan Produk</span>
+      <div class="kpi-icon rose"><i class="fas fa-shopping-bag"></i></div>
+    </div>
+    <div class="kpi-value" style="font-size:1.4rem;">{{ rev_product_fmt }}</div>
+    <div class="kpi-sub">penjualan periode ini</div>
+    {% if mom_product_pct >= 0 %}
+      <div class="kpi-growth">
+        <i class="fas fa-arrow-up"></i> +{{ mom_product_pct }}%
+        <span class="from">dari bulan lalu</span>
+      </div>
+    {% else %}
+      <div class="kpi-growth" style="color:#dc2626;background:#fff1f2;border-color:#fecdd3;">
+        <i class="fas fa-arrow-down"></i> {{ mom_product_pct }}%
+        <span class="from">dari bulan lalu</span>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<!-- ── Target KPI Section ── -->
+<div class="target-section">
+  <div class="target-head">
+    <div class="icon-circle"><i class="fas fa-bullseye"></i></div>
+    <h3>Pencapaian Target KPI Desa Manud Jaya</h3>
+  </div>
+  <p class="target-desc">Target outcome program pemberdayaan masyarakat desa berbasis teknologi informasi</p>
+
+  <div class="target-grid">
+    <div class="prog-item">
+      <div class="prog-top">
+        <span class="prog-name">Kunjungan Wisatawan/Bulan</span>
+        {% if total_visitors >= target_visitors %}
+          <span class="badge-done">Target Tercapai ✓</span>
+        {% endif %}
+      </div>
+      <div class="prog-bar-bg">
+        <div class="prog-fill" style="--progress-width: {{ visitor_pct }}%;"></div>
+      </div>
+      <div class="prog-bottom">
+        <span>{{ total_visitors }} / {{ target_visitors }} target</span>
+        <span class="prog-pct">{{ visitor_pct }}%</span>
+      </div>
+    </div>
+
+    <div class="prog-item">
+      <div class="prog-top">
+        <span class="prog-name">Pemesanan Homestay/Bulan</span>
+        {% if breakdown.0.count >= target_homestay %}
+          <span class="badge-done">Target Tercapai ✓</span>
+        {% endif %}
+      </div>
+      <div class="prog-bar-bg">
+        <div class="prog-fill" style="--progress-width: {{ homestay_pct }}%;"></div>
+      </div>
+      <div class="prog-bottom">
+        <span>{{ breakdown.0.count }} / {{ target_homestay }} target</span>
+        <span class="prog-pct">{{ homestay_pct }}%</span>
+      </div>
+    </div>
+
+    <div class="prog-item">
+      <div class="prog-top">
+        <span class="prog-name">Rata-rata Rating Kepuasan</span>
+        {% if avg_rating >= 4.0 %}
+          <span class="badge-done">Sangat Baik ✓</span>
+        {% endif %}
+      </div>
+      <div class="prog-bar-bg">
+        <div class="prog-fill" style="--progress-width: {% widthratio avg_rating 5 100 %}%;"></div>
+      </div>
+      <div class="prog-bottom">
+        <span>{{ avg_rating }} / 5.0 target</span>
+        <span class="prog-pct">{% widthratio avg_rating 5 100 %}%</span>
+      </div>
+    </div>
+  </div>
+
+  {% if total_visitors >= target_visitors and breakdown.0.count >= target_homestay %}
+    <div class="info-alert">
+      <i class="fas fa-leaf"></i>
+      <div>
+        <strong>Target Outcome Tercapai!</strong><br>
+        Selamat! Desa Manud Jaya telah mencapai target kunjungan &ge;{{ target_visitors }}/bulan
+        dan pemesanan homestay &ge;{{ target_homestay }}/bulan.
+      </div>
+    </div>
+  {% elif total_visitors > 0 %}
+    <div class="info-alert" style="background:#fffbeb;border-color:#fde68a;color:#78350f;">
+      <i class="fas fa-chart-line" style="color:#d97706;"></i>
+      <div>
+        <strong>Menuju Target!</strong><br>
+        Kunjungan <strong>{{ visitor_pct }}%</strong> dari target {{ target_visitors }}/bulan,
+        pemesanan homestay <strong>{{ homestay_pct }}%</strong> dari target {{ target_homestay }}/bulan.
+      </div>
+    </div>
+  {% else %}
+    <div class="info-alert" style="background:#f8fafc;border-color:#e2e8f0;color:#475569;">
+      <i class="fas fa-info-circle" style="color:#64748b;"></i>
+      <div>
+        <strong>Belum ada data untuk periode ini.</strong><br>
+        Pilih periode lain atau tunggu data masuk.
+      </div>
+    </div>
+  {% endif %}
+</div>
