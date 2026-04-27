@@ -1,0 +1,33 @@
+{# dashboard/templates/dashboard/analytics/_bottom_stats.html #}
+{# Context: avg_stay_nights, avg_rating, repeat_rate, total_six_months #}
+
+<!-- ── Bottom Stats ── -->
+<div class="stat-grid">
+
+  <div class="stat-card">
+    <div class="stat-label">Rata-rata Durasi Menginap</div>
+    <div class="stat-value">{{ avg_stay_nights }} malam</div>
+    <div class="stat-hint">per pemesanan homestay</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-label">Customer Satisfaction</div>
+    <div class="stat-value">
+      {% if avg_rating %}{{ avg_rating }}/5.0{% else %}–{% endif %}
+    </div>
+    <div class="stat-hint">rata-rata rating review</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-label">Repeat Visitor Rate</div>
+    <div class="stat-value">{{ repeat_rate }}%</div>
+    <div class="stat-hint">wisatawan yang kembali</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-label">Total 6 Bulan Terakhir</div>
+    <div class="stat-value">{{ total_six_months }}</div>
+    <div class="stat-hint">total kunjungan</div>
+  </div>
+
+</div>

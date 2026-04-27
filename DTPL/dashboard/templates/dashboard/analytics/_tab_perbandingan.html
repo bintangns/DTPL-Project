@@ -1,0 +1,120 @@
+{# dashboard/templates/dashboard/analytics/_tab_perbandingan.html #}
+{# Context: mom_visitors_pct, mom_homestay_pct, mom_revenue_pct, mom_product_pct #}
+{#          top_homestays, top_products #}
+{# Charts: momChart (rendered by _scripts.html) #}
+
+<div class="tab-pane" id="tab-perbandingan">
+
+  <!-- MoM Bar Chart + Summary Badges -->
+  <div class="card" style="margin-bottom:20px;">
+    <p class="card-title">Perbandingan Month over Month (MoM)</p>
+    <p class="card-sub">Perbandingan kinerja bulan ini vs bulan sebelumnya</p>
+    <canvas id="momChart" height="100"></canvas>
+
+    <div class="mom-stats">
+
+      <div class="mom-item">
+        <div class="mom-metric">Kunjungan</div>
+        <div class="mom-val" {% if mom_visitors_pct < 0 %}style="color:#dc2626;"{% endif %}>
+          <i class="fas fa-arrow-{% if mom_visitors_pct >= 0 %}up{% else %}down{% endif %}"></i>
+          {% if mom_visitors_pct >= 0 %}+{% endif %}{{ mom_visitors_pct }}%
+        </div>
+      </div>
+
+      <div class="mom-item">
+        <div class="mom-metric">Pemesanan Homestay</div>
+        <div class="mom-val" {% if mom_homestay_pct < 0 %}style="color:#dc2626;"{% endif %}>
+          <i class="fas fa-arrow-{% if mom_homestay_pct >= 0 %}up{% else %}down{% endif %}"></i>
+          {% if mom_homestay_pct >= 0 %}+{% endif %}{{ mom_homestay_pct }}%
+        </div>
+      </div>
+
+      <div class="mom-item">
+        <div class="mom-metric">Pendapatan (juta)</div>
+        <div class="mom-val" {% if mom_revenue_pct < 0 %}style="color:#dc2626;"{% endif %}>
+          <i class="fas fa-arrow-{% if mom_revenue_pct >= 0 %}up{% else %}down{% endif %}"></i>
+          {% if mom_revenue_pct >= 0 %}+{% endif %}{{ mom_revenue_pct }}%
+        </div>
+      </div>
+
+      <div class="mom-item">
+        <div class="mom-metric">Penjualan Produk (juta)</div>
+        <div class="mom-val" {% if mom_product_pct < 0 %}style="color:#dc2626;"{% endif %}>
+          <i class="fas fa-arrow-{% if mom_product_pct >= 0 %}up{% else %}down{% endif %}"></i>
+          {% if mom_product_pct >= 0 %}+{% endif %}{{ mom_product_pct }}%
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Tabel detail (referensi cepat periode ini) -->
+  <div class="grid-2">
+
+    <div class="card">
+      <p class="card-title">Kinerja Homestay</p>
+      <p class="card-sub">Top 5 homestay berdasarkan jumlah pemesanan</p>
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Homestay</th>
+            <th>Pemesanan</th>
+            <th>Pendapatan</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for hs in top_homestays %}
+          <tr>
+            <td>{{ hs.homestay__name }}</td>
+            <td><span class="occ-badge">{{ hs.cnt }}x</span></td>
+            <td>Rp {{ hs.total|floatformat:0 }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="3" style="text-align:center;color:var(--text-light);padding:24px;">
+              Belum ada data homestay
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <p class="card-title">Penjualan Produk Lokal</p>
+      <p class="card-sub">Top selling produk berdasarkan kuantitas terjual</p>
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Produk</th>
+            <th>Terjual</th>
+            <th>Pendapatan</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for prod in top_products %}
+          <tr>
+            <td>
+              {{ prod.product__name }}
+              {% if prod.product__category__name %}
+                <span class="prod-tag" style="background:#f1f5f9;color:#475569;">
+                  {{ prod.product__category__name }}
+                </span>
+              {% endif %}
+            </td>
+            <td>{{ prod.qty }}</td>
+            <td>Rp {{ prod.revenue|floatformat:0 }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="3" style="text-align:center;color:var(--text-light);padding:24px;">
+              Belum ada data penjualan produk
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>

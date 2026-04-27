@@ -1,0 +1,234 @@
+{# dashboard/templates/dashboard/analytics/_scripts.html #}
+{# Context (JSON): chart_labels_json, chart_visitors_json, chart_homestay_json, #}
+{#                 chart_product_json, chart_package_json, chart_homestay_count_json, #}
+{#                 dest_labels_json, dest_data_json, dest_colors_json             #}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// ── Shared defaults ───────────────────────────────────────────────────────────
+Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+Chart.defaults.color = '#64748b';
+
+// ── Parse data from Django context ───────────────────────────────────────────
+const LABELS  = JSON.parse('{{ chart_labels_json|escapejs }}');
+const V_DATA  = JSON.parse('{{ chart_visitors_json|escapejs }}');
+const HS_DATA = JSON.parse('{{ chart_homestay_json|escapejs }}');   // revenue homestay
+const PR_DATA = JSON.parse('{{ chart_product_json|escapejs }}');    // revenue produk
+const PK_DATA = JSON.parse('{{ chart_package_json|escapejs }}');    // revenue paket
+const HS_CNT  = JSON.parse('{{ chart_homestay_count_json|escapejs }}'); // booking count
+
+const DEST_LABELS = JSON.parse('{{ dest_labels_json|escapejs }}');
+const DEST_DATA   = JSON.parse('{{ dest_data_json|escapejs }}');
+const DEST_COLORS = JSON.parse('{{ dest_colors_json|escapejs }}');
+
+// ── 1. Visitor Trend — Line Chart ─────────────────────────────────────────────
+new Chart(document.getElementById('visitorChart'), {
+  type: 'line',
+  data: {
+    labels: LABELS,
+    datasets: [{
+      label: 'Kunjungan',
+      data: V_DATA,
+      borderColor: '#22c55e',
+      backgroundColor: 'rgba(34,197,94,0.08)',
+      fill: true,
+      tension: 0.45,
+      pointRadius: 5,
+      pointBackgroundColor: '#22c55e',
+      pointBorderColor: '#fff',
+      pointBorderWidth: 2,
+      pointHoverRadius: 7,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: true, position: 'bottom', labels: { usePointStyle: true, boxWidth: 8 } }
+    },
+    scales: {
+      y: { beginAtZero: true, grid: { color: '#f1f5f9', borderDash: [4,4] }, border: { dash: [4,4] } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// ── 2. Homestay Booking Count — Bar Chart ─────────────────────────────────────
+new Chart(document.getElementById('homestayChart'), {
+  type: 'bar',
+  data: {
+    labels: LABELS,
+    datasets: [{
+      label: 'Pemesanan',
+      data: HS_CNT,
+      backgroundColor: '#3b82f6',
+      borderRadius: 6,
+      borderSkipped: false,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: true, position: 'bottom', labels: { usePointStyle: true, boxWidth: 8 } }
+    },
+    scales: {
+      y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: '#f1f5f9', borderDash: [4,4] } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// ── 3. Revenue Comparison — Multi-line Chart ──────────────────────────────────
+new Chart(document.getElementById('revenueChart'), {
+  type: 'line',
+  data: {
+    labels: LABELS,
+    datasets: [
+      {
+        label: 'Pendapatan Homestay',
+        data: HS_DATA,
+        borderColor: '#22c55e',
+        backgroundColor: 'rgba(34,197,94,0.06)',
+        fill: false,
+        tension: 0.4,
+        pointRadius: 4,
+        pointBackgroundColor: '#22c55e',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+      },
+      {
+        label: 'Penjualan Produk',
+        data: PR_DATA,
+        borderColor: '#f59e0b',
+        backgroundColor: 'rgba(245,158,11,0.06)',
+        fill: false,
+        tension: 0.4,
+        pointRadius: 4,
+        pointBackgroundColor: '#f59e0b',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: true, position: 'bottom', labels: { usePointStyle: true, boxWidth: 8 } },
+      tooltip: {
+        callbacks: {
+          label: ctx => ` ${ctx.dataset.label}: Rp ${ctx.parsed.y.toLocaleString('id-ID')}`
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        grid: { color: '#f1f5f9', borderDash: [4,4] },
+        ticks: {
+          callback: val => 'Rp ' + (val >= 1000000 ? (val/1000000).toFixed(1) + 'jt' : val.toLocaleString('id-ID'))
+        }
+      },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// ── 4. Destinasi — Doughnut Chart ────────────────────────────────────────────
+new Chart(document.getElementById('destChart'), {
+  type: 'doughnut',
+  data: {
+    labels: DEST_LABELS.length ? DEST_LABELS : ['Belum ada data'],
+    datasets: [{
+      data: DEST_DATA.length ? DEST_DATA : [1],
+      backgroundColor: DEST_COLORS.length ? DEST_COLORS : ['#e2e8f0'],
+      borderWidth: 2,
+      borderColor: '#fff',
+      hoverOffset: 8
+    }]
+  },
+  options: {
+    responsive: true,
+    cutout: '60%',
+    plugins: {
+      legend: {
+        display: true,
+        position: 'bottom',
+        labels: { usePointStyle: true, boxWidth: 8, padding: 12, font: { size: 11 } }
+      },
+      tooltip: {
+        callbacks: {
+          label: ctx => ` ${ctx.label}: ${ctx.parsed} pemesanan`
+        }
+      }
+    }
+  }
+});
+
+// ── 5. MoM Comparison — Grouped Bar Chart ────────────────────────────────────
+const lastMonthVisitors = V_DATA[V_DATA.length - 2] || 0;
+const thisMonthVisitors = V_DATA[V_DATA.length - 1] || 0;
+const lastBookingHS     = HS_CNT[HS_CNT.length - 2] || 0;
+const thisBookingHS     = HS_CNT[HS_CNT.length - 1] || 0;
+const lastRevHS         = HS_DATA[HS_DATA.length - 2] || 0;
+const thisRevHS         = HS_DATA[HS_DATA.length - 1] || 0;
+const lastRevPR         = PR_DATA[PR_DATA.length - 2] || 0;
+const thisRevPR         = PR_DATA[PR_DATA.length - 1] || 0;
+
+new Chart(document.getElementById('momChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Kunjungan', 'Pemesanan', 'Pendapatan (juta)', 'Penjualan Produk (juta)'],
+    datasets: [
+      {
+        label: 'Bulan Lalu',
+        data: [
+          lastMonthVisitors,
+          lastBookingHS,
+          Math.round(lastRevHS / 1000000),
+          Math.round(lastRevPR / 1000000)
+        ],
+        backgroundColor: '#94a3b8',
+        borderRadius: 6,
+        borderSkipped: false,
+      },
+      {
+        label: 'Bulan Ini',
+        data: [
+          thisMonthVisitors,
+          thisBookingHS,
+          Math.round(thisRevHS / 1000000),
+          Math.round(thisRevPR / 1000000)
+        ],
+        backgroundColor: '#22c55e',
+        borderRadius: 6,
+        borderSkipped: false,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: true, position: 'bottom', labels: { usePointStyle: true, boxWidth: 8 } }
+    },
+    scales: {
+      y: { beginAtZero: true, grid: { color: '#f1f5f9', borderDash: [4,4] } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// ── Animate dest-bar progress bars (uses data-pct & data-color attributes) ───
+document.querySelectorAll('.dest-bar').forEach(el => {
+  el.style.width = (el.dataset.pct || '0') + '%';
+  el.style.backgroundColor = el.dataset.color || '#ccc';
+});
+
+// ── Tab Switching ─────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+</script>
