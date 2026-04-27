@@ -255,10 +255,15 @@ def analytics_dashboard(request):
  
     # ── MoM growth % (harus setelah semua chart_* terdefinisi) ───────────────
     def pct_change(current, previous):
-        if previous and previous != 0:
-            return round(((current - previous) / previous) * 100, 1)
-        return 0
- 
+        if (previous is None or previous == 0) and current > 0:
+            return 100.0
+        
+        # Jika keduanya 0, maka memang 0%
+        if (previous is None or previous == 0) and (current == 0):
+            return 0.0
+        
+        return round(((current - previous) / previous) * 100, 1)
+        
     mom_visitors_pct = pct_change(chart_visitors[-1],  chart_visitors[-2])  if len(chart_visitors)  >= 2 else 0
     mom_homestay_pct = pct_change(chart_homestay[-1],  chart_homestay[-2])  if len(chart_homestay)  >= 2 else 0
     mom_revenue_pct  = pct_change(chart_total[-1],     chart_total[-2])     if len(chart_total)     >= 2 else 0

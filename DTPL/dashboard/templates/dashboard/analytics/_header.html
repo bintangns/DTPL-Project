@@ -137,7 +137,7 @@
         {% endif %}
       </div>
       <div class="prog-bar-bg">
-        <div class="prog-fill" style="width:{{ visitor_pct }}%;"></div>
+        <div class="prog-fill" style="--progress-width: {{ visitor_pct }}%;"></div>
       </div>
       <div class="prog-bottom">
         <span>{{ total_visitors }} / {{ target_visitors }} target</span>
@@ -153,7 +153,7 @@
         {% endif %}
       </div>
       <div class="prog-bar-bg">
-        <div class="prog-fill" style="width:{{ homestay_pct }}%;"></div>
+        <div class="prog-fill" style="--progress-width: {{ homestay_pct }}%;"></div>
       </div>
       <div class="prog-bottom">
         <span>{{ breakdown.0.count }} / {{ target_homestay }} target</span>
@@ -169,7 +169,7 @@
         {% endif %}
       </div>
       <div class="prog-bar-bg">
-        <div class="prog-fill" style="width:{% widthratio avg_rating 5 100 %}%;"></div>
+        <div class="prog-fill" style="--progress-width: {% widthratio avg_rating 5 100 %}%;"></div>
       </div>
       <div class="prog-bottom">
         <span>{{ avg_rating }} / 5.0 target</span>
